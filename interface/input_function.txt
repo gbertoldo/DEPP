@@ -1,0 +1,36 @@
+          10 =        nf:   Function number
+           1 =        nu:   Number of unknowns
+          X1 =  xname(1):   Name of the unknown
+           1 =   xopt(1):   Optimization option for the unknown ( 0 = no, 1 = yes )
+       1.0E0 =      x(1):   Value of the unknown (this value will be used only if x_opt = 0 )
+          X2 =  xname(2):   Name of the unknown
+           1 =   xopt(2):   Optimization option for the unknown ( 0 = no, 1 = yes )
+       1.0E0 =      x(2):   Value of the unknown (this value will be used only if x_opt = 0 )
+          X3 =  xname(3):   Name of the unknown
+           1 =   xopt(3):   Optimization option for the unknown ( 0 = no, 1 = yes )
+       1.0E0 =      x(3):   Value of the unknown (this value will be used only if x_opt = 0 )
+
+
+==============================================================================================
+NF    FUNCTION NAME                                    OBJECTIVE      DOMAIN
+==============================================================================================
+ 1    Sphere (Coley, page 38, 1999)                    Maximization   -5.12 < x(i) < 5.12
+--------------------------------------------------------------------------------
+ 2    Step (Coley, page 38, 1999)                      Maximization   -5.12 < x(i) < 5.12
+--------------------------------------------------------------------------------
+ 3    Function test F4 (Coley, page 38, 1999)          Maximization   -100 < x(1), x(2) < 100
+--------------------------------------------------------------------------------
+ 4    Function test F5 (Coley, page 38, 1999)          Maximization   -40 < x(i) < 60
+--------------------------------------------------------------------------------
+ 5    Function test (for testing the exit status)      Maximization    -1.5 < x(i) < 1.5
+--------------------------------------------------------------------------------
+ 6    Bump (Feoktistov, page 139, 2006)                Maximization     0 < x(i) < 10
+--------------------------------------------------------------------------------
+ 7    Rastrigin (Feoktistov, page 163, 2006)           Maximization   -5.12 < x(i) < 5.12
+--------------------------------------------------------------------------------
+ 8    Ellipsoid (Feoktistov, page 164, 2006)           Maximization   -65.536 < x(i) < 65.536
+--------------------------------------------------------------------------------
+ 9    Rosenbrock (Feoktistov, page 160, 2006)          Maximization   -2 < x(i) < 2
+--------------------------------------------------------------------------------
+10    Shifted Ackley (Vicenzi and Savoia, 2015)        Maximization   -32.768 < x(i) < 32.768
+===============================================================================================

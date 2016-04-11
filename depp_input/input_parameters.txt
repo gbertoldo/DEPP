@@ -1,0 +1,65 @@
+                 function1 = sname:    Simulation name
+                         0 = reload:   Upload backup data and continue computation (0=no; 1=yes)
+         '$PWD/interface/' = fdir:     Name of working directory for fitness calculation
+             'functions.x' = ffit:     Name of executable for fitness calculation
+                         2 = kss:      Kind of search strategy. (See options bellow)
+                         2 = kh:       Kind of hybridization (See options bellow)
+                     0.5d0 = fh:       Fraction of hybridization
+                     1.5d0 = fnb:      Multiple of the minimum number of points for RSM fitting
+                         1 = kw:       Kind of weighting function for RSM fitting (1=uniform, 2=exponential)
+                         3 = kcm:      Kind of population convergence measure (See options bellow)
+                     0.5d0 = fc:       Fraction of the population used for the convergence measure (for kcm=3)
+                         1 = nu:       Number of unknowns
+                        10 = np:       Size of population (recommended 10*nu)
+                       200 = ng:       Number of generations
+                    0.85d0 = dif:      Differentiation constant (recommended 0.85)
+                     0.5d0 = crs:      Crossover probability (recommended 0.5)
+                     0.5d0 = crsh:     Crossover probability of the hybridized model
+                         5 = nstp:     Number of trials for adjusting the step of the RSM solution
+                  0.0001d0 = netol:    Tolerance for distance when selecting neighbors points for RSM adjusting
+                  0.0005d0 = detol:    Tolerance for the convergence measure in the DE algorithm
+                        X1 = xname(1): Name of the unknown
+                   -5.12d0 =  xmin(1): Lower value for 1st unknown
+                    5.12d0 =  xmax(1): Biggest value for 1st unknown
+                        X2 = xname(2): Name of the unknown
+                   -5.12d0 =  xmin(2): Lower value for 2nd unknown
+                    5.12d0 =  xmax(2): Biggest value for 2nd unknown
+                        X3 = xname(3): Name of the unknown
+                   -1.00d0 =  xmin(3): Lower value for 3rd unknown
+                    1.00d0 =  xmax(3): Biggest value for 3rd unknown
+
+
+
+
+Kind of Search Strategy (kss):
+------------------------------
+
+1 - Search strategy SS01: uses three distinct random individuals of the population
+    to generate the trial individual. Strategy Rand3 of Feoktistov (2006)
+         
+2 - Search strategy SS02: generates a trial individual from two randomly selected individuals
+    of the population and the best individual. Strategy Rand2-Best of Feoktistov (2006).
+    
+    
+         
+Kind of hybridization (kh):
+---------------------------
+
+0 - No hybridization (pure DE)
+   
+2 - Response Surface Methodology. Selects the nf-1 individuals closest to the selected individual. Fits an incomplete
+    quadratic model and returns the maximizer of this model.
+
+3 - Response Surface Methodology. Selects the nf-1 individuals closest to the selected individual. Fits a complete
+    quadratic model and returns the maximizer of this model.
+    
+
+Kind of convergence measure (kcm):
+----------------------------------
+
+1 - Population convergence measure of Feoktistov using dimensional variables
+
+2 - Population convergence measure of Feoktistov using dimensionless variables
+    
+3 - Population convergence measure using a fraction fc of the population and dimensionless variables
+
