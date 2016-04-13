@@ -43,6 +43,21 @@ program functions
    integer,       dimension(:), allocatable :: xopt   !< Optimization checker
    character(10), dimension(:), allocatable :: xname  !< Name of parameters
    real(8),       dimension(:), allocatable :: x      !< parameters
+   
+   ! Variables used for creating seeds of the random number generator
+   integer :: clock     !< clock time for seeds generation
+   integer :: seed(97)  !< seeds for random numbers
+
+   
+   
+   ! Initializing the seed for the random numbers
+   
+   call system_clock(count = clock)
+   seed = clock
+   call random_seed(put = seed)
+   
+   
+   
 
    open(10, file = "./input_function.txt")
    read(10,*) nf
@@ -88,6 +103,16 @@ program functions
          fit = function9(nu, x)  ! Rosenbrock's function, (Feoktistov, page 160, 2006) 
       case(10)
          fit = function10(nu, x) ! Shifted Ackley's function (Vicenzi and Savoia, 2015)
+      case(11)
+         fit = function11(nu, x) ! Schwefel 2.22 (Zhang and Sanderson, 2009)
+      case(12)
+         fit = function12(nu, x) ! Schwefel 2.21 (Zhang and Sanderson, 2009)
+      case(13)
+         fit = function13(nu, x) ! Noisy quartic (Zhang and Sanderson, 2009)
+      case(14)
+         fit = function14(nu, x) ! Schwefel 2.26 (Zhang and Sanderson, 2009)
+      case(15)
+         fit = function15(nu, x) ! Griewank (Zhang and Sanderson, 2009)
       case default
          write(*,*) " ERROR: invalid function number. "
          stop
@@ -362,6 +387,128 @@ contains
    
    end function function10
 
+   !============================================================================
+
+   !> \brief Schwefel 2.22 (Zhang and Sanderson, 2009)
+   real(8) function function11(nu, x)
+      implicit none
+      integer, intent(in) :: nu     !< number of unknowns
+      real(8), intent(in) :: x(nu)  !< parameters (-10 < x(i) < 10)
+      
+      
+      integer :: i
+      real(8) :: sum1
+      real(8) :: mul1
+
+      
+      sum1 = sum(abs(x))
+      
+      mul1 = 1.d0
+      
+      do i = 1, nu
+      
+         mul1 = mul1 * abs(x(i))
+         
+      end do
+
+      
+      function11 = sum1 + mul1
+      
+
+      function11 = - function11
+   
+   end function function11
+
+   !============================================================================
+
+   !> \brief Schwefel 2.21 (Zhang and Sanderson, 2009)
+   real(8) function function12(nu, x)
+      implicit none
+      integer, intent(in) :: nu     !< number of unknowns
+      real(8), intent(in) :: x(nu)  !< parameters (-100 < x(i) < 100)
+      
+      function12 = - maxval(abs(x))
+   
+   end function function12
+
+   !============================================================================
+   
+   !> \brief Noisy quartic (Zhang and Sanderson, 2009)
+   real(8) function function13(nu, x)
+      implicit none
+      integer, intent(in) :: nu     !< number of unknowns
+      real(8), intent(in) :: x(nu)  !< parameters (-1.28 < x(i) < 1.28)
+     
+      
+      integer :: i
+      real(8) :: rnd
+
+
+      function13 = 0.d0
+      
+      do i = 1, nu
+      
+         call random_number(rnd)
+      
+         function13 = function13 + x(i)**4 * dble(i) + rnd
+         
+      end do
+
+
+      function13 = - function13
+   
+   end function function13
+
+
+   !> \brief Schwefel 2.26 (Zhang and Sanderson, 2009)
+   real(8) function function14(nu, x)
+      implicit none
+      integer, intent(in) :: nu     !< number of unknowns
+      real(8), intent(in) :: x(nu)  !< parameters (-500 < x(i) < 500)
+      
+      integer :: i
+      
+      function14 = 0.d0
+      
+      do i = 1, nu
+      
+         function14 = function14 - x(i) * sin( sqrt( abs(x(i)) ) )
+      
+      end do
+      
+      function14 = function14 + dble(nu) * 418.98288727243369d0
+
+      function14 = - function14
+   
+   end function function14
+   
+   
+
+   !> \brief Griewank (Zhang and Sanderson, 2009)
+   real(8) function function15(nu, x)
+      implicit none
+      integer, intent(in) :: nu     !< number of unknowns
+      real(8), intent(in) :: x(nu)  !< parameters (-600 < x(i) < 600)
+            
+      integer :: i
+      real(8) :: sum1
+      real(8) :: mul1
+
+      sum1 = sum( x*x ) / 4000d0
+      
+      mul1 = 1.d0
+      
+      do i = 1, nu
+      
+         mul1 = mul1 * cos(x(i)/sqrt(dble(i)))
+      
+      end do
+      
+      function15 = sum1 - mul1 + 1.d0
+
+      function15 = - function15
+   
+   end function function15
 
 end program functions
 

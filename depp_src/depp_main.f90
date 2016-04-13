@@ -106,7 +106,7 @@ program depp
    end if
 
 
-   ! if ipŕoc == 0, master processor writes the parameter to a file
+   ! if iproc == 0, master processor writes the parameter to a file
    if (iproc == 0) then
 
       ! Writting parameters to the output file
