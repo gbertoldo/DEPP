@@ -444,13 +444,13 @@ contains
       real(8) :: rnd
 
 
-      function13 = 0.d0
+      call random_number(rnd)
+
+      function13 = rnd
       
       do i = 1, nu
-      
-         call random_number(rnd)
-      
-         function13 = function13 + x(i)**4 * dble(i) + rnd
+            
+         function13 = function13 + x(i)**4 * dble(i) 
          
       end do
 
