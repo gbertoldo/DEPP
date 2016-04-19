@@ -84,7 +84,7 @@ program functions
       case(1)
          fit = function1(nu, x) ! Sphere function (Coley, page 38, 1999)
       case(2)
-         fit = function2(nu, x) ! Step function (Coley, page 38, 1999)
+         fit = function2(nu, x) ! Step function (Zhang and Sanderson, 2009)
       case(3)
          fit = function3(nu, x) ! Test function 4 (Coley, page 38, 1999)
       case(4)
@@ -144,17 +144,17 @@ contains
 
    !============================================================================
 
-   !> \brief Step function (Coley, page 38, 1999)
+   !> \brief Step function (Zhang and Sanderson, 2009)
    real(8) function function2(nu, x)
       implicit none
       integer, intent(in) :: nu     !< number of unknowns
-      real(8), intent(in) :: x(nu)  !< parameters (-5.12 < x(i) < 5.12)
+      real(8), intent(in) :: x(nu)  !< parameters (-100 < x(i) < 100)
       
       integer :: i
        
-      function2 = 26.d0
+      function2 = 0.d0
       do i = 1, nu
-         function2 = function2 - dble(int(x(i)))
+         function2 = function2 - dble(floor(x(i)+0.5d0))**2
       end do
    
    end function function2

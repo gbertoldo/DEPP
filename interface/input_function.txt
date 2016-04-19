@@ -1,4 +1,4 @@
-          10 =        nf:   Function number
+           2 =        nf:   Function number
            1 =        nu:   Number of unknowns
           X1 =  xname(1):   Name of the unknown
            1 =   xopt(1):   Optimization option for the unknown ( 0 = no, 1 = yes )
@@ -16,7 +16,7 @@ NF    FUNCTION NAME                                    OBJECTIVE      DOMAIN
 ==============================================================================================
  1    Sphere (Coley, page 38, 1999)                    Maximization   -5.12 < x(i) < 5.12
 ----------------------------------------------------------------------------------------------
- 2    Step (Coley, page 38, 1999)                      Maximization   -5.12 < x(i) < 5.12
+ 2    Step (Zhang and Sanderson, 2009)                 Maximization   -100 < x(i) < 100
 ----------------------------------------------------------------------------------------------
  3    Function test F4 (Coley, page 38, 1999)          Maximization   -100 < x(1), x(2) < 100
 ----------------------------------------------------------------------------------------------
