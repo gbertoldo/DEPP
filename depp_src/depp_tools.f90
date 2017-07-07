@@ -251,37 +251,6 @@ contains
 
 
 
-   !> \brief Projects individuals into the domain of calculation
-   subroutine get_X_projection(nu, xmin, xmax, x)
-      implicit none
-      integer, intent(in)    :: nu           !< number of unknowns
-      real(8), intent(in)    :: xmin(nu)     !< lower boundary constraints
-      real(8), intent(in)    :: xmax(nu)     !< higher boundary constraints
-      real(8), intent(inout) :: x(nu)        !< trial individual
-
-      integer :: j
-
-      do j = 1, nu
-
-         if ( x(j) < xmin(j) ) then
-
-            x(j) = xmin(j)
-
-         end if
-
-
-         if ( x(j) > xmax(j) ) then
-
-            x(j) = xmax(j)
-
-         end if
-
-      end do
-
-   end subroutine get_X_projection
-
-
-
    !> \brief Checks if X is out of range
    logical function is_X_out_of_range(nu, xmin, xmax, x)
       implicit none

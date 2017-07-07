@@ -257,8 +257,13 @@ program depp
 
 
                   ! Verifying the constraints. If the individual x is out of range,
-                  ! its projection is taken
-                  call get_X_projection(nu, xmin, xmax, x)
+                  ! another one is created using pure DE
+                  do while ( is_X_out_of_range(nu, xmin, xmax, x) )
+
+                     ! Creating the trial individual x
+                     call get_trial_individual(ind, nu, np, kss, dif, crs, pop, fit, x)
+
+                  end do
 
 
                   ! Asking to the external program 'ffit' the fitness of individual 'x'

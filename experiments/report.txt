@@ -6,3 +6,16 @@ Average g: 22
 stdev g: 7
 % of failures: 30
 Results: results001.xls
+
+
+
+DE was tested using the following parameters
+Schwefel 2.26 (Zhang and Sanderson, 2009) function14, nu=1, np=10, F=0.85, CR=0.5, kss=1 (see other parameters in depp_input/input_parameters.txt)
+Goal: Evaluate boundary constraints using resampling instead of projection
+Number of repetitions: 50
+Average g: 23
+stdev g: 4
+% of failures: 12
+Results: results002.xls
+Conclusion: it can be seen that resampling reduced the percentage of failures compared to projection (from 30% to 12%)
+
