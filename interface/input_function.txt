@@ -1,4 +1,4 @@
-           2 =        nf:   Function number
+          14 =        nf:   Function number
            1 =        nu:   Number of unknowns
           X1 =  xname(1):   Name of the unknown
            1 =   xopt(1):   Optimization option for the unknown ( 0 = no, 1 = yes )
