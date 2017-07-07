@@ -282,6 +282,43 @@ contains
 
 
 
+   !> \brief Checks if X is out of range
+   logical function is_X_out_of_range(nu, xmin, xmax, x)
+      implicit none
+      integer, intent(in)    :: nu           !< number of unknowns
+      real(8), intent(in)    :: xmin(nu)     !< lower boundary constraints
+      real(8), intent(in)    :: xmax(nu)     !< higher boundary constraints
+      real(8), intent(in)    :: x(nu)        !< trial individual
+
+      integer :: j
+
+      is_X_out_of_range = .false.
+
+      do j = 1, nu
+
+         if ( x(j) < xmin(j) ) then
+
+            is_X_out_of_range = .true.
+
+            return
+
+         end if
+
+
+         if ( x(j) > xmax(j) ) then
+
+            is_X_out_of_range = .true.
+
+            return
+
+         end if
+
+      end do
+
+   end function is_X_out_of_range
+
+
+
 
 
    !> \brief Get the fitness of each individual
