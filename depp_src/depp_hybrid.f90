@@ -134,7 +134,8 @@ contains
 
 
       ! Selects a target individual from the history list
-      call select_target_individual(ind, nu, np, ng, g, hist, xs)
+      !call select_target_individual(ind, nu, np, ng, g, hist, xs)
+      xs = pop(ind,:)
 
 
 
