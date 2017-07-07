@@ -1,3 +1,5 @@
+Experiment 001
+==============
 DE was tested using the following parameters
 Schwefel 2.26 (Zhang and Sanderson, 2009) function14, nu=1, np=10, F=0.85, CR=0.5, kss=1 (see other parameters in depp_input/input_parameters.txt)
 Goal: Take a benchmark for pure DE 
@@ -8,7 +10,8 @@ stdev g: 7
 Results: results001.xls
 
 
-
+Experiment 002
+==============
 DE was tested using the following parameters
 Schwefel 2.26 (Zhang and Sanderson, 2009) function14, nu=1, np=10, F=0.85, CR=0.5, kss=1 (see other parameters in depp_input/input_parameters.txt)
 Goal: Evaluate boundary constraints using resampling instead of projection
@@ -18,4 +21,43 @@ stdev g: 4
 % of failures: 12
 Results: results002.xls
 Conclusion: it can be seen that resampling reduced the percentage of failures compared to projection (from 30% to 12%)
+
+
+Experiment 003
+==============
+DE-RSM was tested using the following parameters
+Schwefel 2.26 (Zhang and Sanderson, 2009) function14, nu=1, np=10, F=0.85, CR=0.5, kss=1, kh=2, fh=0.35, fnb=2 (see other parameters in depp_input/input_parameters.txt)
+Goal: Register a benchmark of DE-RSM with fh=0.35
+Number of repetitions: 50
+Average g: 13
+stdev g: 3
+% of failures: 12
+Results: results003.xls
+Conclusion: it can be seen that the number of generations reduced 44% compared with the Experiment 002.
+
+
+Experiment 004
+==============
+DE-RSM was tested using the following parameters
+Schwefel 2.26 (Zhang and Sanderson, 2009) function14, nu=1, np=10, F=0.85, CR=0.5, kss=1, kh=2, fh=0.5, fnb=2 (see other parameters in depp_input/input_parameters.txt)
+Goal: Register a benchmark of DE-RSM with fh=0.5
+Number of repetitions: 50
+Average g: 12
+stdev g: 3
+% of failures: 8 
+Results: results004.xls
+Conclusion: The performance of Experiment004 and Experiment003 are similar.
+
+
+Experiment 005
+==============
+DE-RSM was tested using the following parameters
+Schwefel 2.26 (Zhang and Sanderson, 2009) function14, nu=1, np=10, F=0.85, CR=0.5, kss=1, kh=2, fh=0.75, fnb=2 (see other parameters in depp_input/input_parameters.txt)
+Goal: Register a benchmark of DE-RSM with fh=0.75
+Number of repetitions: 50
+Average g: 11
+stdev g: 3
+% of failures: 10  
+Results: results005.xls
+Conclusion: The performance of Experiment005, Experiment004 and Experiment003 are similar.
 
