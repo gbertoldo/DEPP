@@ -90,12 +90,13 @@ program depp
 
    ! Getting the input data
    call get_parameters(  folderin,  folderout,  sname,  iarq, reload, fdir,  ffit,   &
-      tcpu0, kss, kh, fh, fnb, kw, kcm, fc, nu, np, ng, dif, crs, crsh, nstp, netol, &
-      detol, xmin, xmax, xname, x, fit, pop, hist)
+      tcpu0, kss, kh, fh, fhm, fnb, kw, kcm, fc, nu, np, ng, dif, crs, crsh, nstp,   &
+      netol, detol, xmin, xmax, xname, x, fit, pop, hist)
 
 
    ! Initializes hybrid module and checks hybridization necessary condition for RSM
-   call initialize_hybrid_module(kh, nu, np, ng, fnb, es)
+   call initialize_hybrid_module(kh, nu, np, ng, fnb, fh, fhm, es)
+
 
    ! Checking the exit status of the module initialization
    if ( es == 1 ) then
@@ -110,7 +111,7 @@ program depp
    if (iproc == 0) then
 
       ! Writting parameters to the output file
-      call write_parameters(folderout, sname, reload, ffit, kss, kh, fh, fnb, kw, kcm, &
+      call write_parameters(folderout, sname, reload, ffit, kss, kh, fh, fhm, fnb, kw, kcm, &
          fc, nu, np, ng, dif, crs, crsh, nstp, netol, detol, xmin, xmax)
 
    end if
@@ -193,6 +194,10 @@ program depp
             ! First generation needs special attention
             if ( g == 1 ) then
 
+               ! rsm_tag (0=DE, 1=RSM) is a tag used to inform
+               ! master how many individuals were created using RSM
+               rsm_tag = 0
+
                ! Calculating the fitness function
                fitloop1: do
 
@@ -235,6 +240,10 @@ program depp
 
                   if ( rsm_check(kh, np, g, fh) ) then
 
+                     ! rsm_tag (0=DE, 1=RSM) is a tag used to inform
+                     ! master how many individuals were created using RSM
+                     rsm_tag = 1
+
                      ! Generating a RSM individual
 
                      call get_rsm_optimum(ind, kw, nu, np, ng, g, crsh, nstp, netol, xmin, xmax, pop, hist, x, es)
@@ -243,12 +252,20 @@ program depp
                      ! If RSM fails, generates a pure DE individual
                      if ( es == 1 ) then
 
+                        ! rsm_tag (0=DE, 1=RSM) is a tag used to inform
+                        ! master how many individuals were created using RSM
+                        rsm_tag = 0
+
                         ! Creating the trial individual x
                         call get_trial_individual(ind, nu, np, kss, dif, crs, pop, fit, x)
 
                      end if
 
                   else
+
+                     ! rsm_tag (0=DE, 1=RSM) is a tag used to inform
+                     ! master how many individuals were created using RSM
+                     rsm_tag = 0
 
                      ! Creating the trial individual x
                      call get_trial_individual(ind, nu, np, kss, dif, crs, pop, fit, x)
@@ -259,6 +276,10 @@ program depp
                   ! Verifying the constraints. If the individual x is out of range,
                   ! another one is created using pure DE
                   do while ( is_X_out_of_range(nu, xmin, xmax, x) )
+
+                     ! rsm_tag (0=DE, 1=RSM) is a tag used to inform
+                     ! master how many individuals were created using RSM
+                     rsm_tag = 0
 
                      ! Creating the trial individual x
                      call get_trial_individual(ind, nu, np, kss, dif, crs, pop, fit, x)
@@ -278,6 +299,10 @@ program depp
                         exit fitloop2
 
                      case (1) ! Failure
+
+                        ! rsm_tag (0=DE, 1=RSM) is a tag used to inform
+                        ! master how many individuals were created using RSM
+                        rsm_tag = 0
 
                         ! Failure in the calculation of fitness function. Saving informations.
                         call save_fitness_failure(nu, g, ind, folderout, sname, &
@@ -308,9 +333,10 @@ program depp
             end if
 
             ! Sending informations to master processor
-            call mpi_send( ind,  1,          mpi_integer, 0, tag, comm, code)
-            call mpi_send(   x, nu, mpi_double_precision, 0, tag, comm, code)
-            call mpi_send(xfit,  1, mpi_double_precision, 0, tag, comm, code)
+            call mpi_send(    ind,  1,          mpi_integer, 0, tag, comm, code)
+            call mpi_send(      x, nu, mpi_double_precision, 0, tag, comm, code)
+            call mpi_send(   xfit,  1, mpi_double_precision, 0, tag, comm, code)
+            call mpi_send(rsm_tag,  1,          mpi_integer, 0, tag, comm, code)
 
          end if
 
@@ -331,13 +357,20 @@ program depp
             iaux = mod(i, nproc-1) + 1
 
             ! Recieving informations from slaves
-            call mpi_recv( ind,  1,          mpi_integer, iaux, tag, comm, status, code)
-            call mpi_recv(   x, nu, mpi_double_precision, iaux, tag, comm, status, code)
-            call mpi_recv(xfit,  1, mpi_double_precision, iaux, tag, comm, status, code)
+            call mpi_recv(    ind,  1,          mpi_integer, iaux, tag, comm, status, code)
+            call mpi_recv(      x, nu, mpi_double_precision, iaux, tag, comm, status, code)
+            call mpi_recv(   xfit,  1, mpi_double_precision, iaux, tag, comm, status, code)
+            call mpi_recv(rsm_tag,  1,          mpi_integer, iaux, tag, comm, status, code)
 
             ! Updating history
             hist(g,ind,1:nu) = x    ! Individual
             hist(g,ind,0)    = xfit ! Fitness of the individual
+
+
+            ! Updating RSM Dynamic Control module
+            call add_to_rsm_dynamic_control(rsm_tag, xfit, fit(ind))
+
+            write(*,*) ind, rsm_tag, xfit, fit(ind), rsm_p_success(), fh
 
 
             write(*,"(a, i4, a, 10(1pe23.15, 2x))") &
@@ -363,9 +396,15 @@ program depp
          ! Calculating of the convergence measure
          call get_convergence(kcm, nu, np, fc, xmin, xmax, pop, fit, cm)
 
+
+         ! Calculating the hybridization factor
+         fh = get_hybridization_factor()
+
+
          ! Sending convergence measure to slave processors
          do i = 1, nproc-1
             call mpi_send(cm, 1, mpi_double_precision, i, tag, comm, code)
+            call mpi_send(fh, 1, mpi_double_precision, i, tag, comm, code)
          end do
 
          write(*,"(a,1pe23.15)") "Convergence measure: ", cm
@@ -386,6 +425,7 @@ program depp
       ! If iproc /= 0, slave processors receive the convergence measure from the master processor
       if ( iproc > 0 ) then
          call mpi_recv(cm, 1, mpi_double_precision, 0, tag, comm, status, code)
+         call mpi_recv(fh, 1, mpi_double_precision, 0, tag, comm, status, code)
       end if
 
       call mpi_barrier(comm, code)

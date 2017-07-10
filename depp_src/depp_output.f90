@@ -9,7 +9,7 @@ contains
 
    !> \brief Writes parameters in the output file
    subroutine write_parameters(folderout, sname, reload, ffit, kss, kh, &
-         fh, fnb, kw, kcm, fc, nu, np, ng,  dif, crs, crsh, nstp, netol, detol, xmin, xmax)
+         fh, fhm, fnb, kw, kcm, fc, nu, np, ng,  dif, crs, crsh, nstp, netol, detol, xmin, xmax)
       implicit none
       character(len=*), intent(in) :: folderout   !< folder the for output files
       character(len=*), intent(in) :: sname       !< simulations name
@@ -18,6 +18,7 @@ contains
       integer, intent(in) :: kss       !< kind of search strategy
       integer, intent(in) :: kh        !< kind of the hybridization (see input file)
       real(8), intent(in) :: fh        !< Fraction of hybridization
+      integer, intent(in) :: fhm       !< Model for the dynamical calculation of the factor of hybridization
       real(8), intent(in) :: fnb       !< Multiple of the minimum number of points for RSM fitting
       integer, intent(in) :: kw        !< kind of weighting function for RSM fitting
       integer, intent(in) :: kcm       !< kind of convergence measure
@@ -88,6 +89,7 @@ contains
       write(22,"(i23, a, a)") kh, " = kh:      Kind of the hybridization ", &
          "(see input file)"
       write(22,"(1pe23.15, a, a)") fh, " = fh:      Fraction of hybridization"
+      write(22,"(i23, a, a)") fhm, " = fhm:      Model for the dynamical calculation of the factor of hybridization"
       write(22,"(1pe23.15, a, a)") fnb, " = fnb:     Multiple of the minimum ", &
          "number of points for RSM fitting"
       write(22,"(i23, a, a)") kw, " = kw:      Kind of weighting function ", &

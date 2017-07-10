@@ -48,6 +48,8 @@ module input
    real(8) :: tcpu2     !< finishes CPU time
    real(8) :: fnb       !< Multiple of the minimum number of points for RSM fitting
    real(8) :: fh        !< Fraction of hybridization
+   integer :: fhm       !< Model for the dynamical calculation of the factor of hybridization
+   integer :: rsm_tag   !< (0=DE, 1=RSM) is a tag used to inform master how many individuals were created using RSM
 
    real(8) :: fc        !< Fraction of the population used for the convergence measure
    real(8) :: cm        !< convergence measure
@@ -79,8 +81,8 @@ contains
 
    !> \brief Gets the parameters from the input file
    subroutine get_parameters(   folderin, folderout, sname, iarq, reload, fdir,     &
-         ffit, tcpu0, kss, kh, fh, fnb, kw, kcm, fc, nu, np, ng, dif, crs, crsh,    &
-         nstp, netol, detol, xmin, xmax, xname, x, fit, pop, hist)
+         ffit, tcpu0, kss, kh, fh, fhm, fnb, kw, kcm, fc, nu, np, ng, dif, crs,     &
+         crsh, nstp, netol, detol, xmin, xmax, xname, x, fit, pop, hist)
       implicit none
       character(len=*), intent(inout) :: folderin  !< folder the for input files
       character(len=*), intent(inout) :: folderout !< folder the for output files
@@ -92,6 +94,7 @@ contains
       integer, intent(out) :: kss      !< kind of search strategy
       integer, intent(out) :: kh       !< kind of the hybridization (see input file)
       real(8), intent(out) :: fh       !< Fraction of hybridization
+      integer, intent(out) :: fhm      !< Model for the dynamical calculation of the factor of hybridization
       real(8), intent(out) :: fnb      !< Multiple of the minimum number of points for RSM fitting
       integer, intent(out) :: kw       !< kind of weighting function for RSM fitting
       integer, intent(out) :: kcm      !< kind of convergence measure (see the options in the subroutine get_convergence)
@@ -144,6 +147,7 @@ contains
       read(iarq,*) kss
       read(iarq,*) kh
       read(iarq,*) fh
+      read(iarq,*) fhm
       read(iarq,*) fnb
       read(iarq,*) kw
       read(iarq,*) kcm
