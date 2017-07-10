@@ -370,8 +370,6 @@ program depp
             ! Updating RSM Dynamic Control module
             call add_to_rsm_dynamic_control(rsm_tag, xfit, fit(ind))
 
-            write(*,*) ind, rsm_tag, xfit, fit(ind), rsm_p_success(), fh
-
 
             write(*,"(a, i4, a, 10(1pe23.15, 2x))") &
                "The performance of the",  ind, "th individual is ", xfit, x

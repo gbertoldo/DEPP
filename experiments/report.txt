@@ -100,3 +100,16 @@ stdev g: 10
 Results: results008.xls
 Conclusion: Comparing Experiment008 and 005, the performance is clearly better for 005. The percentage of failures are similar.
 
+
+Experiment 009
+==============
+DE-RSM was tested using the following parameters
+Schwefel 2.26 (Zhang and Sanderson, 2009) function14, nu=1, np=10, F=0.85, CR=0.5, kss=1, kh=2, fh=0.35, fnb=2 (see other parameters in depp_input/input_parameters.txt)
+Goal: Register a benchmark of DE-RSM with initial fh=0.35 and dynamic control of fh
+Number of repetitions: 50
+Average g: 11
+stdev g: 2
+% of failures: 2
+Results: results009.xls
+Conclusion: the efficiency of applying dynamic control is similar, for this experiment, compared to those found in Experiment003.
+

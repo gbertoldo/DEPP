@@ -5,7 +5,7 @@
                          1 = kss:      Kind of search strategy. (See options bellow)
                          2 = kh:       Kind of hybridization (See options bellow)
                     0.35d0 = fh:       Fraction of hybridization
-                         0 = fhm:      Model for the dynamical calculation of the factor of hybridization
+                         1 = fhm:      Model for the dynamical calculation of the factor of hybridization
                      2.0d0 = fnb:      Multiple of the minimum number of points for RSM fitting
                          1 = kw:       Kind of weighting function for RSM fitting (1=uniform, 2=exponential)
                          3 = kcm:      Kind of population convergence measure (See options bellow)
