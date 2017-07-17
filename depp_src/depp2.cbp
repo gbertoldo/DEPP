@@ -37,6 +37,7 @@
 		<Unit filename="depp_output.f90" />
 		<Unit filename="depp_qsort.f90" />
 		<Unit filename="depp_rsm.f90" />
+		<Unit filename="depp_rsm_dynamic_control.f90" />
 		<Unit filename="depp_tools.f90" />
 		<Extensions>
 			<envvars />
