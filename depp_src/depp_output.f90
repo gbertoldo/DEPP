@@ -131,6 +131,9 @@ contains
          52 format("# generation  individual", 18x, "fitness", 15x,"parameters")
          write(21,52)
 
+         open(24, file = trim(folderout) // trim(sname) // "-convergence.txt")
+         write(24,"(A12,4(2X,A23))") "# generation", "conv. meas."
+
       else
 
          open(20, position = "append", file = trim(folderout) // trim(sname) &
@@ -138,6 +141,9 @@ contains
 
          open(21, position = "append", file = trim(folderout) // trim(sname) &
             // "-history.txt")
+
+         open(24, position = "append", file = trim(folderout) // trim(sname) &
+            // "-convergence.txt")
 
       end if
 
@@ -167,6 +173,8 @@ contains
 
       close(20)
       close(21)
+
+      call plot_convergence(sname, folderout)
 
       call plot_statistics(sname, folderout)
 
@@ -387,7 +395,38 @@ contains
 
    !============================================================================
 
-   !> \brief Plots the fittest, the mean and the convergence measure of the
+   !> \brief Plots the population convergence measure
+   subroutine plot_convergence(sname, folderout)
+      implicit none
+      character(len=*), intent(in) :: sname       !< simulations name
+      character(len=*), intent(in) :: folderout   !< folder the for output files
+      character(len=600) :: fname
+
+      open(49, file = trim(folderout) // trim(sname) // "-convergence.plt")
+
+      write(49,*) "set terminal postscript eps rounded color"
+      write(49,*) "set out '", trim(folderout), trim(sname), "-convergence.eps'"
+      write(49,*) "set style data linespoints"
+      write(49,*) "set time"
+      write(49,*) "set logscale y"
+      write(49,*) "set title 'convergence measure of ", trim(sname), "'"
+      write(49,*) "set xlabel 'generation  (g)'"
+      write(49,*) "set ylabel 'convergence measure'"
+      write(49,*) "set grid"
+      fname = trim(folderout) // trim(sname) // "-convergence.txt"
+      write(49,*) "plot '", trim(fname) , "' u 1:2 pt 5 t 'Convergence measure'"
+      write(49,*) "exit"
+
+      close(49)
+
+      call system("gnuplot -persist "// trim(folderout) // trim(sname) // &
+         "-convergence.plt")
+
+   end subroutine plot_convergence
+
+   !============================================================================
+
+   !> \brief Plots the fittest, the mean and the hybridization factor
    !! population.
    subroutine plot_statistics(sname, folderout)
       implicit none
@@ -416,26 +455,6 @@ contains
       call system("gnuplot -persist "// trim(folderout) // trim(sname) // &
          "-statistics.plt")
 
-      open(49, file = trim(folderout) // trim(sname) // "-convergence.plt")
-
-      write(49,*) "set terminal postscript eps rounded color"
-      write(49,*) "set out '", trim(folderout), trim(sname), "-convergence.eps'"
-      write(49,*) "set style data linespoints"
-      write(49,*) "set time"
-      write(49,*) "set logscale y"
-      write(49,*) "set title 'convergence measure of ", trim(sname), "'"
-      write(49,*) "set xlabel 'generation  (g)'"
-      write(49,*) "set ylabel 'convergence measure'"
-      write(49,*) "set grid"
-      fname = trim(folderout) // trim(sname) // "-statistics.txt"
-      write(49,*) "plot '", trim(fname) , "' u 1:5 pt 5 t 'Convergence measure'"
-      write(49,*) "exit"
-
-      close(49)
-
-      call system("gnuplot -persist "// trim(folderout) // trim(sname) // &
-         "-convergence.plt")
-
       open(49, file = trim(folderout) // trim(sname) // "-hybridization-factor.plt")
 
       write(49,*) "set terminal postscript eps rounded color"
@@ -447,7 +466,7 @@ contains
       write(49,*) "set ylabel 'hybridization factor (fh)'"
       write(49,*) "set grid"
       fname = trim(folderout) // trim(sname) // "-statistics.txt"
-      write(49,*) "plot '", trim(fname) , "' u 1:4 pt 5 t 'Convergence measure'"
+      write(49,*) "plot '", trim(fname) , "' u 1:4 pt 5 t ''"
       write(49,*) "exit"
 
       close(49)

@@ -145,7 +145,23 @@ program depp
 
    ! Starting the generations loop. This loop is maintained while the stopping
    ! condition is not satisfied
-   do while ( .not. is_stopping_condition_satisfied(nu, np, ng, g, kpm, detol, xmin, xmax, pop, fit) )
+   do
+
+      stopflag = is_stopping_condition_satisfied(nu, np, ng, g, kpm, detol, xmin, xmax, pop, fit)
+
+      ! Printing convergence measure of the current generation
+      if (iproc==0) then
+
+         write(*,*)  g, trim(convergence_info)
+         write(24,*) g, trim(convergence_info)
+         call flush(24)
+
+      end if
+
+      if ( stopflag ) exit
+
+
+      ! Starting a new generation
 
       g = g+1
 
@@ -384,9 +400,7 @@ program depp
             call mpi_send(fh,    1, mpi_double_precision, i, tag, comm, code)
          end do
 
-         write(*,*) trim(convergence_info)
-
-         write(20,"(i12, 3(2x, 1pe23.15),A)") g, sum(fit)/np, maxval(fit), fh, trim(convergence_info)
+         write(20,"(i12, 3(2x, 1pe23.15),A)") g, sum(fit)/np, maxval(fit), fh
 
          call flush(20)
 
@@ -434,8 +448,6 @@ program depp
 
    ! Master processor: data post processing
    if (iproc == 0) then
-
-      write(*,*) trim(convergence_info)
 
       tcpu2 = MPI_Wtime()
       tcpu = tcpu0 + tcpu2 - tcpu1

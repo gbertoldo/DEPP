@@ -58,7 +58,7 @@ module input
    integer :: nstp      !< Number of trials for adjusting the step of the RSM solution
    real(8) :: netol     !< Tolerance for distance when selecting neighbors points for RSM adjusting
 
-   logical :: NoAcc
+   logical :: stopflag  !< Flag indicating that stopping condition was reached
 
 
    real(8), dimension(:),     allocatable :: x      !< trial individual
