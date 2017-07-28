@@ -52,7 +52,6 @@ module input
    integer :: fhm       !< Model for the dynamical calculation of the factor of hybridization
    integer :: rsm_tag   !< (0=DE, 1=RSM) is a tag used to inform master how many individuals were created using RSM
 
-   real(8) :: fc        !< Fraction of the population used for the convergence measure
    real(8) :: detol     !< tolerance for the convergence measure in the DE algorithm
 
    integer :: nstp      !< Number of trials for adjusting the step of the RSM solution
@@ -83,7 +82,7 @@ contains
 
    !> \brief Gets the parameters from the input file
    subroutine get_parameters(   folderin, folderout, sname, iarq, reload, fdir,     &
-         ffit, tcpu0, kss, kh, fh, fhm, fnb, kw, kpm, fc, nu, np, ng, GNoAcc, dif,  &
+         ffit, tcpu0, kss, kh, fh, fhm, fnb, kw, kpm, nu, np, ng, GNoAcc, dif,      &
          crs, crsh, nstp, netol, detol, xmin, xmax, xname, x, fit, pop, hist)
       implicit none
       character(len=*), intent(inout) :: folderin  !< folder the for input files
@@ -100,7 +99,6 @@ contains
       real(8), intent(out) :: fnb      !< Multiple of the minimum number of points for RSM fitting
       integer, intent(out) :: kw       !< kind of weighting function for RSM fitting
       integer, intent(out) :: kpm      !< kind of population convergence measure
-      real(8), intent(out) :: fc       !< Fraction of the population used in the convergence measure
       integer, intent(out) :: nu       !< number of unknowns
       integer, intent(out) :: np       !< population size
       integer, intent(out) :: ng       !< maximal number of generations
@@ -154,7 +152,6 @@ contains
       read(iarq,*) fnb
       read(iarq,*) kw
       read(iarq,*) kpm
-      read(iarq,*) fc
       read(iarq,*) nu
       read(iarq,*) np
       read(iarq,*) ng

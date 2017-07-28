@@ -9,7 +9,6 @@
                      2.0d0 = fnb:      Multiple of the minimum number of points for RSM fitting
                          1 = kw:       Kind of weighting function for RSM fitting (1=uniform, 2=exponential)
                          2 = kpm:      Kind of population convergence measure (See options bellow)
-                     1.0d0 = fc:       Fraction of the population used for the convergence measure (for kcm=3)
                          2 = nu:       Number of unknowns
                         20 = np:       Size of population (recommended 10*nu)
                        200 = ng:       Number of generations

@@ -91,7 +91,7 @@ program depp
 
    ! Getting the input data
    call get_parameters(  folderin,  folderout,  sname,  iarq, reload, fdir,  ffit,   &
-      tcpu0, kss, kh, fh, fhm, fnb, kw, kpm, fc, nu, np, ng, GNoAcc, dif, crs, crsh, &
+      tcpu0, kss, kh, fh, fhm, fnb, kw, kpm, nu, np, ng, GNoAcc, dif, crs, crsh,     &
       nstp, netol, detol, xmin, xmax, xname, x, fit, pop, hist)
 
 
@@ -117,7 +117,7 @@ program depp
 
       ! Writting parameters to the output file
       call write_parameters(folderout, sname, reload, ffit, kss, kh, fh, fhm, fnb, kw, kpm, &
-         fc, nu, np, ng, GNoAcc, dif, crs, crsh, nstp, netol, detol, xmin, xmax)
+         nu, np, ng, GNoAcc, dif, crs, crsh, nstp, netol, detol, xmin, xmax)
 
    end if
 

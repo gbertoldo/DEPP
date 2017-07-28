@@ -9,7 +9,7 @@ contains
 
    !> \brief Writes parameters in the output file
    subroutine write_parameters(folderout, sname, reload, ffit, kss, kh, &
-         fh, fhm, fnb, kw, kpm, fc, nu, np, ng, GNoAcc,  dif, crs, crsh,&
+         fh, fhm, fnb, kw, kpm, nu, np, ng, GNoAcc,  dif, crs, crsh,    &
          nstp, netol, detol, xmin, xmax)
       implicit none
       character(len=*), intent(in) :: folderout   !< folder the for output files
@@ -23,7 +23,6 @@ contains
       real(8), intent(in) :: fnb       !< Multiple of the minimum number of points for RSM fitting
       integer, intent(in) :: kw        !< kind of weighting function for RSM fitting
       integer, intent(in) :: kpm       !< kind of population convergence measure
-      real(8), intent(in) :: fc        !< fraction of the population used in the convergence measure
       integer, intent(in) :: nu        !< number of unknowns
       integer, intent(in) :: np        !< population size
       integer, intent(in) :: ng        !< maximal number of generations
@@ -98,8 +97,6 @@ contains
          "for RSM fitting (1=uniform, 2=exponential)"
       write(22,"(i23, a)") kpm, &
          " = kpm:     Kind of population convergence measure"
-      write(22,"(1pe23.15, a, a)") fc, " = fc:     Fraction of the population ", &
-         "used in the convergence measure (for kcm=3)"
       write(22,"(i23, a)") nu, " = nu:      Number of unknowns"
       write(22,"(i23, a)") np, " = np:      Population size"
       write(22,"(i23, a)") ng, " = ng:      Max. number of generations"
