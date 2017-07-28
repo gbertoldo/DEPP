@@ -9,7 +9,8 @@ contains
 
    !> \brief Writes parameters in the output file
    subroutine write_parameters(folderout, sname, reload, ffit, kss, kh, &
-         fh, fhm, fnb, kw, kcm, fc, nu, np, ng,  dif, crs, crsh, nstp, netol, detol, xmin, xmax)
+         fh, fhm, fnb, kw, kpm, fc, nu, np, ng, GNoAcc,  dif, crs, crsh,&
+         nstp, netol, detol, xmin, xmax)
       implicit none
       character(len=*), intent(in) :: folderout   !< folder the for output files
       character(len=*), intent(in) :: sname       !< simulations name
@@ -21,11 +22,12 @@ contains
       integer, intent(in) :: fhm       !< Model for the dynamical calculation of the factor of hybridization
       real(8), intent(in) :: fnb       !< Multiple of the minimum number of points for RSM fitting
       integer, intent(in) :: kw        !< kind of weighting function for RSM fitting
-      integer, intent(in) :: kcm       !< kind of convergence measure
+      integer, intent(in) :: kpm       !< kind of population convergence measure
       real(8), intent(in) :: fc        !< fraction of the population used in the convergence measure
       integer, intent(in) :: nu        !< number of unknowns
       integer, intent(in) :: np        !< population size
       integer, intent(in) :: ng        !< maximal number of generations
+      integer, intent(in) :: GNoAcc    !< maximum number of generations allowed before stopping if no improvement was found
       real(8), intent(in) :: dif       !< differentiation constant
       real(8), intent(in) :: crs       !< crossover constant
       real(8), intent(in) :: crsh      !< crossover constant of the hybridized model
@@ -94,13 +96,14 @@ contains
          "number of points for RSM fitting"
       write(22,"(i23, a, a)") kw, " = kw:      Kind of weighting function ", &
          "for RSM fitting (1=uniform, 2=exponential)"
-      write(22,"(i23, a)") kcm, &
-         " = kcm:     Kind of convergence measure"
+      write(22,"(i23, a)") kpm, &
+         " = kpm:     Kind of population convergence measure"
       write(22,"(1pe23.15, a, a)") fc, " = fc:     Fraction of the population ", &
          "used in the convergence measure (for kcm=3)"
       write(22,"(i23, a)") nu, " = nu:      Number of unknowns"
       write(22,"(i23, a)") np, " = np:      Population size"
       write(22,"(i23, a)") ng, " = ng:      Max. number of generations"
+      write(22,"(i23, a)") GNoAcc,   " = GNoAcc:  Maximum number of generations allowed before stopping if no improvement was found"
       write(22,"(1pe23.15, a)") dif, " = dif:     Differentiation constant"
       write(22,"(1pe23.15, a)") crs, " = crs:     Crossover constant"
       write(22,"(1pe23.15, a)") crsh, " = crsh:     Crossover constant of the hybridized model"
@@ -147,20 +150,20 @@ contains
    !> \brief Calls subroutines for writing the main results, plotting statistics
    !! and convergence history.
    subroutine write_output_files(folderout, sname, nu, np, ibest, g, tcpu, &
-         cm, xmin, xmax, fit, pop)
+         convergence_info, xmin, xmax, fit, pop)
       implicit none
-      character(len=*), intent(in) :: folderout  !< folder the for output files
-      character(len=*), intent(in) :: sname      !< simulations name
-      integer, intent(in) :: nu           !< number of unknowns
-      integer, intent(in) :: np           !< population size
-      integer, intent(in) :: ibest        !< index of the best individual in the population
-      integer, intent(in) :: g            !< final number of generations
-      real(8), intent(in) :: tcpu         !< Total CPU time
-      real(8), intent(in) :: cm           !< Convergence measure
-      real(8), intent(in) :: xmin(nu)     !< lower boundary constraints
-      real(8), intent(in) :: xmax(nu)     !< higher boundary constraints
-      real(8), intent(in) :: fit(np)      !< fitness of the population
-      real(8), intent(in) :: pop(np,nu)   !< population
+      character(len=*), intent(in) :: folderout        !< folder the for output files
+      character(len=*), intent(in) :: sname            !< simulations name
+      integer,          intent(in) :: nu               !< number of unknowns
+      integer,          intent(in) :: np               !< population size
+      integer,          intent(in) :: ibest            !< index of the best individual in the population
+      integer,          intent(in) :: g                !< final number of generations
+      real(8),          intent(in) :: tcpu             !< Total CPU time
+      character(len=*), intent(in) :: convergence_info !< Convergence measure
+      real(8),          intent(in) :: xmin(nu)         !< lower boundary constraints
+      real(8),          intent(in) :: xmax(nu)         !< higher boundary constraints
+      real(8),          intent(in) :: fit(np)          !< fitness of the population
+      real(8),          intent(in) :: pop(np,nu)       !< population
 
       close(20)
       close(21)
@@ -169,23 +172,23 @@ contains
 
       call plot_history(sname, folderout, nu, xmin, xmax)
 
-      call write_results(tcpu, nu, np, ibest, g, cm, fit, pop)
+      call write_results(tcpu, nu, np, ibest, g, convergence_info, fit, pop)
 
    end subroutine
 
    !============================================================================
 
    !> \brief Writes main results to a file
-   subroutine write_results(tcpu, nu, np, ibest, g, cm, fit, pop)
+   subroutine write_results(tcpu, nu, np, ibest, g, convergence_info, fit, pop)
       implicit none
-      integer, intent(in) :: nu           !< number of unknowns
-      integer, intent(in) :: np           !< population size
-      integer, intent(in) :: ibest        !< index of the best individual in the population
-      integer, intent(in) :: g            !< final number of generations
-      real(8), intent(in) :: tcpu         !< total CPU time
-      real(8), intent(in) :: cm           !< Convergence measure
-      real(8), intent(in) :: fit(np)      !< fitness of the population
-      real(8), intent(in) :: pop(np,nu)   !< population
+      integer,          intent(in) :: nu               !< number of unknowns
+      integer,          intent(in) :: np               !< population size
+      integer,          intent(in) :: ibest            !< index of the best individual in the population
+      integer,          intent(in) :: g                !< final number of generations
+      real(8),          intent(in) :: tcpu             !< total CPU time
+      character(len=*), intent(in) :: convergence_info !< Convergence measure
+      real(8),          intent(in) :: fit(np)          !< fitness of the population
+      real(8),          intent(in) :: pop(np,nu)       !< population
 
       character(10) tcpuf
       integer :: j
@@ -216,7 +219,7 @@ contains
       write(22,*)
 
       write(22,"(I23, a)") g, " = g:       Final number of generations"
-      write(22,"(1pe23.15, a)") cm, " = cm:      Convergence measure"
+      write(22,*) " ", trim(adjustl(convergence_info))
       write(22,"(1pe23.15, a)") tcpu, " = tcpu:    Total CPU time [s]"
       write(22,"(a23, a)") tcpuf, &
          " = tcpuf:   Total CPU time formatted [hh:mm:ss]"

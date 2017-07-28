@@ -18,11 +18,12 @@ module input
    integer :: nu        !< number of unknowns
    integer :: np        !< population size
    integer :: ng        !< maximal number of generations
+   integer :: GNoAcc    !< maximum number of generations allowed before stopping if no improvement was found
    integer :: nf        !< number of individuals for fitting RSM
    integer :: kss       !< kind of search strategy
    integer :: kh        !< kind of hybridization (see input file)
    integer :: kw        !< kind of weighting function for RSM fitting
-   integer :: kcm       !< kind of convergence measure (see the options in the subroutine get_convergence)
+   integer :: kpm       !< kind of population convergence measure
    integer :: ibest     !< index of the best individual in the population
    integer :: r(3)      !< indexes of selected individuals
 
@@ -52,11 +53,12 @@ module input
    integer :: rsm_tag   !< (0=DE, 1=RSM) is a tag used to inform master how many individuals were created using RSM
 
    real(8) :: fc        !< Fraction of the population used for the convergence measure
-   real(8) :: cm        !< convergence measure
    real(8) :: detol     !< tolerance for the convergence measure in the DE algorithm
 
    integer :: nstp      !< Number of trials for adjusting the step of the RSM solution
    real(8) :: netol     !< Tolerance for distance when selecting neighbors points for RSM adjusting
+
+   logical :: NoAcc
 
 
    real(8), dimension(:),     allocatable :: x      !< trial individual
@@ -81,8 +83,8 @@ contains
 
    !> \brief Gets the parameters from the input file
    subroutine get_parameters(   folderin, folderout, sname, iarq, reload, fdir,     &
-         ffit, tcpu0, kss, kh, fh, fhm, fnb, kw, kcm, fc, nu, np, ng, dif, crs,     &
-         crsh, nstp, netol, detol, xmin, xmax, xname, x, fit, pop, hist)
+         ffit, tcpu0, kss, kh, fh, fhm, fnb, kw, kpm, fc, nu, np, ng, GNoAcc, dif,  &
+         crs, crsh, nstp, netol, detol, xmin, xmax, xname, x, fit, pop, hist)
       implicit none
       character(len=*), intent(inout) :: folderin  !< folder the for input files
       character(len=*), intent(inout) :: folderout !< folder the for output files
@@ -97,11 +99,12 @@ contains
       integer, intent(out) :: fhm      !< Model for the dynamical calculation of the factor of hybridization
       real(8), intent(out) :: fnb      !< Multiple of the minimum number of points for RSM fitting
       integer, intent(out) :: kw       !< kind of weighting function for RSM fitting
-      integer, intent(out) :: kcm      !< kind of convergence measure (see the options in the subroutine get_convergence)
+      integer, intent(out) :: kpm      !< kind of population convergence measure
       real(8), intent(out) :: fc       !< Fraction of the population used in the convergence measure
       integer, intent(out) :: nu       !< number of unknowns
       integer, intent(out) :: np       !< population size
       integer, intent(out) :: ng       !< maximal number of generations
+      integer, intent(out) :: GNoAcc   !< maximum number of generations allowed before stopping if no improvement was found
       real(8), intent(out) :: tcpu0    !< accumulated CPU time
       real(8), intent(out) :: dif      !< differentiation constant
       real(8), intent(out) :: crs      !< crossover constant
@@ -150,11 +153,12 @@ contains
       read(iarq,*) fhm
       read(iarq,*) fnb
       read(iarq,*) kw
-      read(iarq,*) kcm
+      read(iarq,*) kpm
       read(iarq,*) fc
       read(iarq,*) nu
       read(iarq,*) np
       read(iarq,*) ng
+      read(iarq,*) GNoAcc
       read(iarq,*) dif
       read(iarq,*) crs
       read(iarq,*) crsh

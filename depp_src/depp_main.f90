@@ -43,6 +43,7 @@ program depp
    use input
    use hybrid
    use output
+   use stopping_condition_module
 
    implicit none
 
@@ -90,12 +91,16 @@ program depp
 
    ! Getting the input data
    call get_parameters(  folderin,  folderout,  sname,  iarq, reload, fdir,  ffit,   &
-      tcpu0, kss, kh, fh, fhm, fnb, kw, kcm, fc, nu, np, ng, dif, crs, crsh, nstp,   &
-      netol, detol, xmin, xmax, xname, x, fit, pop, hist)
+      tcpu0, kss, kh, fh, fhm, fnb, kw, kpm, fc, nu, np, ng, GNoAcc, dif, crs, crsh, &
+      nstp, netol, detol, xmin, xmax, xname, x, fit, pop, hist)
 
 
    ! Initializes hybrid module and checks hybridization necessary condition for RSM
    call initialize_hybrid_module(kh, nu, np, ng, fnb, fh, fhm, es)
+
+
+   ! Initializers stopping condition module
+   call initialize_stopping_condition_module(GNoAcc)
 
 
    ! Checking the exit status of the module initialization
@@ -111,8 +116,8 @@ program depp
    if (iproc == 0) then
 
       ! Writting parameters to the output file
-      call write_parameters(folderout, sname, reload, ffit, kss, kh, fh, fhm, fnb, kw, kcm, &
-         fc, nu, np, ng, dif, crs, crsh, nstp, netol, detol, xmin, xmax)
+      call write_parameters(folderout, sname, reload, ffit, kss, kh, fh, fhm, fnb, kw, kpm, &
+         fc, nu, np, ng, GNoAcc, dif, crs, crsh, nstp, netol, detol, xmin, xmax)
 
    end if
 
@@ -123,17 +128,12 @@ program depp
       pop  =  0.d0
       fit  = -huge(1.d0)
       hist = 0.d0
-      cm   =  huge(1.d0)
-
       ibest = 1
 
    else
 
       ! Loading data
       call load_backup(folderout, sname, ng, nu, np, tcpu0, g, fit, pop, hist)
-
-      ! Calculation of the convergence measure
-      call get_convergence(kcm, nu, np, fc, xmin, xmax, pop, fit, cm)
 
       ! Searching for the best individual of the current generation
       ibest = maxloc(fit,1)
@@ -143,16 +143,13 @@ program depp
    call mpi_barrier(comm, code)
 
 
-   ! Starting the generations loop. This loop is maintained while the convergence
-   ! measure is greater than a specified tolerance (detol) and the generation number
-   ! is lower than the maximum one (ng).
-   do while ( cm > detol .and. g < ng )
+   ! Starting the generations loop. This loop is maintained while the stopping
+   ! condition is not satisfied
+   do while ( .not. is_stopping_condition_satisfied(nu, np, ng, g, kpm, detol, xmin, xmax, pop, fit) )
 
       g = g+1
 
-      ! If iproc == 0, master processor sends the updated population and its fitness to
-      !                slave processors
-      ! If iproc /= 0, slave processors receive the updated population and its fitness
+      ! Print time
       if (iproc == 0) then
 
          tcpu2 = MPI_Wtime()
@@ -164,20 +161,6 @@ program depp
          write(*,"(/, a, a)") "Accumulated CPU time: ", tcpuf
 
          write(*,"(/, a, i4, a, /)") "Processing the", g, "th generation..."
-
-         ! Sending the population and its fitness to slave processors
-         do i = 1, nproc-1
-            call mpi_send(hist, ng*np*(nu+1), mpi_double_precision, i, tag, comm, code)
-            call mpi_send(pop,         np*nu, mpi_double_precision, i, tag, comm, code)
-            call mpi_send(fit,            np, mpi_double_precision, i, tag, comm, code)
-         end do
-
-      else
-
-         ! Receiving the population and its fitness from master processor
-         call mpi_recv(hist, ng*np*(nu+1), mpi_double_precision, 0, tag, comm, status, code)
-         call mpi_recv(pop,         np*nu, mpi_double_precision, 0, tag, comm, status, code)
-         call mpi_recv(fit,            np, mpi_double_precision, 0, tag, comm, status, code)
 
       end if
 
@@ -391,9 +374,6 @@ program depp
 
          end do
 
-         ! Calculating of the convergence measure
-         call get_convergence(kcm, nu, np, fc, xmin, xmax, pop, fit, cm)
-
 
          ! Calculating the hybridization factor
          fh = get_hybridization_factor()
@@ -401,13 +381,12 @@ program depp
 
          ! Sending convergence measure to slave processors
          do i = 1, nproc-1
-            call mpi_send(cm, 1, mpi_double_precision, i, tag, comm, code)
-            call mpi_send(fh, 1, mpi_double_precision, i, tag, comm, code)
+            call mpi_send(fh,    1, mpi_double_precision, i, tag, comm, code)
          end do
 
-         write(*,"(a,1pe23.15)") "Convergence measure: ", cm
+         write(*,*) trim(convergence_info)
 
-         write(20,"(i12, 3(2x, 1pe23.15))") g, sum(fit)/np, maxval(fit), cm
+         write(20,"(i12, 2(2x, 1pe23.15),A)") g, sum(fit)/np, maxval(fit), trim(convergence_info)
 
          call flush(20)
 
@@ -422,8 +401,30 @@ program depp
 
       ! If iproc /= 0, slave processors receive the convergence measure from the master processor
       if ( iproc > 0 ) then
-         call mpi_recv(cm, 1, mpi_double_precision, 0, tag, comm, status, code)
-         call mpi_recv(fh, 1, mpi_double_precision, 0, tag, comm, status, code)
+         call mpi_recv(fh,    1, mpi_double_precision, 0, tag, comm, status, code)
+      end if
+
+      call mpi_barrier(comm, code)
+
+      ! If iproc == 0, master processor sends the updated population and its fitness to
+      !                slave processors
+      ! If iproc /= 0, slave processors receive the updated population and its fitness
+      if (iproc == 0) then
+
+         ! Sending the population and its fitness to slave processors
+         do i = 1, nproc-1
+            call mpi_send(hist, ng*np*(nu+1), mpi_double_precision, i, tag, comm, code)
+            call mpi_send(pop,         np*nu, mpi_double_precision, i, tag, comm, code)
+            call mpi_send(fit,            np, mpi_double_precision, i, tag, comm, code)
+         end do
+
+      else
+
+         ! Receiving the population and its fitness from master processor
+         call mpi_recv(hist, ng*np*(nu+1), mpi_double_precision, 0, tag, comm, status, code)
+         call mpi_recv(pop,         np*nu, mpi_double_precision, 0, tag, comm, status, code)
+         call mpi_recv(fit,            np, mpi_double_precision, 0, tag, comm, status, code)
+
       end if
 
       call mpi_barrier(comm, code)
@@ -434,11 +435,13 @@ program depp
    ! Master processor: data post processing
    if (iproc == 0) then
 
+      write(*,*) trim(convergence_info)
+
       tcpu2 = MPI_Wtime()
       tcpu = tcpu0 + tcpu2 - tcpu1
 
       call write_output_files(folderout, sname, nu, np, ibest, g, tcpu, &
-         cm, xmin, xmax, fit, pop)
+         convergence_info, xmin, xmax, fit, pop)
 
    end if
 
