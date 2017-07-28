@@ -124,7 +124,7 @@ contains
       if (reload == 0) then
 
          open(20, file = trim(folderout) // trim(sname) // "-statistics.txt")
-         write(20,"(A12,3(2X,A23))") "# generation", "meanfitness", "fittest", &
+         write(20,"(A12,4(2X,A23))") "# generation", "meanfitness", "fittest", "fh", &
             "conv. meas."
 
          open(21, file = trim(folderout) // trim(sname) // "-history.txt")
@@ -428,13 +428,32 @@ contains
       write(49,*) "set ylabel 'convergence measure'"
       write(49,*) "set grid"
       fname = trim(folderout) // trim(sname) // "-statistics.txt"
-      write(49,*) "plot '", trim(fname) , "' u 1:4 pt 5 t 'Convergence measure'"
+      write(49,*) "plot '", trim(fname) , "' u 1:5 pt 5 t 'Convergence measure'"
       write(49,*) "exit"
 
       close(49)
 
       call system("gnuplot -persist "// trim(folderout) // trim(sname) // &
          "-convergence.plt")
+
+      open(49, file = trim(folderout) // trim(sname) // "-hybridization-factor.plt")
+
+      write(49,*) "set terminal postscript eps rounded color"
+      write(49,*) "set out '", trim(folderout), trim(sname), "-hybridization-factor.eps'"
+      write(49,*) "set style data linespoints"
+      write(49,*) "set time"
+      write(49,*) "set title 'Evolution of hybridization factor of ", trim(sname), "'"
+      write(49,*) "set xlabel 'generation  (g)'"
+      write(49,*) "set ylabel 'hybridization factor (fh)'"
+      write(49,*) "set grid"
+      fname = trim(folderout) // trim(sname) // "-statistics.txt"
+      write(49,*) "plot '", trim(fname) , "' u 1:4 pt 5 t 'Convergence measure'"
+      write(49,*) "exit"
+
+      close(49)
+
+      call system("gnuplot -persist "// trim(folderout) // trim(sname) // &
+         "-hybridization-factor.plt")
 
    end subroutine plot_statistics
 

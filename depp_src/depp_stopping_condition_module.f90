@@ -5,7 +5,7 @@ module stopping_condition_module
 
    implicit none
 
-   character(len=300) :: convergence_info
+   character(len=300) :: convergence_info = ""
 
 contains
 

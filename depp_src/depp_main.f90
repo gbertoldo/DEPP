@@ -386,7 +386,7 @@ program depp
 
          write(*,*) trim(convergence_info)
 
-         write(20,"(i12, 2(2x, 1pe23.15),A)") g, sum(fit)/np, maxval(fit), trim(convergence_info)
+         write(20,"(i12, 3(2x, 1pe23.15),A)") g, sum(fit)/np, maxval(fit), fh, trim(convergence_info)
 
          call flush(20)
 
