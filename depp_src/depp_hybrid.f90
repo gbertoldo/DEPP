@@ -191,7 +191,7 @@ contains
 
 
       ! Crossing over
-      call crossing_over(ind, nu, np, crsh, pop, x)
+      !call crossing_over(ind, nu, np, crsh, pop, x)
 
 
 
