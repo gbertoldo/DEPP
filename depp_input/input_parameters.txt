@@ -15,7 +15,7 @@
                         10 = GNoAcc:   Maximum number of generations allowed before stopping if no improvement was found
                     0.85d0 = dif:      Differentiation constant (recommended 0.85)
                      0.5d0 = crs:      Crossover probability (recommended 0.5)
-                     0.5d0 = crsh:     Crossover probability of the hybridized model
+                     0.5d0 = crsh:     Crossover probability of the hybridized model (disable if crsh < 0)
                          0 = nstp:     Number of trials for adjusting the step of the RSM solution
                   0.0001d0 = netol:    Tolerance for distance when selecting neighbors points for RSM adjusting
                   0.0005d0 = detol:    Tolerance for the convergence measure in the DE algorithm
