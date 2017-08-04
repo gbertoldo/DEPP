@@ -13,6 +13,12 @@ module rsm_dynamic_control
    ! Initial factor of hybridization
    real(8), private :: fh0
 
+   ! Minimum factor of hybridization
+   real(8), private :: fhmin0
+
+   ! Maximum factor of hybridization
+   real(8), private :: fhmax0
+
    ! Model for the dynamical calculation of the factor of hybridization
    integer, private :: fhm0
 
@@ -34,15 +40,21 @@ module rsm_dynamic_control
 contains
 
    ! \brief Initializes RSM Dynamic Control module
-   subroutine initialize_rsm_dynamic_control(np, fh, fhm)
+   subroutine initialize_rsm_dynamic_control(np, fh, fhmin, fhmax, fhm)
       implicit none
-      integer, intent(in) :: np  !< Population size
-      real(8), intent(in) :: fh  !< Initial hybridization factor
-      integer, intent(in) :: fhm !< Model for the dynamical calculation of the factor of hybridization
+      integer, intent(in) :: np    !< Population size
+      real(8), intent(in) :: fh    !< Initial hybridization factor
+      real(8), intent(in) :: fhmin !< Minimum hybridization factor
+      real(8), intent(in) :: fhmax !< Maximum hybridization factor
+      integer, intent(in) :: fhm   !< Model for the dynamical calculation of the factor of hybridization
 
       nps = np
 
       fh0 = fh
+
+      fhmin0 = fhmin
+
+      fhmax0 = fhmax
 
       fhm0 = fhm
 
@@ -159,6 +171,9 @@ contains
    real(8) function get_hybridization_factor()
       implicit none
 
+      ! Inner variables
+      real(8) :: ps
+
       select case (fhm0)
 
          ! Constant hybridization factor
@@ -169,9 +184,19 @@ contains
          ! Variable hybridization factor
          case (1)
 
-            if ( rsm_p_success() > 0.d0 ) then
+            ps = rsm_p_success()
 
-               get_hybridization_factor =  rsm_p_success()
+            if ( 0.d0 <= ps .and. ps <= fhmin0 ) then
+
+               get_hybridization_factor =  fhmin0
+
+            else if ( fhmin0 < ps .and. ps < fhmax0 ) then
+
+               get_hybridization_factor =  ps
+
+            else if ( fhmax0 <= ps .and. ps <= 1.d0 ) then
+
+               get_hybridization_factor =  fhmax0
 
             else
 

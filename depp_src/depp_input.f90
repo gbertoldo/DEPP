@@ -49,6 +49,8 @@ module input
    real(8) :: tcpu2     !< finishes CPU time
    real(8) :: fnb       !< Multiple of the minimum number of points for RSM fitting
    real(8) :: fh        !< Fraction of hybridization
+   real(8) :: fhmin     !< Minimum fraction of hybridization
+   real(8) :: fhmax     !< Maximum fraction of hybridization
    integer :: fhm       !< Model for the dynamical calculation of the factor of hybridization
    integer :: rsm_tag   !< Stores the return state of application of DE-RSM
 
@@ -82,8 +84,9 @@ contains
 
    !> \brief Gets the parameters from the input file
    subroutine get_parameters(   folderin, folderout, sname, iarq, reload, fdir,     &
-         ffit, tcpu0, kss, kh, fh, fhm, fnb, kw, kpm, nu, np, ng, GNoAcc, dif,      &
-         crs, crsh, nstp, netol, detol, xmin, xmax, xname, x, fit, pop, hist)
+         ffit, tcpu0, kss, kh, fh, fhmin, fhmax, fhm, fnb, kw, kpm, nu, np, ng,     &
+         GNoAcc, dif, crs, crsh, nstp, netol, detol, xmin, xmax, xname, x, fit,     &
+         pop, hist)
       implicit none
       character(len=*), intent(inout) :: folderin  !< folder the for input files
       character(len=*), intent(inout) :: folderout !< folder the for output files
@@ -95,6 +98,8 @@ contains
       integer, intent(out) :: kss      !< kind of search strategy
       integer, intent(out) :: kh       !< kind of the hybridization (see input file)
       real(8), intent(out) :: fh       !< Fraction of hybridization
+      real(8), intent(out) :: fhmin    !< Minimum hybridization factor
+      real(8), intent(out) :: fhmax    !< Maximum hybridization factor
       integer, intent(out) :: fhm      !< Model for the dynamical calculation of the factor of hybridization
       real(8), intent(out) :: fnb      !< Multiple of the minimum number of points for RSM fitting
       integer, intent(out) :: kw       !< kind of weighting function for RSM fitting
@@ -148,6 +153,8 @@ contains
       read(iarq,*) kss
       read(iarq,*) kh
       read(iarq,*) fh
+      read(iarq,*) fhmin
+      read(iarq,*) fhmax
       read(iarq,*) fhm
       read(iarq,*) fnb
       read(iarq,*) kw

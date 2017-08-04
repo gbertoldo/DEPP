@@ -91,12 +91,12 @@ program depp
 
    ! Getting the input data
    call get_parameters(  folderin,  folderout,  sname,  iarq, reload, fdir,  ffit,   &
-      tcpu0, kss, kh, fh, fhm, fnb, kw, kpm, nu, np, ng, GNoAcc, dif, crs, crsh,     &
-      nstp, netol, detol, xmin, xmax, xname, x, fit, pop, hist)
+      tcpu0, kss, kh, fh, fhmin, fhmax, fhm, fnb, kw, kpm, nu, np, ng, GNoAcc, dif,  &
+      crs, crsh, nstp, netol, detol, xmin, xmax, xname, x, fit, pop, hist)
 
 
    ! Initializes hybrid module and checks hybridization necessary condition for RSM
-   call initialize_hybrid_module(kh, nu, np, ng, fnb, fh, fhm, es)
+   call initialize_hybrid_module(kh, nu, np, ng, fnb, fh, fhmin, fhmax, fhm, es)
 
 
    ! Initializers stopping condition module

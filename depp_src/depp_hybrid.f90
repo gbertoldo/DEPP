@@ -17,7 +17,7 @@ contains
 
 
    !> \brief Initializes hybrid module and checks hybridization necessary condition for RSM
-   subroutine initialize_hybrid_module(kh, nu, np, ng, fnb, fh, fhm, es)
+   subroutine initialize_hybrid_module(kh, nu, np, ng, fnb, fh, fhmin, fhmax, fhm, es)
       implicit none
       integer, intent(in)   :: kh    !< Kind of hybridization (see input file)
       integer, intent(in)   :: nu    !< Number of unknowns
@@ -25,12 +25,14 @@ contains
       integer, intent(in)   :: ng    !< Maximum number of generations
       real(8), intent(in)   :: fnb   !< Multiple of the minimum number of points for RSM fitting
       real(8), intent(in)   :: fh    !< Initial hybridization factor
+      real(8), intent(in)   :: fhmin !< Minimum hybridization factor
+      real(8), intent(in)   :: fhmax !< Maximum hybridization factor
       integer, intent(in)   :: fhm   !< Model for the dynamical calculation of the factor of hybridization
       integer, intent(out)  :: es    !< Exit status (0=success, 1=failure)
 
 
       ! Initializing RSM Dynamic Control module
-      call initialize_rsm_dynamic_control(np, fh, fhm)
+      call initialize_rsm_dynamic_control(np, fh, fhmin, fhmax, fhm)
 
 
       ! Initializing exit status
