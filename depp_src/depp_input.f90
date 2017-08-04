@@ -50,7 +50,7 @@ module input
    real(8) :: fnb       !< Multiple of the minimum number of points for RSM fitting
    real(8) :: fh        !< Fraction of hybridization
    integer :: fhm       !< Model for the dynamical calculation of the factor of hybridization
-   integer :: rsm_tag   !< (0=DE, 1=RSM) is a tag used to inform master how many individuals were created using RSM
+   integer :: rsm_tag   !< Stores the return state of application of DE-RSM
 
    real(8) :: detol     !< tolerance for the convergence measure in the DE algorithm
 

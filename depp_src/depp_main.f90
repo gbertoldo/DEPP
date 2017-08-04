@@ -193,9 +193,8 @@ program depp
             ! First generation needs special attention
             if ( g == 1 ) then
 
-               ! rsm_tag (0=DE, 1=RSM) is a tag used to inform
-               ! master how many individuals were created using RSM
-               rsm_tag = 0
+               ! rsm_tag stores the return state of application of DE-RSM
+               rsm_tag = DE_RSM_RETURN%DE_APPLIED
 
                ! Calculating the fitness function
                fitloop1: do
@@ -239,9 +238,8 @@ program depp
 
                   if ( rsm_check(kh, np, g, fh) ) then
 
-                     ! rsm_tag (0=DE, 1=RSM) is a tag used to inform
-                     ! master how many individuals were created using RSM
-                     rsm_tag = 1
+                     ! rsm_tag stores the return state of application of DE-RSM
+                     rsm_tag = DE_RSM_RETURN%RSM_APPLIED
 
                      ! Generating a RSM individual
 
@@ -251,9 +249,8 @@ program depp
                      ! If RSM fails, generates a pure DE individual
                      if ( es == 1 ) then
 
-                        ! rsm_tag (0=DE, 1=RSM) is a tag used to inform
-                        ! master how many individuals were created using RSM
-                        rsm_tag = 0
+                        ! rsm_tag stores the return state of application of DE-RSM
+                        rsm_tag = DE_RSM_RETURN%DE_APPLIED_AFTER_RSM_FAILURE
 
                         ! Creating the trial individual x
                         call get_trial_individual(ind, nu, np, kss, dif, crs, pop, fit, x)
@@ -262,9 +259,8 @@ program depp
 
                   else
 
-                     ! rsm_tag (0=DE, 1=RSM) is a tag used to inform
-                     ! master how many individuals were created using RSM
-                     rsm_tag = 0
+                     ! rsm_tag stores the return state of application of DE-RSM
+                     rsm_tag = DE_RSM_RETURN%DE_APPLIED
 
                      ! Creating the trial individual x
                      call get_trial_individual(ind, nu, np, kss, dif, crs, pop, fit, x)
@@ -276,9 +272,27 @@ program depp
                   ! another one is created using pure DE
                   do while ( is_X_out_of_range(nu, xmin, xmax, x) )
 
-                     ! rsm_tag (0=DE, 1=RSM) is a tag used to inform
-                     ! master how many individuals were created using RSM
-                     rsm_tag = 0
+                     ! Checking DE-RSM status
+                     select case (rsm_tag)
+
+                        ! If DE was applied, do nothing.
+                        case (DE_RSM_RETURN%DE_APPLIED)
+
+                        ! If RSM was applied, a DE individual will be generated. Counts this application as a RSM failure.
+                        case (DE_RSM_RETURN%RSM_APPLIED)
+
+                           rsm_tag = DE_RSM_RETURN%DE_APPLIED_AFTER_RSM_FAILURE
+
+                        ! If DE was applied after a RSM failure, counts this application as a RSM failure.
+                        case (DE_RSM_RETURN%DE_APPLIED_AFTER_RSM_FAILURE)
+
+                        ! If black box evaluation failed, do nothing.
+                        case (DE_RSM_RETURN%BLACK_BOX_EVALUATION_FAILURE)
+
+                        case default
+
+                     end select
+
 
                      ! Creating the trial individual x
                      call get_trial_individual(ind, nu, np, kss, dif, crs, pop, fit, x)
@@ -299,9 +313,8 @@ program depp
 
                      case (1) ! Failure
 
-                        ! rsm_tag (0=DE, 1=RSM) is a tag used to inform
-                        ! master how many individuals were created using RSM
-                        rsm_tag = 0
+                        ! rsm_tag stores the return state of application of DE-RSM
+                        rsm_tag = DE_RSM_RETURN%BLACK_BOX_EVALUATION_FAILURE
 
                         ! Failure in the calculation of fitness function. Saving informations.
                         call save_fitness_failure(nu, g, ind, folderout, sname, &
@@ -314,6 +327,9 @@ program depp
                         exit fitloop2
 
                      case (2:10) ! Generate another individual
+
+                        ! rsm_tag stores the return state of application of DE-RSM
+                        rsm_tag = DE_RSM_RETURN%BLACK_BOX_EVALUATION_FAILURE
 
                         ! Failure in the calculation of fitness function. Saving informations.
                         call save_fitness_failure(nu, g, ind, folderout, sname, &

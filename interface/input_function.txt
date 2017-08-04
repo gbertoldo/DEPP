@@ -1,4 +1,4 @@
-           2 =        nf:   Function number
+          14 =        nf:   Function number
            2 =        nu:   Number of unknowns
           X1 =  xname(1):   Name of the unknown
            1 =   xopt(1):   Optimization option for the unknown ( 0 = no, 1 = yes )
@@ -9,6 +9,9 @@
           X3 =  xname(3):   Name of the unknown
            1 =   xopt(3):   Optimization option for the unknown ( 0 = no, 1 = yes )
        1.0E0 =      x(3):   Value of the unknown (this value will be used only if x_opt = 0 )
+          X4 =  xname(4):   Name of the unknown
+           1 =   xopt(4):   Optimization option for the unknown ( 0 = no, 1 = yes )
+       1.0E0 =      x(4):   Value of the unknown (this value will be used only if x_opt = 0 )
 
 
 ==============================================================================================

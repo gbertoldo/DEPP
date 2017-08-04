@@ -19,6 +19,17 @@ module rsm_dynamic_control
    ! Register if RSM was applied with success (1) or not (0)
    real(8), allocatable, dimension(:), private :: r_rsm
 
+   ! Defining a return code for application of DE-RSM
+   type, private :: DE_RSM_RETURN_CODE
+
+      integer ::                   DE_APPLIED
+      integer ::                  RSM_APPLIED
+      integer :: DE_APPLIED_AFTER_RSM_FAILURE
+      integer :: BLACK_BOX_EVALUATION_FAILURE
+
+   end type
+
+   type(DE_RSM_RETURN_CODE), parameter, public :: DE_RSM_RETURN = DE_RSM_RETURN_CODE(0,1,2,3)
 
 contains
 
@@ -48,29 +59,59 @@ contains
    ! \brief Add a result and update RSM Dynamic Control
    subroutine add_to_rsm_dynamic_control(rsm_tag, xfit, fit)
       implicit none
-      integer, intent(in) :: rsm_tag !< 0=DE, 1=RSM
+      integer, intent(in) :: rsm_tag !< Stores the return state of application of DE-RSM
       real(8), intent(in) :: xfit    !< fitness of the trial individual
       real(8), intent(in) :: fit     !< fitness of a given individual of the population
 
-      ! If RSM was applied
-      if ( rsm_tag == 1 ) then
-
-         ! Getting the index of the current register
-         ireg = idx(ireg+1,nps)
+      ! Checking DE-RSM status
+      select case (rsm_tag)
 
 
-         ! If RSM was applied with success
-         if ( xfit > fit ) then
+         ! If DE was applied, do nothing
+         case (DE_RSM_RETURN%DE_APPLIED)
 
-            r_rsm(ireg) = 1.d0
 
-         else
+
+         ! If RSM was applied, evaluate the success of the application
+         case (DE_RSM_RETURN%RSM_APPLIED)
+
+            ! Getting the index of the current register
+            ireg = idx(ireg+1,nps)
+
+            ! If RSM was applied with success
+            if ( xfit > fit ) then
+
+               r_rsm(ireg) = 1.d0
+
+            else
+
+               r_rsm(ireg) = 0.d0
+
+            end if
+
+
+
+         ! If DE was applied after a RSM failure, counts this application as a failure
+         case (DE_RSM_RETURN%DE_APPLIED_AFTER_RSM_FAILURE)
+
+            ! Getting the index of the current register
+            ireg = idx(ireg+1,nps)
 
             r_rsm(ireg) = 0.d0
 
-         end if
 
-      end if
+
+         ! If black box evaluation failed, do nothing
+         case (DE_RSM_RETURN%BLACK_BOX_EVALUATION_FAILURE)
+
+
+         case default
+
+            write(*,*) "add_to_rsm_dynamic_control: unknown return code. Stopping."
+            stop
+
+      end select
+
 
    end subroutine
 
