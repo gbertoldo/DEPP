@@ -25,7 +25,7 @@ function ReadData(){
 }
 
 # SETTING UP PARAMETERS
-NR=5 # Number of runs
+NR=50 # Number of runs
 
 
 # Extracting informations about simulation case

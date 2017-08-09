@@ -102,15 +102,8 @@ contains
             end if
 
 
-
-         ! If DE was applied after a RSM failure, counts this application as a failure
+         ! If RSM was not applied, its is not possible to  evaluate the success of improving the fitness function
          case (DE_RSM_RETURN%DE_APPLIED_AFTER_RSM_FAILURE)
-
-            ! Getting the index of the current register
-            ireg = idx(ireg+1,nps)
-
-            r_rsm(ireg) = 0.d0
-
 
 
          ! If black box evaluation failed, do nothing
