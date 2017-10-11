@@ -1,9 +1,9 @@
-                function14 = sname:    Simulation name
+                function14DE = sname:    Simulation name
                          0 = reload:   Upload backup data and continue computation (0=no; 1=yes)
          '$PWD/interface/' = fdir:     Name of working directory for fitness calculation
              'functions.x' = ffit:     Name of executable for fitness calculation
                          1 = kss:      Kind of search strategy. (See options bellow)
-                         2 = kh:       Kind of hybridization (See options bellow)
+                         0 = kh:       Kind of hybridization (See options bellow)
                     0.35d0 = fh:       Fraction of hybridization
                     0.10d0 = fhmin:    Minimum fraction of hybridization
                     0.90d0 = fhmax:    Maximum fraction of hybridization

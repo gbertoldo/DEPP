@@ -1,6 +1,8 @@
 !> \brief Contains subroutines for writing output data.
 module output
 
+   use mod_class_timer
+
    implicit none
 
 contains
@@ -152,7 +154,7 @@ contains
 
    !> \brief Calls subroutines for writing the main results, plotting statistics
    !! and convergence history.
-   subroutine write_output_files(folderout, sname, nu, np, ibest, g, tcpu, &
+   subroutine write_output_files(folderout, sname, nu, np, ibest, g, timer, &
          convergence_info, xmin, xmax, fit, pop)
       implicit none
       character(len=*), intent(in) :: folderout        !< folder the for output files
@@ -161,7 +163,7 @@ contains
       integer,          intent(in) :: np               !< population size
       integer,          intent(in) :: ibest            !< index of the best individual in the population
       integer,          intent(in) :: g                !< final number of generations
-      real(8),          intent(in) :: tcpu             !< Total CPU time
+      type(class_timer),intent(in) :: timer            !< timer
       character(len=*), intent(in) :: convergence_info !< Convergence measure
       real(8),          intent(in) :: xmin(nu)         !< lower boundary constraints
       real(8),          intent(in) :: xmax(nu)         !< higher boundary constraints
@@ -177,28 +179,25 @@ contains
 
       call plot_history(sname, folderout, nu, xmin, xmax)
 
-      call write_results(tcpu, nu, np, ibest, g, convergence_info, fit, pop)
+      call write_results(timer, nu, np, ibest, g, convergence_info, fit, pop)
 
    end subroutine
 
    !============================================================================
 
    !> \brief Writes main results to a file
-   subroutine write_results(tcpu, nu, np, ibest, g, convergence_info, fit, pop)
+   subroutine write_results(timer, nu, np, ibest, g, convergence_info, fit, pop)
       implicit none
       integer,          intent(in) :: nu               !< number of unknowns
       integer,          intent(in) :: np               !< population size
       integer,          intent(in) :: ibest            !< index of the best individual in the population
       integer,          intent(in) :: g                !< final number of generations
-      real(8),          intent(in) :: tcpu             !< total CPU time
+      type(class_timer),intent(in) :: timer            !< timer
       character(len=*), intent(in) :: convergence_info !< Convergence measure
       real(8),          intent(in) :: fit(np)          !< fitness of the population
       real(8),          intent(in) :: pop(np,nu)       !< population
 
-      character(10) tcpuf
       integer :: j
-
-      call convert_real_to_time_format(tcpu, tcpuf)
 
       write(*,*)
       write(*,*) "SOLUTION:"
@@ -225,8 +224,8 @@ contains
 
       write(22,"(I23, a)") g, " = g:       Final number of generations"
       write(22,*) " ", trim(adjustl(convergence_info))
-      write(22,"(1pe23.15, a)") tcpu, " = tcpu:    Total CPU time [s]"
-      write(22,"(a23, a)") tcpuf, &
+      write(22,"(1pe23.15, a)") timer%elapsed_time(), " = tcpu:    Total CPU time [s]"
+      write(22,"(a23, a)") timer%formatted_elapsed_time(), &
          " = tcpuf:   Total CPU time formatted [hh:mm:ss]"
       write(22,*)
 
@@ -361,34 +360,6 @@ contains
 
    end subroutine save_backup
 
-   !============================================================================
-
-   !> \brief Converts a real number to the time format 00:00:00.
-   subroutine convert_real_to_time_format(rtime, ftime)
-      implicit none
-      character(10), intent(out) :: ftime !< time formatted
-      real(8), intent(in) :: rtime        !< time in seconds
-
-      character(2) :: char2
-      integer :: hora
-      integer :: min
-      integer :: seg
-
-      hora = int(rtime/3600)
-      min = int((rtime - hora*3600)/60)
-      seg = int(rtime - hora*3600 - min*60)
-
-      write(ftime, "(i4)") hora
-
-      write(char2, "(i2)") min
-      if (min < 10) char2 = "0" // adjustl(char2)
-      ftime = trim(ftime) // ":" // char2
-
-      write(char2, "(i2)") seg
-      if (seg < 10) char2 = "0" // adjustl(char2)
-      ftime = trim(ftime) // ":" // char2
-
-   end subroutine convert_real_to_time_format
 
    !============================================================================
 

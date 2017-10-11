@@ -43,10 +43,6 @@ module input
    real(8) :: crs       !< crossover constant
    real(8) :: crsh      !< crossover constant of the hybridized model
    real(8) :: xfit      !< fitness of the trial individual
-   real(8) :: tcpu      !< total CPU time
-   real(8) :: tcpu0     !< accumulated CPU time
-   real(8) :: tcpu1     !< starts CPU time
-   real(8) :: tcpu2     !< finishes CPU time
    real(8) :: fnb       !< Multiple of the minimum number of points for RSM fitting
    real(8) :: fh        !< Fraction of hybridization
    real(8) :: fhmin     !< Minimum fraction of hybridization
@@ -84,7 +80,7 @@ contains
 
    !> \brief Gets the parameters from the input file
    subroutine get_parameters(   folderin, folderout, sname, iarq, reload, fdir,     &
-         ffit, tcpu0, kss, kh, fh, fhmin, fhmax, fhm, fnb, kw, kpm, nu, np, ng,     &
+         ffit, kss, kh, fh, fhmin, fhmax, fhm, fnb, kw, kpm, nu, np, ng,            &
          GNoAcc, dif, crs, crsh, nstp, netol, detol, xmin, xmax, xname, x, fit,     &
          pop, hist)
       implicit none
@@ -108,7 +104,6 @@ contains
       integer, intent(out) :: np       !< population size
       integer, intent(out) :: ng       !< maximal number of generations
       integer, intent(out) :: GNoAcc   !< maximum number of generations allowed before stopping if no improvement was found
-      real(8), intent(out) :: tcpu0    !< accumulated CPU time
       real(8), intent(out) :: dif      !< differentiation constant
       real(8), intent(out) :: crs      !< crossover constant
       real(8), intent(out) :: crsh     !< crossover constant of the hybridized model
@@ -145,8 +140,6 @@ contains
       read(iarq,*) reload
 
       folderout = trim(folderout) // trim(sname) // "/"
-
-      tcpu0 = 0.d0
 
       read(iarq,*) fdir
       read(iarq,*) ffit

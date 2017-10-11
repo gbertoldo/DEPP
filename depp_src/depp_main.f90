@@ -44,23 +44,20 @@ program depp
    use hybrid
    use output
    use stopping_condition_module
+   use mod_class_timer
 
    implicit none
 
    include 'mpif.h'
 
-   character(10) :: tcpuf                    !< Formatted CPU time
    integer       :: i                        !< Dummy variable
    integer       :: iaux                     !< Dummy variable
    integer       :: status(mpi_status_size)  !< mpi: vector with information and source tag
+   type(class_timer) :: timer
 
 
    ! Initializing MPI (from now on the code is parallel)
    call mpi_init(code)
-
-
-   ! Initializing CPU time
-   tcpu1 = MPI_Wtime()
 
 
    ! Initializing MPI variables
@@ -84,14 +81,14 @@ program depp
 
 
    ! Generating seeds for the random number subroutine
-   call system_clock(count = clock)
-   seed = ( iproc + 1 ) * clock
-   call random_seed(put = seed)
+!   call system_clock(count = clock)
+!   seed = ( iproc + 1 ) * clock
+!   call random_seed(put = seed)
 
 
    ! Getting the input data
    call get_parameters(  folderin,  folderout,  sname,  iarq, reload, fdir,  ffit,   &
-      tcpu0, kss, kh, fh, fhmin, fhmax, fhm, fnb, kw, kpm, nu, np, ng, GNoAcc, dif,  &
+      kss, kh, fh, fhmin, fhmax, fhm, fnb, kw, kpm, nu, np, ng, GNoAcc, dif,         &
       crs, crsh, nstp, netol, detol, xmin, xmax, xname, x, fit, pop, hist)
 
 
@@ -124,6 +121,8 @@ program depp
    ! If reload=0, data is initialized, otherwise the population and its fitness are read from the backup file
    if ( reload == 0 ) then
 
+      call timer%start()
+
       g    =  0
       pop  =  0.d0
       fit  = -huge(1.d0)
@@ -134,6 +133,8 @@ program depp
 
       ! Loading data
       call load_backup(folderout, sname, ng, nu, np, tcpu0, g, fit, pop, hist)
+
+      call timer%start(tcpu0)
 
       ! Searching for the best individual of the current generation
       ibest = maxloc(fit,1)
@@ -168,13 +169,9 @@ program depp
       ! Print time
       if (iproc == 0) then
 
-         tcpu2 = MPI_Wtime()
+         call timer%measure()
 
-         tcpu = tcpu0 + tcpu2 - tcpu1
-
-         call convert_real_to_time_format(tcpu, tcpuf)
-
-         write(*,"(/, a, a)") "Accumulated CPU time: ", tcpuf
+         write(*,"(/, a, a)") "Accumulated CPU time: ", timer%formatted_elapsed_time()
 
          write(*,"(/, a, i4, a, /)") "Processing the", g, "th generation..."
 
@@ -421,11 +418,10 @@ program depp
          call flush(20)
 
          ! Calculating the ellapsed CPU time
-         tcpu2 = MPI_Wtime()
-         tcpu = tcpu0 + tcpu2 - tcpu1
+         call timer%measure()
 
          ! Saving backup data
-         call save_backup(folderout, sname, ng, nu, np, tcpu, g, fit, pop, hist)
+         call save_backup(folderout, sname, ng, nu, np, timer%elapsed_time(), g, fit, pop, hist)
 
       end if
 
@@ -465,10 +461,9 @@ program depp
    ! Master processor: data post processing
    if (iproc == 0) then
 
-      tcpu2 = MPI_Wtime()
-      tcpu = tcpu0 + tcpu2 - tcpu1
+      call timer%measure()
 
-      call write_output_files(folderout, sname, nu, np, ibest, g, tcpu, &
+      call write_output_files(folderout, sname, nu, np, ibest, g, timer, &
          convergence_info, xmin, xmax, fit, pop)
 
    end if
