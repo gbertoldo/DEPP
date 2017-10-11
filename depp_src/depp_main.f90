@@ -53,6 +53,7 @@ program depp
    integer       :: i                        !< Dummy variable
    integer       :: iaux                     !< Dummy variable
    integer       :: status(mpi_status_size)  !< mpi: vector with information and source tag
+   real(8)       :: tcpu0
    type(class_timer) :: timer
 
 

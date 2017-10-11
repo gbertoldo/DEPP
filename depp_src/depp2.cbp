@@ -58,6 +58,7 @@
 		<Unit filename="depp_stopping_condition_module.f90">
 			<Option weight="1" />
 		</Unit>
+		<Unit filename="depp_timer.f90" />
 		<Unit filename="depp_tools.f90">
 			<Option weight="1" />
 		</Unit>
