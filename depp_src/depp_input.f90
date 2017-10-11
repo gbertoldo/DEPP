@@ -27,9 +27,6 @@ module input
    integer :: ibest     !< index of the best individual in the population
    integer :: r(3)      !< indexes of selected individuals
 
-   integer :: clock     !< clock time for seeds generation
-   integer :: seed(97)  !< seeds for random numbers
-
    integer :: es        !< exit status (0=success; 1=failure)
    integer :: estatus   !< exit status (0=success; 1=failure)
 

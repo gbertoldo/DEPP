@@ -3,6 +3,8 @@ module tools
 
    use qsort
 
+   use mod_random_generator
+
    implicit none
 
 contains
@@ -28,7 +30,7 @@ contains
 
          do j = 1, nu
 
-            call random_number(rnd)
+            call rand_number(rnd)
 
             pop(ind,j) = xmin(j) + rnd*(xmax(j) - xmin(j))
 
@@ -54,7 +56,7 @@ contains
 
       do j = 1, nu
 
-         call random_number(rnd)
+         call rand_number(rnd)
 
          x(j) = xmin(j) + rnd*(xmax(j) - xmin(j))
 
@@ -78,7 +80,7 @@ contains
 
       do while (r(1) == ind)
 
-         call random_number(rnd)
+         call rand_number(rnd)
 
          r(1) = int(rnd*np) + 1
 
@@ -86,7 +88,7 @@ contains
 
       do while (r(2) == r(1) .or. r(2) == ind)
 
-         call random_number(rnd)
+         call rand_number(rnd)
 
          r(2) = int(rnd*np) + 1
 
@@ -94,7 +96,7 @@ contains
 
       do while (r(3) == r(1) .or. r(3) == r(2) .or. r(3) == ind)
 
-         call random_number(rnd)
+         call rand_number(rnd)
 
          r(3) = int(rnd*np) + 1
 
@@ -225,13 +227,13 @@ contains
       real(8) :: rnd
 
 
-      call random_number(rnd)
+      call rand_number(rnd)
 
       irnd = int(rnd*nu) + 1
 
       do j = 1, nu
 
-         call random_number(rnd)
+         call rand_number(rnd)
 
          if (rnd < crs .or. irnd == j) then
 

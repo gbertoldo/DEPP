@@ -44,8 +44,9 @@ program depp
    use hybrid
    use output
    use stopping_condition_module
-   use mod_class_timer
    use mod_mpi
+   use mod_class_timer
+   use mod_random_generator
 
    implicit none
 
@@ -55,12 +56,12 @@ program depp
    type(class_timer) :: timer
 
 
+   ! Initializing MPI module
    call initialize_mpi_module()
 
-   ! Generating seeds for the random number subroutine
-!   call system_clock(count = clock)
-!   seed = ( iproc + 1 ) * clock
-!   call random_seed(put = seed)
+
+   ! Initializing random number generator module
+   call initialize_random_generator(iproc)
 
 
    ! Getting the input data

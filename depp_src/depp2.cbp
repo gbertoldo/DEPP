@@ -40,6 +40,7 @@
 		<Unit filename="depp_main.f90">
 			<Option weight="3" />
 		</Unit>
+		<Unit filename="depp_mpi.f90" />
 		<Unit filename="depp_no_improvement_stopping_condition.f90">
 			<Option weight="0" />
 		</Unit>
@@ -49,6 +50,7 @@
 		<Unit filename="depp_qsort.f90">
 			<Option weight="0" />
 		</Unit>
+		<Unit filename="depp_random_generator.f90" />
 		<Unit filename="depp_rsm.f90">
 			<Option weight="0" />
 		</Unit>
