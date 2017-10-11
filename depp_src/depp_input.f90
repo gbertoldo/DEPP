@@ -33,12 +33,6 @@ module input
    integer :: es        !< exit status (0=success; 1=failure)
    integer :: estatus   !< exit status (0=success; 1=failure)
 
-   integer :: iproc     !< mpi: identification number of the process
-   integer :: code      !< mpi: status code
-   integer :: nproc     !< mpi: number of processes
-   integer :: tag       !< mpi: message label
-   integer :: comm      !< mpi: MPI communicator
-
    real(8) :: dif       !< differentiation constant
    real(8) :: crs       !< crossover constant
    real(8) :: crsh      !< crossover constant of the hybridized model

@@ -45,41 +45,17 @@ program depp
    use output
    use stopping_condition_module
    use mod_class_timer
+   use mod_mpi
 
    implicit none
 
-   include 'mpif.h'
-
    integer       :: i                        !< Dummy variable
    integer       :: iaux                     !< Dummy variable
-   integer       :: status(mpi_status_size)  !< mpi: vector with information and source tag
    real(8)       :: tcpu0
    type(class_timer) :: timer
 
 
-   ! Initializing MPI (from now on the code is parallel)
-   call mpi_init(code)
-
-
-   ! Initializing MPI variables
-   comm = mpi_comm_world
-   tag = 42
-
-
-   ! Checking for MPI initialization errors
-   if (code /= mpi_success) then
-      write(*,*) " =====  Error in the MPI initialization. Stopping...  ====="
-      call mpi_abort(comm, code, code)
-   endif
-
-
-   ! Getting the total number of processors
-   call mpi_comm_size(comm, nproc, code)
-
-
-   ! Getting the ID number of each processor
-   call mpi_comm_rank(comm, iproc, code)
-
+   call initialize_mpi_module()
 
    ! Generating seeds for the random number subroutine
 !   call system_clock(count = clock)
