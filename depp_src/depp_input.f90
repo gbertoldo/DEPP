@@ -2,56 +2,30 @@
 !! from input files.
 module input
 
+   use mod_class_ifile
+   use mod_class_system_variables
+
+
    implicit none
 
-   character(600) :: folderin = "./depp_input/"   !< folder the for input files
-   character(600) :: folderout = "./depp_output/" !< folder the for output files
-   character(600) :: logfile  !< name of the log file
-   character(600) :: sname    !< simulations name
-   character(600) :: fdir     !< name of working directory for fitness calculation
-   character(600) :: ffit     !< name of executable for fitness calculation
+   ! System
+   type(class_system_variables) :: sys_var
 
-   integer :: iarq = 10 !< number of the input file
+   ! Simulation
+   character(str_size) :: sname    !< simulations name
    integer :: reload    !< upload backup data
    integer :: ind       !< number of the individual
-   integer :: g         !< generation
-   integer :: nu        !< number of unknowns
-   integer :: np        !< population size
-   integer :: ng        !< maximal number of generations
-   integer :: GNoAcc    !< maximum number of generations allowed before stopping if no improvement was found
-   integer :: nf        !< number of individuals for fitting RSM
-   integer :: kss       !< kind of search strategy
-   integer :: kh        !< kind of hybridization (see input file)
-   integer :: kw        !< kind of weighting function for RSM fitting
-   integer :: kpm       !< kind of population convergence measure
    integer :: ibest     !< index of the best individual in the population
+   real(8) :: xfit      !< fitness of the trial individual
    integer :: r(3)      !< indexes of selected individuals
-
+   real(8), dimension(:),     allocatable :: x      !< trial individual
    integer :: es        !< exit status (0=success; 1=failure)
    integer :: estatus   !< exit status (0=success; 1=failure)
 
-   real(8) :: dif       !< differentiation constant
-   real(8) :: crs       !< crossover constant
-   real(8) :: crsh      !< crossover constant of the hybridized model
-   real(8) :: xfit      !< fitness of the trial individual
-   real(8) :: fnb       !< Multiple of the minimum number of points for RSM fitting
-   real(8) :: fh        !< Fraction of hybridization
-   real(8) :: fhmin     !< Minimum fraction of hybridization
-   real(8) :: fhmax     !< Maximum fraction of hybridization
-   integer :: fhm       !< Model for the dynamical calculation of the factor of hybridization
-   integer :: rsm_tag   !< Stores the return state of application of DE-RSM
-
-   real(8) :: detol     !< tolerance for the convergence measure in the DE algorithm
-
-   integer :: nstp      !< Number of trials for adjusting the step of the RSM solution
-   real(8) :: netol     !< Tolerance for distance when selecting neighbors points for RSM adjusting
-
-   logical :: stopflag  !< Flag indicating that stopping condition was reached
-
-
-   real(8), dimension(:),     allocatable :: x      !< trial individual
-   real(8), dimension(:),     allocatable :: xmin   !< lower boundary constraints
-   real(8), dimension(:),     allocatable :: xmax   !< higher boundary constraints
+   ! Evolution history
+   integer :: g         !< generation
+   integer :: nu        !< number of unknowns
+   integer :: np        !< population size
    real(8), dimension(:),     allocatable :: fit    !< fitness of the population
    real(8), dimension(:,:),   allocatable :: pop    !< population
 
@@ -63,96 +37,87 @@ module input
 
    real(8), dimension(:,:,:), allocatable :: hist   !< history
 
+
+   ! Domain
+   real(8), dimension(:),     allocatable :: xmin   !< lower boundary constraints
+   real(8), dimension(:),     allocatable :: xmax   !< higher boundary constraints
    character(10), dimension(:), allocatable :: xname !< names of the unknowns
+
+
+   ! DE Mutation and crossing over
+   real(8) :: dif       !< differentiation constant
+   real(8) :: crs       !< crossover constant
+   integer :: kss       !< kind of search strategy
+
+
+   ! RSM
+   integer :: nf        !< number of individuals for fitting RSM
+   integer :: kh        !< kind of hybridization (see input file)
+   integer :: kw        !< kind of weighting function for RSM fitting
+   real(8) :: crsh      !< crossover constant of the hybridized model
+   real(8) :: fnb       !< Multiple of the minimum number of points for RSM fitting
+   real(8) :: fh        !< Fraction of hybridization
+   real(8) :: fhmin     !< Minimum fraction of hybridization
+   real(8) :: fhmax     !< Maximum fraction of hybridization
+   integer :: fhm       !< Model for the dynamical calculation of the factor of hybridization
+   integer :: rsm_tag   !< Stores the return state of application of DE-RSM
+   integer :: nstp      !< Number of trials for adjusting the step of the RSM solution
+   real(8) :: netol     !< Tolerance for distance when selecting neighbors points for RSM adjusting
+
+
+
+   ! Stop condition
+   integer :: kpm       !< kind of population convergence measure
+   integer :: GNoAcc    !< maximum number of generations allowed before stopping if no improvement was found
+   real(8) :: detol     !< tolerance for the convergence measure in the DE algorithm
+   logical :: stopflag  !< Flag indicating that stopping condition was reached
+   integer :: ng        !< maximal number of generations
 
 contains
 
    !============================================================================
 
    !> \brief Gets the parameters from the input file
-   subroutine get_parameters(   folderin, folderout, sname, iarq, reload, fdir,     &
-         ffit, kss, kh, fh, fhmin, fhmax, fhm, fnb, kw, kpm, nu, np, ng,            &
-         GNoAcc, dif, crs, crsh, nstp, netol, detol, xmin, xmax, xname, x, fit,     &
-         pop, hist)
+   subroutine get_parameters()
       implicit none
-      character(len=*), intent(inout) :: folderin  !< folder the for input files
-      character(len=*), intent(inout) :: folderout !< folder the for output files
-      character(len=*), intent(out) :: sname       !< simulations name
-      character(len=*), intent(out) :: fdir        !< name of working directory for fitness calculation
-      character(len=*), intent(out) :: ffit        !< name of executable for fitness calculation
-      integer, intent(inout) :: iarq   !< number of input file
-      integer, intent(out) :: reload   !< upload backup data
-      integer, intent(out) :: kss      !< kind of search strategy
-      integer, intent(out) :: kh       !< kind of the hybridization (see input file)
-      real(8), intent(out) :: fh       !< Fraction of hybridization
-      real(8), intent(out) :: fhmin    !< Minimum hybridization factor
-      real(8), intent(out) :: fhmax    !< Maximum hybridization factor
-      integer, intent(out) :: fhm      !< Model for the dynamical calculation of the factor of hybridization
-      real(8), intent(out) :: fnb      !< Multiple of the minimum number of points for RSM fitting
-      integer, intent(out) :: kw       !< kind of weighting function for RSM fitting
-      integer, intent(out) :: kpm      !< kind of population convergence measure
-      integer, intent(out) :: nu       !< number of unknowns
-      integer, intent(out) :: np       !< population size
-      integer, intent(out) :: ng       !< maximal number of generations
-      integer, intent(out) :: GNoAcc   !< maximum number of generations allowed before stopping if no improvement was found
-      real(8), intent(out) :: dif      !< differentiation constant
-      real(8), intent(out) :: crs      !< crossover constant
-      real(8), intent(out) :: crsh     !< crossover constant of the hybridized model
-      integer, intent(out) :: nstp     !< Number of trials for adjusting the step of the RSM solution
-      real(8), intent(out) :: netol    !< Tolerance for distance when selecting neighbors points for RSM adjusting
-      real(8), intent(out) :: detol    !< tolerance for the convergence measure in the DE algorithm
-      real(8),       dimension(:),     allocatable, intent(out) :: x     !< trial individual
-      real(8),       dimension(:),     allocatable, intent(out) :: xmin  !< lower boundary constraints
-      real(8),       dimension(:),     allocatable, intent(out) :: xmax  !< higher boundary constraints
-      character(10), dimension(:),     allocatable, intent(out) :: xname !< names of the unknowns
-      real(8),       dimension(:),     allocatable, intent(out) :: fit   !< fitness of the population
-      real(8),       dimension(:,:),   allocatable, intent(out) :: pop   !< population
-      real(8),       dimension(:,:,:), allocatable, intent(out) :: hist  !< history
 
-      character(400) :: CWD      !< current working directory
-      character(200) :: arqin    !< input file name
+      type(class_ifile) :: ifile
+
+      character(20)  :: caux
       integer :: i
 
-      ! Getting
-      call getcwd(CWD)
 
-      ! Complete path of input and output
-      folderin  = trim(CWD) // "/" // trim(folderin)
-      folderout = trim(CWD) // "/" // trim(folderout)
+      ! Initializing system variables
+      call sys_var%init()
 
 
-      open(10, file = trim(folderin) // "input_file.txt")
-      read(10,*) arqin
-      close(10)
+      ! Reading the parameters input file
 
-      open(iarq, file = trim(folderin) // trim(adjustl(arqin)))
+      call ifile%init(filename=trim(sys_var%absfolderin) // trim(sys_var%parfile), field_separator="&")
 
-      read(iarq,*) sname
-      read(iarq,*) reload
+      call ifile%load()
 
-      folderout = trim(folderout) // trim(sname) // "/"
-
-      read(iarq,*) fdir
-      read(iarq,*) ffit
-      read(iarq,*) kss
-      read(iarq,*) kh
-      read(iarq,*) fh
-      read(iarq,*) fhmin
-      read(iarq,*) fhmax
-      read(iarq,*) fhm
-      read(iarq,*) fnb
-      read(iarq,*) kw
-      read(iarq,*) kpm
-      read(iarq,*) nu
-      read(iarq,*) np
-      read(iarq,*) ng
-      read(iarq,*) GNoAcc
-      read(iarq,*) dif
-      read(iarq,*) crs
-      read(iarq,*) crsh
-      read(iarq,*) nstp
-      read(iarq,*) netol
-      read(iarq,*) detol
+      call ifile%get_value( sname, "sname")
+      call ifile%get_value( reload, "reload")
+      call ifile%get_value( kss, "kss")
+      call ifile%get_value( kh, "kh")
+      call ifile%get_value( fh, "fh")
+      call ifile%get_value( fhmin, "fhmin")
+      call ifile%get_value( fhmax, "fhmax")
+      call ifile%get_value( fhm, "fhm")
+      call ifile%get_value( fnb, "fnb")
+      call ifile%get_value( kw, "kw")
+      call ifile%get_value( kpm, "kpm")
+      call ifile%get_value( nu, "nu")
+      call ifile%get_value( np, "np")
+      call ifile%get_value( ng, "ng")
+      call ifile%get_value( GNoAcc, "GNoAcc")
+      call ifile%get_value( dif, "dif")
+      call ifile%get_value( crs, "crs")
+      call ifile%get_value( crsh, "crsh")
+      call ifile%get_value( nstp, "nstp")
+      call ifile%get_value( netol, "netol")
+      call ifile%get_value( detol, "detol")
 
       allocate(xmin(nu))
       allocate(xmax(nu))
@@ -163,21 +128,22 @@ contains
       allocate(hist(ng,np,0:nu))
 
       do i = 1, nu
-         read(iarq,*) xname(i)
-         read(iarq,*) xmin(i)
-         read(iarq,*) xmax(i)
+         write(caux,"(A,I1.1,A)") "xname(",i,")"
+         call ifile%get_value( xname(i), trim(caux))
+         write(caux,"(A,I1.1,A)") "xmin(",i,")"
+         call ifile%get_value(  xmin(i), trim(caux))
+         write(caux,"(A,I1.1,A)") "xmax(",i,")"
+         call ifile%get_value(  xmax(i), trim(caux))
       end do
-
-      close(10)
 
    end subroutine get_parameters
 
    !============================================================================
 
    ! \brief Loads the backup data
-   subroutine load_backup(folderout, sname, ng, nu, np, tcpu, g, fit, pop, hist)
+   subroutine load_backup(sys_var, sname, ng, nu, np, tcpu, g, fit, pop, hist)
       implicit none
-      character(len=*), intent(in) :: folderout   !< folder the for output files
+      class(class_system_variables), intent(in) :: sys_var
       character(len=*), intent(in) :: sname       !< simulations name
       integer, intent(in)  :: ng               !< maximum number of generations
       integer, intent(in)  :: nu               !< dimension of the problem
@@ -192,7 +158,7 @@ contains
 
       integer :: ind, cg ! Dummy index
 
-      open(23, file = trim(folderout) // trim(sname) // "-backup.txt")
+      open(23, file = trim(sys_var%absfolderout) // trim(sname) // "-backup.txt")
 
       read(23,*) tcpu ! " = tcpu:    Accumulated CPU time"
 

@@ -5,6 +5,8 @@ module tools
 
    use mod_random_generator
 
+   use mod_class_system_variables
+
    implicit none
 
 contains
@@ -293,12 +295,10 @@ contains
 
 
    !> \brief Get the fitness of each individual
-   subroutine get_fitness(folderout, sname, fdir, ffit, ind, nu, x, xname, xfit, estatus) ! last parameter is output
+   subroutine get_fitness(sys_var, sname, ind, nu, x, xname, xfit, estatus) ! last parameter is output
       implicit none
-      character(len=*), intent(in)  :: folderout   !< folder the for output files
+      class(class_system_variables), intent(in) :: sys_var
       character(len=*), intent(in)  :: sname       !< simulations name
-      character(len=*), intent(in)  :: fdir        !< name of  working directory for fitness calculation
-      character(len=*), intent(in)  :: ffit        !< name of executable for fitness calculation
       integer,          intent(in)  :: ind         !< individual number
       integer,          intent(in)  :: nu          !< dimension
       real(8),          intent(in)  :: x(nu)       !< parameters for optimization
@@ -313,8 +313,8 @@ contains
 
       call convert_int_to_char3(ind, char3)
 
-      arqpar = trim(folderout) // "parameters" // char3 // ".txt"
-      arqfit = trim(folderout) // "fitness"    // char3 // ".txt"
+      arqpar = trim(sys_var%absfolderout) // "parameters" // char3 // ".txt"
+      arqfit = trim(sys_var%absfolderout) // "fitness"    // char3 // ".txt"
 
       open(27, file = trim(arqpar))
 
@@ -344,7 +344,7 @@ contains
       write(27,*)
       close(27)
 
-      call system("(cd " // trim(fdir) // " && exec ./" // trim(ffit) // ") < " // trim(arqpar) // " > /dev/null")
+      call system("(cd " // trim(sys_var%fdir) // " && exec ./" // trim(sys_var%ffit) // ") < " // trim(arqpar) // " > /dev/null")
 
 
       open(26, file = trim(arqfit))

@@ -31,6 +31,9 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
+		<Unit filename="depp_class_ifile.f90" />
+		<Unit filename="depp_class_system_variables.f90" />
+		<Unit filename="depp_global_parameters.f90" />
 		<Unit filename="depp_hybrid.f90">
 			<Option weight="2" />
 		</Unit>

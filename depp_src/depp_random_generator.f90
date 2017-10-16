@@ -18,9 +18,9 @@ contains
 
 
       ! Generating seeds for the random number subroutine
-      !   call system_clock(count = clock)
-      !   seed = ( iproc + 1 ) * clock
-      !   call random_seed(put = seed)
+      call system_clock(count = clock)
+      seed = ( iproc + 1 ) * clock
+      call random_seed(put = seed)
 
    end subroutine
 

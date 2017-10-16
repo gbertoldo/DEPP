@@ -1,2 +1,2 @@
-input_parameters.txt    = arqin:   Input file name of the parameters
+input_parameters.txt    & parfile &   Input file name of the parameters
 

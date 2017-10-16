@@ -61,13 +61,17 @@ program depp
 
 
    ! Initializing random number generator module
-   call initialize_random_generator(iproc)
+   !call initialize_random_generator(iproc)
+
+
+
 
 
    ! Getting the input data
-   call get_parameters(  folderin,  folderout,  sname,  iarq, reload, fdir,  ffit,   &
-      kss, kh, fh, fhmin, fhmax, fhm, fnb, kw, kpm, nu, np, ng, GNoAcc, dif,         &
-      crs, crsh, nstp, netol, detol, xmin, xmax, xname, x, fit, pop, hist)
+   call get_parameters()
+!     folderin,  folderout,  sname,  iarq, reload, fdir,  ffit,   &
+!      kss, kh, fh, fhmin, fhmax, fhm, fnb, kw, kpm, nu, np, ng, GNoAcc, dif,         &
+!      crs, crsh, nstp, netol, detol, xmin, xmax, xname, x, fit, pop, hist)
 
 
    ! Initializes hybrid module and checks hybridization necessary condition for RSM
@@ -91,8 +95,7 @@ program depp
    if (iproc == 0) then
 
       ! Writting parameters to the output file
-      call write_parameters(folderout, sname, reload, ffit, kss, kh, fh, fhm, fnb, kw, kpm, &
-         nu, np, ng, GNoAcc, dif, crs, crsh, nstp, netol, detol, xmin, xmax)
+      call write_parameters(sys_var, sname, reload)
 
    end if
 
@@ -110,7 +113,7 @@ program depp
    else
 
       ! Loading data
-      call load_backup(folderout, sname, ng, nu, np, tcpu0, g, fit, pop, hist)
+      call load_backup(sys_var, sname, ng, nu, np, tcpu0, g, fit, pop, hist)
 
       call timer%start(tcpu0)
 
@@ -177,7 +180,7 @@ program depp
                   ! Creating the trial individual x
                   call get_random_individual(nu, xmin, xmax, x)
 
-                  call get_fitness(folderout, sname, fdir, ffit, ind, nu, x, xname, &
+                  call get_fitness(sys_var, sname, ind, nu, x, xname, &
                      xfit, estatus)
 
                   ! Analyzing the exit status of the external program
@@ -190,7 +193,7 @@ program depp
                      case (1:10) ! Failure
 
                         ! Failure in the calculation of fitness function. Saving informations.
-                        call save_fitness_failure(nu, g, ind, folderout, sname, &
+                        call save_fitness_failure(nu, g, ind, sys_var, sname, &
                            x, estatus)
 
                      case default
@@ -276,7 +279,7 @@ program depp
 
 
                   ! Asking to the external program 'ffit' the fitness of individual 'x'
-                  call get_fitness(folderout, sname, fdir, ffit, ind, nu, x, xname, &
+                  call get_fitness(sys_var, sname, ind, nu, x, xname, &
                      xfit, estatus)
 
                   ! Analyzing the exit status of the external program
@@ -292,7 +295,7 @@ program depp
                         rsm_tag = DE_RSM_RETURN%BLACK_BOX_EVALUATION_FAILURE
 
                         ! Failure in the calculation of fitness function. Saving informations.
-                        call save_fitness_failure(nu, g, ind, folderout, sname, &
+                        call save_fitness_failure(nu, g, ind, sys_var, sname, &
                            x, estatus)
 
                         x = pop(ind,:)
@@ -307,7 +310,7 @@ program depp
                         rsm_tag = DE_RSM_RETURN%BLACK_BOX_EVALUATION_FAILURE
 
                         ! Failure in the calculation of fitness function. Saving informations.
-                        call save_fitness_failure(nu, g, ind, folderout, sname, &
+                        call save_fitness_failure(nu, g, ind, sys_var, sname, &
                            x, estatus)
 
                      case default
@@ -399,7 +402,7 @@ program depp
          call timer%measure()
 
          ! Saving backup data
-         call save_backup(folderout, sname, ng, nu, np, timer%elapsed_time(), g, fit, pop, hist)
+         call save_backup(sys_var, sname, ng, nu, np, timer%elapsed_time(), g, fit, pop, hist)
 
       end if
 
@@ -441,7 +444,7 @@ program depp
 
       call timer%measure()
 
-      call write_output_files(folderout, sname, nu, np, ibest, g, timer, &
+      call write_output_files(sys_var, sname, nu, np, ibest, g, timer, &
          convergence_info, xmin, xmax, fit, pop)
 
    end if

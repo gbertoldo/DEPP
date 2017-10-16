@@ -3,6 +3,8 @@ module output
 
    use mod_class_timer
 
+   use mod_class_system_variables
+
    implicit none
 
 contains
@@ -10,33 +12,11 @@ contains
    !============================================================================
 
    !> \brief Writes parameters in the output file
-   subroutine write_parameters(folderout, sname, reload, ffit, kss, kh, &
-         fh, fhm, fnb, kw, kpm, nu, np, ng, GNoAcc,  dif, crs, crsh,    &
-         nstp, netol, detol, xmin, xmax)
+   subroutine write_parameters(sys_var, sname, reload)
       implicit none
-      character(len=*), intent(in) :: folderout   !< folder the for output files
+      class(class_system_variables), intent(in) :: sys_var   !< folder the for output files
       character(len=*), intent(in) :: sname       !< simulations name
-      character(len=*), intent(in) :: ffit        !< name of executable for fitness calculation
       integer, intent(in) :: reload    !< upload backup data
-      integer, intent(in) :: kss       !< kind of search strategy
-      integer, intent(in) :: kh        !< kind of the hybridization (see input file)
-      real(8), intent(in) :: fh        !< Fraction of hybridization
-      integer, intent(in) :: fhm       !< Model for the dynamical calculation of the factor of hybridization
-      real(8), intent(in) :: fnb       !< Multiple of the minimum number of points for RSM fitting
-      integer, intent(in) :: kw        !< kind of weighting function for RSM fitting
-      integer, intent(in) :: kpm       !< kind of population convergence measure
-      integer, intent(in) :: nu        !< number of unknowns
-      integer, intent(in) :: np        !< population size
-      integer, intent(in) :: ng        !< maximal number of generations
-      integer, intent(in) :: GNoAcc    !< maximum number of generations allowed before stopping if no improvement was found
-      real(8), intent(in) :: dif       !< differentiation constant
-      real(8), intent(in) :: crs       !< crossover constant
-      real(8), intent(in) :: crsh      !< crossover constant of the hybridized model
-      integer, intent(in) :: nstp      !< Number of trials for adjusting the step of the RSM solution
-      real(8), intent(in) :: netol     !< Tolerance for distance when selecting neighbors points for RSM adjusting
-      real(8), intent(in) :: detol     !< tolerance for the convergence measure in the DE algorithm
-      real(8), intent(in) :: xmin(nu)  !< lower boundary constraints
-      real(8), intent(in) :: xmax(nu)  !< higher boundary constraints
 
       character(10) :: day    ! System date
       character(8) :: hour    ! System time
@@ -46,24 +26,23 @@ contains
       write(*,"(//, a, /)") &
          "  =======  DIFFERENTIAL EVOLUTION PARALLEL PROGRAM  =======  "
 
-      inquire(file = trim(folderout), exist = lexist)
+      inquire(file = trim(sys_var%absfolderout), exist = lexist)
 
       if (lexist) then
 
          if (reload == 0) then
-            call system("rm -r " // trim(folderout))
-            call system("mkdir " // trim(folderout))
+            call system("rm -r " // trim(sys_var%absfolderout))
+            call system("mkdir " // trim(sys_var%absfolderout))
          end if
 
       else
 
-         call system("mkdir " // trim(folderout))
+         call system("mkdir " // trim(sys_var%absfolderout))
 
       end if
 
-      call system("cp -r ./depp_input/ " // trim(folderout))
 
-      open(22, file = trim(folderout) // trim(sname) // "-summary.txt")
+      open(22, file = trim(sys_var%absfolderout) // trim(sname) // "-summary.txt")
 
       write(22,*)
       write(22,*) " =====  DIFFERENTIAL EVOLUTION PARALLEL PROGRAM  ====="
@@ -80,68 +59,29 @@ contains
          write(22,"(a, a)") trim(sname), " = sname: Simulation name"
       end if
 
-      if (len(trim(ffit)) <= 23) then
-         write(22,"(a23, a)") trim(ffit), &
-            " = ffit:    Name of executable for fitness calculation"
-      else
-         write(22,"(a, a)") trim(ffit), &
-            " = ffit: Name of executable for fitness calculation"
-      end if
-
-      write(22,"(i23, a, a)") kss, " = kss:     Kind of search strategy"
-      write(22,"(i23, a, a)") kh, " = kh:      Kind of the hybridization ", &
-         "(see input file)"
-      write(22,"(1pe23.15, a, a)") fh, " = fh:      Fraction of hybridization"
-      write(22,"(i23, a, a)") fhm, " = fhm:      Model for the dynamical calculation of the factor of hybridization"
-      write(22,"(1pe23.15, a, a)") fnb, " = fnb:     Multiple of the minimum ", &
-         "number of points for RSM fitting"
-      write(22,"(i23, a, a)") kw, " = kw:      Kind of weighting function ", &
-         "for RSM fitting (1=uniform, 2=exponential)"
-      write(22,"(i23, a)") kpm, &
-         " = kpm:     Kind of population convergence measure"
-      write(22,"(i23, a)") nu, " = nu:      Number of unknowns"
-      write(22,"(i23, a)") np, " = np:      Population size"
-      write(22,"(i23, a)") ng, " = ng:      Max. number of generations"
-      write(22,"(i23, a)") GNoAcc,   " = GNoAcc:  Maximum number of generations allowed before stopping if no improvement was found"
-      write(22,"(1pe23.15, a)") dif, " = dif:     Differentiation constant"
-      write(22,"(1pe23.15, a)") crs, " = crs:     Crossover constant"
-      write(22,"(1pe23.15, a)") crsh, " = crsh:     Crossover constant of the hybridized model"
-      write(22,"(i23, a)") nstp, " = nstp:      Number of trials for adjusting the step of the RSM solution"
-      write(22,"(1pe23.15, a)") netol, &
-         " = netol:   Tolerance for distance when selecting neighbors points for RSM adjusting"
-      write(22,"(1pe23.15, a)") detol, &
-         " = detol:   Tolerance for the convergence measure in the DE algorithm"
-
-      do i = 1, nu
-         write(22,"(1pe23.15, a, i2, a, i2, a)") xmin(i), &
-            " = xmin(", i, "): Lower value for the ", i, " unknown"
-         write(22,"(1pe23.15, a, i2, a, i2, a)") xmax(i), &
-            " = xmax(", i, "): Biggest value for the ", i, " unknown"
-      end do
-      write(22,*)
 
       if (reload == 0) then
 
-         open(20, file = trim(folderout) // trim(sname) // "-statistics.txt")
+         open(20, file = trim(sys_var%absfolderout) // trim(sname) // "-statistics.txt")
          write(20,"(A12,4(2X,A23))") "# generation", "meanfitness", "fittest", "fh", &
             "conv. meas."
 
-         open(21, file = trim(folderout) // trim(sname) // "-history.txt")
+         open(21, file = trim(sys_var%absfolderout) // trim(sname) // "-history.txt")
          52 format("# generation  individual", 18x, "fitness", 15x,"parameters")
          write(21,52)
 
-         open(24, file = trim(folderout) // trim(sname) // "-convergence.txt")
+         open(24, file = trim(sys_var%absfolderout) // trim(sname) // "-convergence.txt")
          write(24,"(A12,4(2X,A23))") "# generation", "conv. meas."
 
       else
 
-         open(20, position = "append", file = trim(folderout) // trim(sname) &
+         open(20, position = "append", file = trim(sys_var%absfolderout) // trim(sname) &
             // "-statistics.txt")
 
-         open(21, position = "append", file = trim(folderout) // trim(sname) &
+         open(21, position = "append", file = trim(sys_var%absfolderout) // trim(sname) &
             // "-history.txt")
 
-         open(24, position = "append", file = trim(folderout) // trim(sname) &
+         open(24, position = "append", file = trim(sys_var%absfolderout) // trim(sname) &
             // "-convergence.txt")
 
       end if
@@ -154,10 +94,10 @@ contains
 
    !> \brief Calls subroutines for writing the main results, plotting statistics
    !! and convergence history.
-   subroutine write_output_files(folderout, sname, nu, np, ibest, g, timer, &
+   subroutine write_output_files(sys_var, sname, nu, np, ibest, g, timer, &
          convergence_info, xmin, xmax, fit, pop)
       implicit none
-      character(len=*), intent(in) :: folderout        !< folder the for output files
+      class(class_system_variables), intent(in) :: sys_var
       character(len=*), intent(in) :: sname            !< simulations name
       integer,          intent(in) :: nu               !< number of unknowns
       integer,          intent(in) :: np               !< population size
@@ -173,11 +113,11 @@ contains
       close(20)
       close(21)
 
-      call plot_convergence(sname, folderout)
+      call plot_convergence(sname, sys_var%absfolderout)
 
-      call plot_statistics(sname, folderout)
+      call plot_statistics(sname, sys_var%absfolderout)
 
-      call plot_history(sname, folderout, nu, xmin, xmax)
+      call plot_history(sname, sys_var%absfolderout, nu, xmin, xmax)
 
       call write_results(timer, nu, np, ibest, g, convergence_info, fit, pop)
 
@@ -236,14 +176,14 @@ contains
    !============================================================================
 
    !> \brief Saves data about the failure in the calculation of the fitness
-   subroutine save_fitness_failure(nu, g, ind, folderout, sname, x, estatus)
+   subroutine save_fitness_failure(nu, g, ind, sys_var, sname, x, estatus)
       implicit none
       integer, intent(in) ::  nu !< number of unknowns
       integer, intent(in) ::   g !< number of the generation
       integer, intent(in) :: ind !< number of the individual
       integer, intent(in) :: estatus   !< exit status (0=success; 1=failure; 2=generate another individual)
 
-      character(len=*), intent(in) :: folderout !< folder the for output files
+      class(class_system_variables), intent(in) :: sys_var
       character(len=*), intent(in) :: sname     !< simulations name
 
       real(8), intent(in) :: x(nu) !< unknowns
@@ -263,7 +203,7 @@ contains
 
       call convert_int_to_char3(ind,str2)
 
-      fout = trim(adjustl(folderout)) // "fitness_failures_i" // str2 // ".txt"
+      fout = trim(adjustl(sys_var%absfolderout)) // "fitness_failures_i" // str2 // ".txt"
 
       open(10, file = fout, position = "append" )
 
@@ -310,9 +250,9 @@ contains
    !============================================================================
 
    ! \brief Saves a backup of some important data
-   subroutine save_backup(folderout, sname, ng, nu, np, tcpu, g, fit, pop, hist)
+   subroutine save_backup(sys_var, sname, ng, nu, np, tcpu, g, fit, pop, hist)
       implicit none
-      character(len=*), intent(in) :: folderout   !< folder the for output files
+      class(class_system_variables), intent(in) :: sys_var
       character(len=*), intent(in) :: sname       !< simulations name
       integer, intent(in) :: ng               !< maximum number of generations
       integer, intent(in) :: nu               !< dimension of the problem
@@ -328,7 +268,7 @@ contains
 
       integer :: ind, cg ! Dummy index
 
-      open(23, file = trim(folderout) // trim(sname) // "-backup.txt")
+      open(23, file = trim(sys_var%absfolderout) // trim(sname) // "-backup.txt")
 
       write(23,"(1pe23.15, a)") tcpu, " = tcpu:    Accumulated CPU time"
 
