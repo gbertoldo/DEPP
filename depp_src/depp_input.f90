@@ -26,6 +26,7 @@ module input
    integer :: g         !< generation
    integer :: nu        !< number of unknowns
    integer :: np        !< population size
+   integer :: ng        !< maximal number of generations
    real(8), dimension(:),     allocatable :: fit    !< fitness of the population
    real(8), dimension(:,:),   allocatable :: pop    !< population
 
@@ -53,14 +54,6 @@ module input
    ! RSM
    real(8) :: fh        !< Fraction of hybridization
    integer :: rsm_tag   !< Stores the return state of application of DE-RSM
-
-
-
-   ! Stop condition
-   integer :: kpm       !< kind of population convergence measure
-   real(8) :: detol     !< tolerance for the convergence measure in the DE algorithm
-   logical :: stopflag  !< Flag indicating that stopping condition was reached
-   integer :: ng        !< maximal number of generations
 
 contains
 
@@ -90,13 +83,11 @@ contains
       call ifile%get_value( reload, "reload")
       call ifile%get_value( kss, "kss")
       call ifile%get_value( fh, "fh")
-      call ifile%get_value( kpm, "kpm")
       call ifile%get_value( nu, "nu")
       call ifile%get_value( np, "np")
       call ifile%get_value( ng, "ng")
       call ifile%get_value( dif, "dif")
       call ifile%get_value( crs, "crs")
-      call ifile%get_value( detol, "detol")
 
       allocate(xmin(nu))
       allocate(xmax(nu))

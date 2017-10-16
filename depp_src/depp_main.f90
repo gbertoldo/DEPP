@@ -129,7 +129,7 @@ program depp
    ! condition is not satisfied
    do
 
-      stopflag = is_stopping_condition_satisfied(nu, np, ng, g, kpm, detol, xmin, xmax, pop, fit)
+      call compute_stop_condition(nu, np, g, xmin, xmax, pop, fit)
 
       ! Printing convergence measure of the current generation
       if (iproc==0) then
@@ -140,7 +140,7 @@ program depp
 
       end if
 
-      if ( stopflag ) exit
+      if ( is_stop_condition_satisfied() ) exit
 
 
       ! Starting a new generation

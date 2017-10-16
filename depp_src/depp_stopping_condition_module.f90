@@ -9,6 +9,12 @@ module stopping_condition_module
 
    character(len=300) :: convergence_info = ""
 
+   integer, private :: ng        !< maximum number of generations
+   integer, private :: kpm       !< kind of population convergence measure
+   real(8), private :: detol     !< tolerance for the convergence measure in the DE algorithm
+   logical, private :: stopflag  !< Flag indicating that stopping condition was reached
+
+
 contains
 
 
@@ -26,21 +32,32 @@ contains
       call ifile%load()
 
       call ifile%get_value(GNoAcc,"GNoAcc")
+      call ifile%get_value(kpm,"kpm")
+      call ifile%get_value(ng,"ng")
+      call ifile%get_value(detol,"detol")
 
       call initialize_no_improvement_stopping_condition(GNoAcc)
+
+      stopflag = .false.
 
    end subroutine
 
 
+   !> Checks if the stop condition was satisfied
+   logical function is_stop_condition_satisfied()
+      implicit none
+
+      is_stop_condition_satisfied = stopflag
+
+   end function
+
+
    !> Checks if the stopping condition was satisfied
-   logical function is_stopping_condition_satisfied(nu, np, ng, g, kpm, detol, xmin, xmax, pop, fit) !< Input (all)
+   subroutine compute_stop_condition(nu, np, g, xmin, xmax, pop, fit) !< Input (all)
       implicit none
       integer, intent(in) :: nu         !< Dimension of the problem
       integer, intent(in) :: np         !< Size of the population
-      integer, intent(in) :: ng         !< Maximum number of generations
       integer, intent(in) :: g          !< Current generation
-      integer, intent(in) :: kpm        !< Kind of P-measure (1=dimensional, 2=dimensionless)
-      real(8), intent(in) :: detol      !< tolerance for the convergence measure in the DE algorithm
       real(8), intent(in) :: xmin(nu)   !< lower boundary constraints
       real(8), intent(in) :: xmax(nu)   !< higher boundary constraints
       real(8), intent(in) :: pop(np,nu) !< Population
@@ -51,11 +68,11 @@ contains
       real(8) :: pcm   ! Population convergence measure
 
 
-      is_stopping_condition_satisfied = .false.
+      stopflag = .false.
 
       if ( g < 1) then
 
-         is_stopping_condition_satisfied = .false.
+         stopflag = .false.
 
          return
 
@@ -67,7 +84,7 @@ contains
 
          fstag = is_best_fitness_stagnated()
 
-         if ( (pcm <= detol) .or. (ng <= g) .or. fstag ) is_stopping_condition_satisfied = .true.
+         if ( (pcm <= detol) .or. (ng <= g) .or. fstag ) stopflag = .true.
 
 
          write(convergence_info, "(1PE23.15,A,L5,A)")   pcm,  " = Population convergence measure." &
@@ -75,7 +92,7 @@ contains
 
       end if
 
-   end function
+   end subroutine
 
 
 
