@@ -8,27 +8,56 @@ module hybrid
    use rsm_dynamic_control
    use qsort
    use tools
+   use mod_class_ifile
+   use mod_class_system_variables
 
    implicit none
 
    integer, private :: nf !< Number of points for fitting the objective function to the polynomial
+   integer, private :: kh
+   integer, private :: kw
+   integer, private :: nstp
+   real(8), private :: crsh
+   real(8), private :: netol
 
 contains
 
 
    !> \brief Initializes hybrid module and checks hybridization necessary condition for RSM
-   subroutine initialize_hybrid_module(kh, nu, np, ng, fnb, fh, fhmin, fhmax, fhm, es)
+   subroutine initialize_hybrid_module(sys_var, es)
       implicit none
-      integer, intent(in)   :: kh    !< Kind of hybridization (see input file)
-      integer, intent(in)   :: nu    !< Number of unknowns
-      integer, intent(in)   :: np    !< Size of the population
-      integer, intent(in)   :: ng    !< Maximum number of generations
-      real(8), intent(in)   :: fnb   !< Multiple of the minimum number of points for RSM fitting
-      real(8), intent(in)   :: fh    !< Initial hybridization factor
-      real(8), intent(in)   :: fhmin !< Minimum hybridization factor
-      real(8), intent(in)   :: fhmax !< Maximum hybridization factor
-      integer, intent(in)   :: fhm   !< Model for the dynamical calculation of the factor of hybridization
+      class(class_system_variables), intent(in) :: sys_var
       integer, intent(out)  :: es    !< Exit status (0=success, 1=failure)
+
+
+      integer :: nu    !< Number of unknowns
+      integer :: np    !< Size of the population
+      integer :: ng    !< Maximum number of generations
+      real(8) :: fnb   !< Multiple of the minimum number of points for RSM fitting
+      real(8) :: fh    !< Initial hybridization factor
+      real(8) :: fhmin !< Minimum hybridization factor
+      real(8) :: fhmax !< Maximum hybridization factor
+      integer :: fhm   !< Model for the dynamical calculation of the factor of hybridization
+
+      type(class_ifile) :: ifile
+
+      call ifile%init(filename=trim(sys_var%absfolderin)//trim(sys_var%parfile), field_separator="&")
+
+      call ifile%load()
+
+      call ifile%get_value(nstp,"nstp")
+      call ifile%get_value(crsh,"crsh")
+      call ifile%get_value(kw,"kw")    !< Kind of weight
+      call ifile%get_value(kh,"kh")    !< Kind of hybridization (see input file)
+      call ifile%get_value(nu,"nu")    !< Number of unknowns
+      call ifile%get_value(np,"np")    !< Size of the population
+      call ifile%get_value(ng,"ng")    !< Maximum number of generations
+      call ifile%get_value(fnb,"fnb")   !< Multiple of the minimum number of points for RSM fitting
+      call ifile%get_value(fh,"fh")    !< Initial hybridization factor
+      call ifile%get_value(fhmin,"fhmin") !< Minimum hybridization factor
+      call ifile%get_value(fhmax,"fhmax") !< Maximum hybridization factor
+      call ifile%get_value(fhm,"fhm")   !< Model for the dynamical calculation of the factor of hybridization
+      call ifile%get_value(netol,"netol")
 
 
       ! Initializing RSM Dynamic Control module
@@ -87,9 +116,8 @@ contains
 
 
    !> \brief Checks if the RSM may be applied
-   logical function rsm_check(kh, np, g, fh)
+   logical function rsm_check(np, g, fh)
       implicit none
-      integer, intent(in)   :: kh    !< Kind of hybridization (see input file)
       integer, intent(in)   :: np    !< Size of the population
       integer, intent(in)   :: g     !< Current generation
       real(8), intent(in)   :: fh    !< Fraction of hybridization
@@ -107,17 +135,13 @@ contains
 
 
    !> \brief Returns the best estimate given by the Response Surface Methodology
-   subroutine get_rsm_optimum(ind, kw, nu, np, ng, g, crsh, nstp, netol, xmin, xmax, pop, hist, x, es)
+   subroutine get_rsm_optimum(ind, nu, np, ng, g, xmin, xmax, pop, hist, x, es)
       implicit none
       integer, intent(in) :: ind   !< Current individual
-      integer, intent(in) :: kw    !< Kind of weighting function
       integer, intent(in) :: nu    !< Dimension of the problem
       integer, intent(in) :: np    !< Size of the population
       integer, intent(in) :: ng    !< Maximum number of generations
       integer, intent(in) :: g     !< Current generation
-      real(8), intent(in) :: crsh  !< crossover constant of the hybridized model
-      integer, intent(in) :: nstp  !< Number of trials for adjusting the step
-      real(8), intent(in) :: netol !< Tolerance for distance when selecting neighbors points
       real(8), dimension(nu),         intent(in)  :: xmin !< Lower bound of the domain of optimization
       real(8), dimension(nu),         intent(in)  :: xmax !< Upper bound of the domain of optimization
       real(8), dimension(np,nu),      intent(in)  :: pop  !< Population

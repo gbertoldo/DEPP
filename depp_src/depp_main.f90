@@ -75,11 +75,11 @@ program depp
 
 
    ! Initializes hybrid module and checks hybridization necessary condition for RSM
-   call initialize_hybrid_module(kh, nu, np, ng, fnb, fh, fhmin, fhmax, fhm, es)
+   call initialize_hybrid_module(sys_var,es)
 
 
    ! Initializers stopping condition module
-   call initialize_stopping_condition_module(GNoAcc)
+   call initialize_stopping_condition_module(sys_var)
 
 
    ! Checking the exit status of the module initialization
@@ -214,14 +214,14 @@ program depp
 
                   ! Checking if RSM can be applied
 
-                  if ( rsm_check(kh, np, g, fh) ) then
+                  if ( rsm_check(np, g, fh) ) then
 
                      ! rsm_tag stores the return state of application of DE-RSM
                      rsm_tag = DE_RSM_RETURN%RSM_APPLIED
 
                      ! Generating a RSM individual
 
-                     call get_rsm_optimum(ind, kw, nu, np, ng, g, crsh, nstp, netol, xmin, xmax, pop, hist, x, es)
+                     call get_rsm_optimum(ind, nu, np, ng, g, xmin, xmax, pop, hist, x, es)
 
 
                      ! If RSM fails, generates a pure DE individual

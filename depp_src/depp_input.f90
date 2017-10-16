@@ -17,7 +17,7 @@ module input
    integer :: ind       !< number of the individual
    integer :: ibest     !< index of the best individual in the population
    real(8) :: xfit      !< fitness of the trial individual
-   integer :: r(3)      !< indexes of selected individuals
+   !integer :: r(3)      !< indexes of selected individuals
    real(8), dimension(:),     allocatable :: x      !< trial individual
    integer :: es        !< exit status (0=success; 1=failure)
    integer :: estatus   !< exit status (0=success; 1=failure)
@@ -51,24 +51,13 @@ module input
 
 
    ! RSM
-   integer :: nf        !< number of individuals for fitting RSM
-   integer :: kh        !< kind of hybridization (see input file)
-   integer :: kw        !< kind of weighting function for RSM fitting
-   real(8) :: crsh      !< crossover constant of the hybridized model
-   real(8) :: fnb       !< Multiple of the minimum number of points for RSM fitting
    real(8) :: fh        !< Fraction of hybridization
-   real(8) :: fhmin     !< Minimum fraction of hybridization
-   real(8) :: fhmax     !< Maximum fraction of hybridization
-   integer :: fhm       !< Model for the dynamical calculation of the factor of hybridization
    integer :: rsm_tag   !< Stores the return state of application of DE-RSM
-   integer :: nstp      !< Number of trials for adjusting the step of the RSM solution
-   real(8) :: netol     !< Tolerance for distance when selecting neighbors points for RSM adjusting
 
 
 
    ! Stop condition
    integer :: kpm       !< kind of population convergence measure
-   integer :: GNoAcc    !< maximum number of generations allowed before stopping if no improvement was found
    real(8) :: detol     !< tolerance for the convergence measure in the DE algorithm
    logical :: stopflag  !< Flag indicating that stopping condition was reached
    integer :: ng        !< maximal number of generations
@@ -100,23 +89,13 @@ contains
       call ifile%get_value( sname, "sname")
       call ifile%get_value( reload, "reload")
       call ifile%get_value( kss, "kss")
-      call ifile%get_value( kh, "kh")
       call ifile%get_value( fh, "fh")
-      call ifile%get_value( fhmin, "fhmin")
-      call ifile%get_value( fhmax, "fhmax")
-      call ifile%get_value( fhm, "fhm")
-      call ifile%get_value( fnb, "fnb")
-      call ifile%get_value( kw, "kw")
       call ifile%get_value( kpm, "kpm")
       call ifile%get_value( nu, "nu")
       call ifile%get_value( np, "np")
       call ifile%get_value( ng, "ng")
-      call ifile%get_value( GNoAcc, "GNoAcc")
       call ifile%get_value( dif, "dif")
       call ifile%get_value( crs, "crs")
-      call ifile%get_value( crsh, "crsh")
-      call ifile%get_value( nstp, "nstp")
-      call ifile%get_value( netol, "netol")
       call ifile%get_value( detol, "detol")
 
       allocate(xmin(nu))

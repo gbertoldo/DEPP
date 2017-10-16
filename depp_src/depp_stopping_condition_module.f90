@@ -2,6 +2,8 @@
 module stopping_condition_module
 
    use no_improvement_stopping_condition
+   use mod_class_ifile
+   use mod_class_system_variables
 
    implicit none
 
@@ -11,9 +13,19 @@ contains
 
 
    !> Initialize module
-   subroutine initialize_stopping_condition_module(GNoAcc)
+   subroutine initialize_stopping_condition_module(sys_var)
       implicit none
-      integer, intent(in) :: GNoAcc !< Maximum number of generations allowed before stopping if no improvement was found
+      class(class_system_variables), intent(in) :: sys_var
+
+      integer :: GNoAcc !< Maximum number of generations allowed before stopping if no improvement was found
+
+      type(class_ifile) :: ifile
+
+      call ifile%init(filename=trim(sys_var%absfolderin)//trim(sys_var%parfile), field_separator="&")
+
+      call ifile%load()
+
+      call ifile%get_value(GNoAcc,"GNoAcc")
 
       call initialize_no_improvement_stopping_condition(GNoAcc)
 
