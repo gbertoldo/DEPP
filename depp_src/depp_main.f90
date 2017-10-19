@@ -98,7 +98,7 @@ program depp
    if (iproc == 0) then
 
       ! Writting parameters to the output file
-      call write_parameters(sys_var, sname, reload)
+      call write_parameters(sys_var, ehist%sname, reload)
 
    end if
 
@@ -108,20 +108,20 @@ program depp
       call timer%start()
 
       g    =  0
-      pop  =  0.d0
-      fit  = -huge(1.d0)
-      hist = 0.d0
+      ehist%pop  =  0.d0
+      ehist%fit  = -huge(1.d0)
+      ehist%hist = 0.d0
       ibest = 1
 
    else
 
       ! Loading data
-      call load_backup(sys_var, sname, ng, nu, np, tcpu0, g, fit, pop, hist)
+      call load_backup(sys_var, ehist%sname, ehist%ng, ehist%nu, ehist%np, tcpu0, g, ehist%fit, ehist%pop, ehist%hist)
 
       call timer%start(tcpu0)
 
       ! Searching for the best individual of the current generation
-      ibest = maxloc(fit,1)
+      ibest = maxloc(ehist%fit,1)
 
    end if
 
@@ -132,7 +132,7 @@ program depp
    ! condition is not satisfied
    do
 
-      call compute_stop_condition(nu, np, g, xmin, xmax, pop, fit)
+      call compute_stop_condition(ehist%nu, ehist%np, g, ehist%xmin, ehist%xmax, ehist%pop, ehist%fit)
 
       ! Printing convergence measure of the current generation
       if (iproc==0) then
@@ -163,7 +163,7 @@ program depp
 
       ! For each individual of the population, another individual (trial individual)
       ! is created and its fitness is calculated.
-      do ind = 1, np
+      do ind = 1, ehist%np
 
          ! Selecting the processor
          iaux = mod(ind, nproc-1) + 1
@@ -181,9 +181,9 @@ program depp
                fitloop1: do
 
                   ! Creating the trial individual x
-                  call get_random_individual(nu, xmin, xmax, x)
+                  call get_random_individual(ehist%nu, ehist%xmin, ehist%xmax, x)
 
-                  call get_fitness(sys_var, sname, ind, nu, x, xname, &
+                  call get_fitness(sys_var, ehist%sname, ind, ehist%nu, x, ehist%xname, &
                      xfit, estatus)
 
                   ! Analyzing the exit status of the external program
@@ -196,7 +196,7 @@ program depp
                      case (1:10) ! Failure
 
                         ! Failure in the calculation of fitness function. Saving informations.
-                        call save_fitness_failure(nu, g, ind, sys_var, sname, &
+                        call save_fitness_failure(ehist%nu, g, ind, sys_var, ehist%sname, &
                            x, estatus)
 
                      case default
@@ -217,14 +217,15 @@ program depp
 
                   ! Checking if RSM can be applied
 
-                  if ( rsm_check(np, g, fh) ) then
+                  if ( rsm_check(ehist%np, g, fh) ) then
 
                      ! rsm_tag stores the return state of application of DE-RSM
                      rsm_tag = DE_RSM_RETURN%RSM_APPLIED
 
                      ! Generating a RSM individual
 
-                     call get_rsm_optimum(ind, nu, np, ng, g, xmin, xmax, pop, hist, x, es)
+                     call get_rsm_optimum(ind, ehist%nu, ehist%np, ehist%ng, g, ehist%xmin,&
+                      ehist%xmax, ehist%pop, ehist%hist, x, es)
 
 
                      ! If RSM fails, generates a pure DE individual
@@ -234,7 +235,7 @@ program depp
                         rsm_tag = DE_RSM_RETURN%DE_APPLIED_AFTER_RSM_FAILURE
 
                         ! Creating the trial individual x
-                        call searcher%get_trial(ind, pop, x)
+                        call searcher%get_trial(ind, ehist%pop, x)
 
                      end if
 
@@ -244,14 +245,14 @@ program depp
                      rsm_tag = DE_RSM_RETURN%DE_APPLIED
 
                      ! Creating the trial individual x
-                       call searcher%get_trial(ind, pop, x)
+                       call searcher%get_trial(ind, ehist%pop, x)
 
                   end if
 
 
                   ! Verifying the constraints. If the individual x is out of range,
                   ! another one is created using pure DE
-                  do while ( is_X_out_of_range(nu, xmin, xmax, x) )
+                  do while ( is_X_out_of_range(ehist%nu, ehist%xmin, ehist%xmax, x) )
 
                      ! Checking DE-RSM status
                      select case (rsm_tag)
@@ -276,13 +277,13 @@ program depp
 
 
                      ! Creating the trial individual x
-                     call searcher%get_trial(ind, pop, x)
+                     call searcher%get_trial(ind, ehist%pop, x)
 
                   end do
 
 
                   ! Asking to the external program 'ffit' the fitness of individual 'x'
-                  call get_fitness(sys_var, sname, ind, nu, x, xname, &
+                  call get_fitness(sys_var, ehist%sname, ind, ehist%nu, x, ehist%xname, &
                      xfit, estatus)
 
                   ! Analyzing the exit status of the external program
@@ -298,12 +299,12 @@ program depp
                         rsm_tag = DE_RSM_RETURN%BLACK_BOX_EVALUATION_FAILURE
 
                         ! Failure in the calculation of fitness function. Saving informations.
-                        call save_fitness_failure(nu, g, ind, sys_var, sname, &
+                        call save_fitness_failure(ehist%nu, g, ind, sys_var, ehist%sname, &
                            x, estatus)
 
-                        x = pop(ind,:)
+                        x = ehist%pop(ind,:)
 
-                        xfit = fit(ind)
+                        xfit = ehist%fit(ind)
 
                         exit fitloop2
 
@@ -313,7 +314,7 @@ program depp
                         rsm_tag = DE_RSM_RETURN%BLACK_BOX_EVALUATION_FAILURE
 
                         ! Failure in the calculation of fitness function. Saving informations.
-                        call save_fitness_failure(nu, g, ind, sys_var, sname, &
+                        call save_fitness_failure(ehist%nu, g, ind, sys_var, ehist%sname, &
                            x, estatus)
 
                      case default
@@ -330,7 +331,7 @@ program depp
 
             ! Sending informations to master processor
             call mpi_send(    ind,  1,          mpi_integer, 0, tag, comm, code)
-            call mpi_send(      x, nu, mpi_double_precision, 0, tag, comm, code)
+            call mpi_send(      x, ehist%nu, mpi_double_precision, 0, tag, comm, code)
             call mpi_send(   xfit,  1, mpi_double_precision, 0, tag, comm, code)
             call mpi_send(rsm_tag,  1,          mpi_integer, 0, tag, comm, code)
 
@@ -347,24 +348,24 @@ program depp
       if (iproc == 0) then
 
          ! For each individual of the population
-         do i = 1, np
+         do i = 1, ehist%np
 
             ! Selecting the processor
             iaux = mod(i, nproc-1) + 1
 
             ! Recieving informations from slaves
             call mpi_recv(    ind,  1,          mpi_integer, iaux, tag, comm, status, code)
-            call mpi_recv(      x, nu, mpi_double_precision, iaux, tag, comm, status, code)
+            call mpi_recv(      x, ehist%nu, mpi_double_precision, iaux, tag, comm, status, code)
             call mpi_recv(   xfit,  1, mpi_double_precision, iaux, tag, comm, status, code)
             call mpi_recv(rsm_tag,  1,          mpi_integer, iaux, tag, comm, status, code)
 
             ! Updating history
-            hist(g,ind,1:nu) = x    ! Individual
-            hist(g,ind,0)    = xfit ! Fitness of the individual
+            ehist%hist(g,ind,1:ehist%nu) = x    ! Individual
+            ehist%hist(g,ind,0)    = xfit ! Fitness of the individual
 
 
             ! Updating RSM Dynamic Control module
-            call add_to_rsm_dynamic_control(rsm_tag, xfit, fit(ind))
+            call add_to_rsm_dynamic_control(rsm_tag, xfit, ehist%fit(ind))
 
 
             write(*,"(a, i4, a, 10(1pe23.15, 2x))") &
@@ -375,13 +376,13 @@ program depp
             call flush(21)
 
             ! Selecting the best individual
-            if ( xfit >= fit(ind)) then
+            if ( xfit >= ehist%fit(ind)) then
 
-               pop(ind,:) = x
+               ehist%pop(ind,:) = x
 
-               fit(ind) = xfit
+               ehist%fit(ind) = xfit
 
-               if ( xfit >= fit(ibest)) ibest = ind
+               if ( xfit >= ehist%fit(ibest)) ibest = ind
 
             end if
 
@@ -397,7 +398,7 @@ program depp
             call mpi_send(fh,    1, mpi_double_precision, i, tag, comm, code)
          end do
 
-         write(20,"(i12, 3(2x, 1pe23.15),A)") g, sum(fit)/np, maxval(fit), fh
+         write(20,"(i12, 3(2x, 1pe23.15),A)") g, sum(ehist%fit)/ehist%np, maxval(ehist%fit), fh
 
          call flush(20)
 
@@ -405,7 +406,8 @@ program depp
          call timer%measure()
 
          ! Saving backup data
-         call save_backup(sys_var, sname, ng, nu, np, timer%elapsed_time(), g, fit, pop, hist)
+         call save_backup(sys_var, ehist%sname, ehist%ng, ehist%nu, ehist%np, &
+          timer%elapsed_time(), g, ehist%fit, ehist%pop, ehist%hist)
 
       end if
 
@@ -423,17 +425,17 @@ program depp
 
          ! Sending the population and its fitness to slave processors
          do i = 1, nproc-1
-            call mpi_send(hist, ng*np*(nu+1), mpi_double_precision, i, tag, comm, code)
-            call mpi_send(pop,         np*nu, mpi_double_precision, i, tag, comm, code)
-            call mpi_send(fit,            np, mpi_double_precision, i, tag, comm, code)
+            call mpi_send(ehist%hist, ehist%ng*ehist%np*(ehist%nu+1), mpi_double_precision, i, tag, comm, code)
+            call mpi_send(ehist%pop,         ehist%np*ehist%nu, mpi_double_precision, i, tag, comm, code)
+            call mpi_send(ehist%fit,            ehist%np, mpi_double_precision, i, tag, comm, code)
          end do
 
       else
 
          ! Receiving the population and its fitness from master processor
-         call mpi_recv(hist, ng*np*(nu+1), mpi_double_precision, 0, tag, comm, status, code)
-         call mpi_recv(pop,         np*nu, mpi_double_precision, 0, tag, comm, status, code)
-         call mpi_recv(fit,            np, mpi_double_precision, 0, tag, comm, status, code)
+         call mpi_recv(ehist%hist, ehist%ng*ehist%np*(ehist%nu+1), mpi_double_precision, 0, tag, comm, status, code)
+         call mpi_recv(ehist%pop,         ehist%np*ehist%nu, mpi_double_precision, 0, tag, comm, status, code)
+         call mpi_recv(ehist%fit,            ehist%np, mpi_double_precision, 0, tag, comm, status, code)
 
       end if
 
@@ -447,8 +449,8 @@ program depp
 
       call timer%measure()
 
-      call write_output_files(sys_var, sname, nu, np, ibest, g, timer, &
-         convergence_info, xmin, xmax, fit, pop)
+      call write_output_files(sys_var, ehist%sname, ehist%nu, ehist%np, ibest, g, timer, &
+         convergence_info, ehist%xmin, ehist%xmax, ehist%fit, ehist%pop)
 
    end if
 

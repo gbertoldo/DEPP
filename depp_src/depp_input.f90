@@ -5,12 +5,13 @@ module input
    use mod_global_parameters
    use mod_class_ifile
    use mod_class_system_variables
-
+   use mod_class_ehist
 
    implicit none
 
    ! System
    type(class_system_variables) :: sys_var
+   type(class_ehist) :: ehist
 
    ! Simulation
    integer :: reload    !< upload backup data
@@ -22,28 +23,7 @@ module input
    integer :: estatus   !< exit status (0=success; 1=failure)
 
    ! Evolution history
-   character(str_size) :: sname    !< simulations name
    integer :: g         !< generation
-   integer :: nu        !< number of unknowns
-   integer :: np        !< population size
-   integer :: ng        !< maximal number of generations
-   real(8), dimension(:),     allocatable :: fit    !< fitness of the population
-   real(8), dimension(:,:),   allocatable :: pop    !< population
-
-   ! History vector meaning
-   ! hist(ng,np,0:nu) - dimension
-   !
-   ! hist(g,i,0)    = fitness of individual i of generation g
-   ! hist(g,i,1:nu) = coordinates of individual i of generation g
-
-   real(8), dimension(:,:,:), allocatable :: hist   !< history
-
-
-   ! Domain
-   real(8), dimension(:),     allocatable :: xmin   !< lower boundary constraints
-   real(8), dimension(:),     allocatable :: xmax   !< higher boundary constraints
-   character(10), dimension(:), allocatable :: xname !< names of the unknowns
-
 
    ! RSM
    real(8) :: fh        !< Fraction of hybridization
@@ -59,13 +39,11 @@ contains
 
       type(class_ifile) :: ifile
 
-      character(20)  :: caux
-      integer :: i
-
 
       ! Initializing system variables
       call sys_var%init()
 
+      call ehist%init(sys_var)
 
       ! Reading the parameters input file
 
@@ -73,29 +51,10 @@ contains
 
       call ifile%load()
 
-      call ifile%get_value( sname, "sname")
       call ifile%get_value( reload, "reload")
       call ifile%get_value( fh, "fh")
-      call ifile%get_value( nu, "nu")
-      call ifile%get_value( np, "np")
-      call ifile%get_value( ng, "ng")
 
-      allocate(xmin(nu))
-      allocate(xmax(nu))
-      allocate(xname(nu))
-      allocate(x(nu))
-      allocate(fit(np))
-      allocate(pop(np,nu))
-      allocate(hist(ng,np,0:nu))
-
-      do i = 1, nu
-         write(caux,"(A,I1.1,A)") "xname(",i,")"
-         call ifile%get_value( xname(i), trim(caux))
-         write(caux,"(A,I1.1,A)") "xmin(",i,")"
-         call ifile%get_value(  xmin(i), trim(caux))
-         write(caux,"(A,I1.1,A)") "xmax(",i,")"
-         call ifile%get_value(  xmax(i), trim(caux))
-      end do
+      allocate(x(ehist%nu))
 
    end subroutine get_parameters
 
