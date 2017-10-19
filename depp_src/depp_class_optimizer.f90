@@ -19,7 +19,7 @@ module mod_class_optimizer
    implicit none
 
    ! Makes everything private, except otherwise stated
-   !private
+   private
 
    ! Evolution history class
    type, public :: class_optimizer
@@ -47,91 +47,50 @@ contains
       class(class_optimizer) :: this
 
       ! Inner variables
-      type(class_ifile) :: ifile
+      integer           :: estatus   ! Exit status (0=success; 1=failure)
+      integer           :: reload    ! Upload backup data
+      type(class_ifile) :: ifile     ! Input file reader
 
 
       ! Creating labels
       associate (sys_var => this%sys_var, timer => this%timer, ehist => this%ehist, searcher => this%searcher )
-
-
-      end associate
-
-   end subroutine
-
-
-   !> \brief Optimization algorithm
-   subroutine run(this)
-      implicit none
-      class(class_optimizer) :: this
-
-
-      ! Simulation
-      integer :: reload    !< upload backup data
-      integer :: ind       !< number of the individual
-      integer :: ibest     !< index of the best individual in the population
-      real(8) :: xfit      !< fitness of the trial individual
-      real(8), dimension(:),     allocatable :: x      !< trial individual
-      integer :: estatus   !< exit status (0=success; 1=failure)
-
-      ! RSM
-      real(8) :: fh        !< Fraction of hybridization
-      integer :: rsm_tag   !< Stores the return state of application of DE-RSM
-
-      integer       :: i                        !< Dummy variable
-      integer       :: iaux                     !< Dummy variable
-
-      type(class_ifile) :: ifile
-
-      ! Creating labels
-      associate (sys_var => this%sys_var, timer => this%timer, ehist => this%ehist, searcher => this%searcher )
-
 
 
       ! Initializing MPI module
-      call initialize_mpi_module()
+      call mpi_module_init()
 
 
       ! Initializing random number generator module
       !call initialize_random_generator(iproc)
 
 
-
-      call create_search_strategy("DE/RAND/1", searcher)
-
-
-      ! Getting the input data
       ! Initializing system variables
       call sys_var%init()
 
+
+      ! Checking reload option
+      call ifile%init(filename=sys_var%absparfile, field_separator="&")
+      call ifile%load()
+      call ifile%get_value(reload, "reload")
+
+
+      ! Initializing evolution history
       call ehist%init(sys_var)
 
-      ! Reading the parameters input file
 
-      call ifile%init(filename=trim(sys_var%absfolderin) // trim(sys_var%parfile), field_separator="&")
-
-      call ifile%load()
-
-      call ifile%get_value( reload, "reload")
-      call ifile%get_value( fh, "fh")
-
-      allocate(x(ehist%nu))
-
-
+      ! Initializing search strategy object
+      call create_search_strategy("DE/RAND/1", searcher)
       ! Initializes hybrid module and checks hybridization necessary condition for RSM
       call initialize_hybrid_module(sys_var,estatus)
+      ! Checking the exit status of the module initialization
+      if ( estatus == 1 ) then
+         ! Finishing MPI
+         call mpi_abort(comm, code, code)
+      end if
 
 
       ! Initializers stopping condition module
       call initialize_stopping_condition_module(sys_var)
-
-
-      ! Checking the exit status of the module initialization
-      if ( estatus == 1 ) then
-
-         ! Finishing MPI
-         call mpi_abort(comm, code, code)
-
-      end if
 
 
       ! if iproc == 0, master processor writes the parameter to a file
@@ -142,30 +101,57 @@ contains
 
       end if
 
-      ! If reload=0, data is initialized, otherwise the population and its fitness are read from the backup file
+
+      ! Initializing timer
       if ( reload == 0 ) then
 
          call timer%start()
 
-         ehist%g    =  0
-         ehist%pop  =  0.d0
-         ehist%fit  = -huge(1.d0)
-         ehist%hist = 0.d0
-         ibest = 1
-
       else
-
-         ! Loading data
-         call load_backup(sys_var, ehist%sname, ehist%ng, ehist%nu, ehist%np, ehist%tcpu, ehist%g, ehist%fit, ehist%pop, ehist%hist)
 
          call timer%start(ehist%tcpu)
 
-         ! Searching for the best individual of the current generation
-         ibest = maxloc(ehist%fit,1)
-
       end if
 
-      call mpi_barrier(comm, code)
+      end associate
+
+   end subroutine
+
+
+
+   !> \brief Optimization algorithm
+   subroutine run(this)
+      implicit none
+      class(class_optimizer) :: this
+
+
+      ! Inner variables
+
+      integer                            :: i       ! Dummy variable
+      integer                            :: iaux    ! Dummy variable
+      integer                            :: ind     ! Number of the individual
+      integer                            :: estatus ! Exit status (0=success; 1=failure)
+      real(8)                            :: xfit    ! Fitness of the trial individual
+      real(8), dimension(:), allocatable :: x       ! Trial individual
+
+
+      ! To be removed...
+      real(8) :: fh =2       !< Fraction of hybridization
+      integer :: rsm_tag   !< Stores the return state of application of DE-RSM
+
+
+
+      ! Creating labels
+      associate (sys_var => this%sys_var, timer => this%timer, ehist => this%ehist, searcher => this%searcher )
+
+
+
+      ! Allocating resources
+      allocate(x(ehist%nu))
+
+
+      !
+      call mod_mpi_barrier()
 
 
       ! Starting the generations loop. This loop is maintained while the stopping
@@ -422,7 +408,7 @@ contains
 
                   ehist%fit(ind) = xfit
 
-                  if ( xfit >= ehist%fit(ibest)) ibest = ind
+                  if ( xfit >= ehist%fit(ehist%ibest)) ehist%ibest = ind
 
                end if
 
@@ -446,8 +432,7 @@ contains
             call timer%measure()
 
             ! Saving backup data
-            call save_backup(sys_var, ehist%sname, ehist%ng, ehist%nu, ehist%np, &
-             timer%elapsed_time(), ehist%g, ehist%fit, ehist%pop, ehist%hist)
+            call ehist%save_backup(sys_var)
 
          end if
 
@@ -489,7 +474,7 @@ contains
 
          call timer%measure()
 
-         call write_output_files(sys_var, ehist%sname, ehist%nu, ehist%np, ibest, ehist%g, timer, &
+         call write_output_files(sys_var, ehist%sname, ehist%nu, ehist%np, ehist%ibest, ehist%g, timer, &
             convergence_info, ehist%xmin, ehist%xmax, ehist%fit, ehist%pop)
 
       end if
@@ -500,63 +485,7 @@ contains
 
    end associate
 
-   contains
-
-
-      !============================================================================
-
-      ! \brief Loads the backup data
-      subroutine load_backup(sys_var, sname, ng, nu, np, tcpu, g, fit, pop, hist)
-         implicit none
-         class(class_system_variables), intent(in) :: sys_var
-         character(len=*), intent(in) :: sname       !< simulations name
-         integer, intent(in)  :: ng               !< maximum number of generations
-         integer, intent(in)  :: nu               !< dimension of the problem
-         integer, intent(in)  :: np               !< size of the population
-         integer, intent(out) :: g                !< generation
-         real(8), intent(out) :: tcpu             !< accumulated CPU time
-         real(8), intent(out) :: fit(np)          !< fitness of the population
-         real(8), intent(out) :: pop(np,nu)       !< population of chromosomes
-         real(8), intent(out) :: hist(ng,np,0:nu) !< history
-
-         ! Inner variables
-
-         integer :: ind, cg ! Dummy index
-
-         open(23, file = trim(sys_var%absfolderout) // trim(sname) // "-backup.txt")
-
-         read(23,*) tcpu ! " = tcpu:    Accumulated CPU time"
-
-         read(23,*)    g ! " = g:       Last generation"
-
-         read(23,*)
-
-         do ind = 1, np
-
-            read(23,*) fit(ind), pop(ind,:)
-
-         end do
-
-         read(23,*)
-
-         do cg = 1, g
-
-            do ind = 1, np
-
-               read(23,*) hist(cg,ind,:)
-
-            end do
-
-         end do
-
-         read(23,*)
-
-         close(23)
-
-      end subroutine load_backup
-
 
    end subroutine
-
 
 end module

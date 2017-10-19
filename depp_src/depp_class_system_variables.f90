@@ -24,6 +24,7 @@ module mod_class_system_variables
       character(str_size) :: absfolderin                  !< absolute path to folderin
       character(str_size) :: absfolderout                 !< absolute path to folderout
       character(str_size) :: parfile                      !< name of the parameters input file
+      character(str_size) :: absparfile                   !< absolute path and name of the parameters input file
       character(str_size) :: logfile                      !< name of the log file
       character(str_size) :: fdir                         !< name of working directory for fitness calculation
       character(str_size) :: ffit                         !< name of executable for fitness calculation
@@ -62,6 +63,8 @@ contains
       call ifile%load()
 
       call ifile%get_value(this%parfile,"parfile")
+
+      this%absparfile = trim(this%absfolderin) // "/" // trim(this%parfile)
 
 
 

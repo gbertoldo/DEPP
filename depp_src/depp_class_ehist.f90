@@ -22,6 +22,7 @@ module mod_class_ehist
       integer :: nu                                    !< Number of unknowns
       integer :: np                                    !< Population size
       integer :: ng                                    !< Maximum number of generations
+      integer :: ibest                                 !< Index of the best individual in the population
       real(8) :: tcpu                                  !< CPU time
       real(8), dimension(:),     allocatable :: fit    !< Fitness of the current population
       real(8), dimension(:,:),   allocatable :: pop    !< Current population
@@ -43,7 +44,9 @@ module mod_class_ehist
 
    contains
 
-      procedure, public, pass :: init
+      procedure, public,  pass :: init
+      procedure, private, pass :: reload
+      procedure, public,  pass :: save_backup
 
    end type
 
@@ -61,6 +64,7 @@ contains
       type(class_ifile) :: ifile
       character(20)     :: caux
       integer           :: i
+      integer           :: reload
 
 
       ! Reading the parameters input file
@@ -69,10 +73,11 @@ contains
 
       call ifile%load()
 
-      call ifile%get_value( this%sname, "sname")
-      call ifile%get_value(    this%nu,    "nu")
-      call ifile%get_value(    this%np,    "np")
-      call ifile%get_value(    this%ng,    "ng")
+      call ifile%get_value( this%sname,  "sname")
+      call ifile%get_value(    this%nu,     "nu")
+      call ifile%get_value(    this%np,     "np")
+      call ifile%get_value(    this%ng,     "ng")
+      call ifile%get_value(     reload, "reload")
 
       allocate(this%xmin(this%nu))
       allocate(this%xmax(this%nu))
@@ -96,7 +101,86 @@ contains
 
       this%tcpu = 0.d0
 
+
+      ! If reload=0, data is initialized, otherwise the population and its fitness are read from the backup file
+      if ( reload == 0 ) then
+
+         this%g     =  0
+         this%pop   =  0.d0
+         this%fit   = -huge(1.d0)
+         this%hist  = 0.d0
+         this%ibest = 1
+
+      else
+
+         ! Loading data
+         call this%reload(sys_var)
+
+      end if
+
+
    end subroutine
+
+
+
+
+   ! \brief Loads the backup data
+   subroutine reload(this, sys_var)
+      implicit none
+      class(class_ehist) :: this
+      class(class_system_variables), intent(in) :: sys_var
+
+      ! Inner variables
+
+      open(23, file = trim(sys_var%absfolderout) // trim(this%sname) // "-ehist-backup.txt")
+
+      read(23,*) this%sname
+      read(23,*) this%g
+      read(23,*) this%nu
+      read(23,*) this%np
+      read(23,*) this%ng
+      read(23,*) this%ibest
+      read(23,*) this%tcpu
+      read(23,*) this%fit
+      read(23,*) this%pop
+      read(23,*) this%hist
+      read(23,*) this%xmin
+      read(23,*) this%xmax
+      read(23,*) this%xname
+
+      close(23)
+
+   end subroutine reload
+
+
+
+
+
+   ! \brief Saves a backup
+   subroutine save_backup(this, sys_var)
+      implicit none
+      class(class_ehist) :: this
+      class(class_system_variables), intent(in) :: sys_var
+
+      open(23, file = trim(sys_var%absfolderout) // trim(this%sname) // "-ehist-backup.txt")
+
+      write(23,*) this%sname
+      write(23,*) this%g
+      write(23,*) this%nu
+      write(23,*) this%np
+      write(23,*) this%ng
+      write(23,*) this%ibest
+      write(23,*) this%tcpu
+      write(23,*) this%fit
+      write(23,*) this%pop
+      write(23,*) this%hist
+      write(23,*) this%xmin
+      write(23,*) this%xmax
+      write(23,*) this%xname
+
+      close(23)
+
+   end subroutine save_backup
 
 
 end module

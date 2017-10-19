@@ -15,7 +15,7 @@ module mod_mpi
 contains
 
    !> \brief Initializes MPI module
-   subroutine initialize_mpi_module()
+   subroutine mpi_module_init()
       implicit none
 
       ! Initializing MPI (from now on the code is parallel)
@@ -41,6 +41,15 @@ contains
       ! Getting the ID number of each processor
       call mpi_comm_rank(comm, iproc, code)
 
+
+   end subroutine
+
+
+   !> \brief A barrier to all processors
+   subroutine mod_mpi_barrier()
+      implicit none
+
+      call mpi_barrier(comm, code)
 
    end subroutine
 

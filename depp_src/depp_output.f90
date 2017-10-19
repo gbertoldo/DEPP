@@ -248,60 +248,6 @@ contains
 
    !============================================================================
 
-   ! \brief Saves a backup of some important data
-   subroutine save_backup(sys_var, sname, ng, nu, np, tcpu, g, fit, pop, hist)
-      implicit none
-      class(class_system_variables), intent(in) :: sys_var
-      character(len=*), intent(in) :: sname       !< simulations name
-      integer, intent(in) :: ng               !< maximum number of generations
-      integer, intent(in) :: nu               !< dimension of the problem
-      integer, intent(in) :: np               !< size of the population
-      integer, intent(in) :: g                !< generation
-      real(8), intent(in) :: tcpu             !< accumulated CPU time
-      real(8), intent(in) :: fit(np)          !< fitness of the population
-      real(8), intent(in) :: pop(np,nu)       !< population of chromosomes
-      real(8), intent(in) :: hist(ng,np,0:nu) !< history
-
-
-      ! Inner variables
-
-      integer :: ind, cg ! Dummy index
-
-      open(23, file = trim(sys_var%absfolderout) // trim(sname) // "-backup.txt")
-
-      write(23,"(1pe23.15, a)") tcpu, " = tcpu:    Accumulated CPU time"
-
-      write(23,    "(i23, a)")    g, " = g:       Last generation"
-
-      write(23,*)
-
-      do ind = 1, np
-
-         write(23,"(100(1pe23.15, 2x))") fit(ind), pop(ind,:)
-
-      end do
-
-      write(23,*)
-
-      do cg = 1, g
-
-         do ind = 1, np
-
-            write(23,"(101(1pe23.15, 2x))") hist(cg, ind, :)
-
-         end do
-
-      end do
-
-      write(23,*)
-
-      close(23)
-
-   end subroutine save_backup
-
-
-   !============================================================================
-
    !> \brief Plots the population convergence measure
    subroutine plot_convergence(sname, folderout)
       implicit none
