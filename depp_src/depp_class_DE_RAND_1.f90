@@ -9,7 +9,7 @@ module mod_class_DE_RAND_1
 
    implicit none
 
-   ! Makes everything private
+   ! Makes everything private, except otherwise stated
    private
 
    ! Public class defining DE/rand/1 search strategy

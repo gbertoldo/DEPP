@@ -12,6 +12,8 @@ module mod_class_system_variables
 
    implicit none
 
+  ! Makes everything private, except otherwise stated
+   private
 
    ! Type system variables contains information about paths and filenames
    type, public :: class_system_variables

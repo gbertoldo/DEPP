@@ -20,7 +20,6 @@ contains
 
       character(10) :: day    ! System date
       character(8) :: hour    ! System time
-      integer :: i
       logical :: lexist
 
       write(*,"(//, a, /)") &

@@ -2,6 +2,7 @@
 !! from input files.
 module input
 
+   use mod_global_parameters
    use mod_class_ifile
    use mod_class_system_variables
 

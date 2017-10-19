@@ -12,6 +12,8 @@
 module mod_class_ifile
    implicit none
 
+
+  ! Makes everything private, except otherwise stated
    private
 
    !! Maximum character length

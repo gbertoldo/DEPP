@@ -4,7 +4,7 @@
 module mod_class_abstract_search_strategy
    implicit none
 
-   ! Makes everything private
+   ! Makes everything private, except otherwise stated
    private
 
    ! Public class defining an interface for creating search strategy objects
