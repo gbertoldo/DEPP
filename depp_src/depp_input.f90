@@ -12,17 +12,16 @@ module input
    type(class_system_variables) :: sys_var
 
    ! Simulation
-   character(str_size) :: sname    !< simulations name
    integer :: reload    !< upload backup data
    integer :: ind       !< number of the individual
    integer :: ibest     !< index of the best individual in the population
    real(8) :: xfit      !< fitness of the trial individual
-   !integer :: r(3)      !< indexes of selected individuals
    real(8), dimension(:),     allocatable :: x      !< trial individual
    integer :: es        !< exit status (0=success; 1=failure)
    integer :: estatus   !< exit status (0=success; 1=failure)
 
    ! Evolution history
+   character(str_size) :: sname    !< simulations name
    integer :: g         !< generation
    integer :: nu        !< number of unknowns
    integer :: np        !< population size
@@ -43,12 +42,6 @@ module input
    real(8), dimension(:),     allocatable :: xmin   !< lower boundary constraints
    real(8), dimension(:),     allocatable :: xmax   !< higher boundary constraints
    character(10), dimension(:), allocatable :: xname !< names of the unknowns
-
-
-   ! DE Mutation and crossing over
-   real(8) :: dif       !< differentiation constant
-   real(8) :: crs       !< crossover constant
-   integer :: kss       !< kind of search strategy
 
 
    ! RSM
@@ -81,13 +74,10 @@ contains
 
       call ifile%get_value( sname, "sname")
       call ifile%get_value( reload, "reload")
-      call ifile%get_value( kss, "kss")
       call ifile%get_value( fh, "fh")
       call ifile%get_value( nu, "nu")
       call ifile%get_value( np, "np")
       call ifile%get_value( ng, "ng")
-      call ifile%get_value( dif, "dif")
-      call ifile%get_value( crs, "crs")
 
       allocate(xmin(nu))
       allocate(xmax(nu))

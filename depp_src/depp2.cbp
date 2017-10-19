@@ -31,6 +31,8 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
+		<Unit filename="depp_class_DE_RAND_1.f90" />
+		<Unit filename="depp_class_abstract_individual_generator.f90" />
 		<Unit filename="depp_class_ifile.f90" />
 		<Unit filename="depp_class_system_variables.f90" />
 		<Unit filename="depp_global_parameters.f90" />

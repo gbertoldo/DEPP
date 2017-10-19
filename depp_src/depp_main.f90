@@ -47,6 +47,8 @@ program depp
    use mod_mpi
    use mod_class_timer
    use mod_random_generator
+   use mod_class_abstract_search_strategy
+   use mod_search_strategy_factory
 
    implicit none
 
@@ -54,6 +56,9 @@ program depp
    integer       :: iaux                     !< Dummy variable
    real(8)       :: tcpu0
    type(class_timer) :: timer
+   class(class_abstract_search_strategy), pointer :: searcher => null()
+
+
 
 
    ! Initializing MPI module
@@ -65,13 +70,11 @@ program depp
 
 
 
+   call create_search_strategy("DE/RAND/1", searcher)
 
 
    ! Getting the input data
    call get_parameters()
-!     folderin,  folderout,  sname,  iarq, reload, fdir,  ffit,   &
-!      kss, kh, fh, fhmin, fhmax, fhm, fnb, kw, kpm, nu, np, ng, GNoAcc, dif,         &
-!      crs, crsh, nstp, netol, detol, xmin, xmax, xname, x, fit, pop, hist)
 
 
    ! Initializes hybrid module and checks hybridization necessary condition for RSM
@@ -231,7 +234,7 @@ program depp
                         rsm_tag = DE_RSM_RETURN%DE_APPLIED_AFTER_RSM_FAILURE
 
                         ! Creating the trial individual x
-                        call get_trial_individual(ind, nu, np, kss, dif, crs, pop, fit, x)
+                        call searcher%get_trial(ind, pop, x)
 
                      end if
 
@@ -241,7 +244,7 @@ program depp
                      rsm_tag = DE_RSM_RETURN%DE_APPLIED
 
                      ! Creating the trial individual x
-                     call get_trial_individual(ind, nu, np, kss, dif, crs, pop, fit, x)
+                       call searcher%get_trial(ind, pop, x)
 
                   end if
 
@@ -273,7 +276,7 @@ program depp
 
 
                      ! Creating the trial individual x
-                     call get_trial_individual(ind, nu, np, kss, dif, crs, pop, fit, x)
+                     call searcher%get_trial(ind, pop, x)
 
                   end do
 
