@@ -22,6 +22,7 @@ module mod_class_ehist
       integer :: nu                                    !< Number of unknowns
       integer :: np                                    !< Population size
       integer :: ng                                    !< Maximum number of generations
+      real(8) :: tcpu                                  !< CPU time
       real(8), dimension(:),     allocatable :: fit    !< Fitness of the current population
       real(8), dimension(:,:),   allocatable :: pop    !< Current population
 
@@ -92,6 +93,8 @@ contains
          call ifile%get_value(  this%xmax(i), trim(caux))
 
       end do
+
+      this%tcpu = 0.d0
 
    end subroutine
 

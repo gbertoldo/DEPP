@@ -54,7 +54,6 @@ program depp
 
    integer       :: i                        !< Dummy variable
    integer       :: iaux                     !< Dummy variable
-   real(8)       :: tcpu0
    type(class_timer) :: timer
    class(class_abstract_search_strategy), pointer :: searcher => null()
 
@@ -78,7 +77,7 @@ program depp
 
 
    ! Initializes hybrid module and checks hybridization necessary condition for RSM
-   call initialize_hybrid_module(sys_var,es)
+   call initialize_hybrid_module(sys_var,estatus)
 
 
    ! Initializers stopping condition module
@@ -86,7 +85,7 @@ program depp
 
 
    ! Checking the exit status of the module initialization
-   if ( es == 1 ) then
+   if ( estatus == 1 ) then
 
       ! Finishing MPI
       call mpi_abort(comm, code, code)
@@ -107,7 +106,7 @@ program depp
 
       call timer%start()
 
-      g    =  0
+      ehist%g    =  0
       ehist%pop  =  0.d0
       ehist%fit  = -huge(1.d0)
       ehist%hist = 0.d0
@@ -116,9 +115,9 @@ program depp
    else
 
       ! Loading data
-      call load_backup(sys_var, ehist%sname, ehist%ng, ehist%nu, ehist%np, tcpu0, g, ehist%fit, ehist%pop, ehist%hist)
+      call load_backup(sys_var, ehist%sname, ehist%ng, ehist%nu, ehist%np, ehist%tcpu, ehist%g, ehist%fit, ehist%pop, ehist%hist)
 
-      call timer%start(tcpu0)
+      call timer%start(ehist%tcpu)
 
       ! Searching for the best individual of the current generation
       ibest = maxloc(ehist%fit,1)
@@ -132,13 +131,13 @@ program depp
    ! condition is not satisfied
    do
 
-      call compute_stop_condition(ehist%nu, ehist%np, g, ehist%xmin, ehist%xmax, ehist%pop, ehist%fit)
+      call compute_stop_condition(ehist%nu, ehist%np, ehist%g, ehist%xmin, ehist%xmax, ehist%pop, ehist%fit)
 
       ! Printing convergence measure of the current generation
       if (iproc==0) then
 
-         write(*,*)  g, trim(convergence_info)
-         write(24,*) g, trim(convergence_info)
+         write(*,*)  ehist%g, trim(convergence_info)
+         write(24,*) ehist%g, trim(convergence_info)
          call flush(24)
 
       end if
@@ -148,7 +147,7 @@ program depp
 
       ! Starting a new generation
 
-      g = g+1
+      ehist%g = ehist%g+1
 
       ! Print time
       if (iproc == 0) then
@@ -157,7 +156,7 @@ program depp
 
          write(*,"(/, a, a)") "Accumulated CPU time: ", timer%formatted_elapsed_time()
 
-         write(*,"(/, a, i4, a, /)") "Processing the", g, "th generation..."
+         write(*,"(/, a, i4, a, /)") "Processing the", ehist%g, "th generation..."
 
       end if
 
@@ -172,7 +171,7 @@ program depp
          if (iproc == iaux) then
 
             ! First generation needs special attention
-            if ( g == 1 ) then
+            if ( ehist%g == 1 ) then
 
                ! rsm_tag stores the return state of application of DE-RSM
                rsm_tag = DE_RSM_RETURN%DE_APPLIED
@@ -196,7 +195,7 @@ program depp
                      case (1:10) ! Failure
 
                         ! Failure in the calculation of fitness function. Saving informations.
-                        call save_fitness_failure(ehist%nu, g, ind, sys_var, ehist%sname, &
+                        call save_fitness_failure(ehist%nu, ehist%g, ind, sys_var, ehist%sname, &
                            x, estatus)
 
                      case default
@@ -217,19 +216,19 @@ program depp
 
                   ! Checking if RSM can be applied
 
-                  if ( rsm_check(ehist%np, g, fh) ) then
+                  if ( rsm_check(ehist%np, ehist%g, fh) ) then
 
                      ! rsm_tag stores the return state of application of DE-RSM
                      rsm_tag = DE_RSM_RETURN%RSM_APPLIED
 
                      ! Generating a RSM individual
 
-                     call get_rsm_optimum(ind, ehist%nu, ehist%np, ehist%ng, g, ehist%xmin,&
-                      ehist%xmax, ehist%pop, ehist%hist, x, es)
+                     call get_rsm_optimum(ind, ehist%nu, ehist%np, ehist%ng, ehist%g, ehist%xmin,&
+                      ehist%xmax, ehist%pop, ehist%hist, x, estatus)
 
 
                      ! If RSM fails, generates a pure DE individual
-                     if ( es == 1 ) then
+                     if ( estatus == 1 ) then
 
                         ! rsm_tag stores the return state of application of DE-RSM
                         rsm_tag = DE_RSM_RETURN%DE_APPLIED_AFTER_RSM_FAILURE
@@ -299,7 +298,7 @@ program depp
                         rsm_tag = DE_RSM_RETURN%BLACK_BOX_EVALUATION_FAILURE
 
                         ! Failure in the calculation of fitness function. Saving informations.
-                        call save_fitness_failure(ehist%nu, g, ind, sys_var, ehist%sname, &
+                        call save_fitness_failure(ehist%nu, ehist%g, ind, sys_var, ehist%sname, &
                            x, estatus)
 
                         x = ehist%pop(ind,:)
@@ -314,7 +313,7 @@ program depp
                         rsm_tag = DE_RSM_RETURN%BLACK_BOX_EVALUATION_FAILURE
 
                         ! Failure in the calculation of fitness function. Saving informations.
-                        call save_fitness_failure(ehist%nu, g, ind, sys_var, ehist%sname, &
+                        call save_fitness_failure(ehist%nu, ehist%g, ind, sys_var, ehist%sname, &
                            x, estatus)
 
                      case default
@@ -360,8 +359,8 @@ program depp
             call mpi_recv(rsm_tag,  1,          mpi_integer, iaux, tag, comm, status, code)
 
             ! Updating history
-            ehist%hist(g,ind,1:ehist%nu) = x    ! Individual
-            ehist%hist(g,ind,0)    = xfit ! Fitness of the individual
+            ehist%hist(ehist%g,ind,1:ehist%nu) = x    ! Individual
+            ehist%hist(ehist%g,ind,0)    = xfit ! Fitness of the individual
 
 
             ! Updating RSM Dynamic Control module
@@ -371,7 +370,7 @@ program depp
             write(*,"(a, i4, a, 10(1pe23.15, 2x))") &
                "The performance of the",  ind, "th individual is ", xfit, x
 
-            write(21,"(2(i12), 100(2x, 1pe23.15))") g, ind, xfit, x
+            write(21,"(2(i12), 100(2x, 1pe23.15))") ehist%g, ind, xfit, x
 
             call flush(21)
 
@@ -398,7 +397,7 @@ program depp
             call mpi_send(fh,    1, mpi_double_precision, i, tag, comm, code)
          end do
 
-         write(20,"(i12, 3(2x, 1pe23.15),A)") g, sum(ehist%fit)/ehist%np, maxval(ehist%fit), fh
+         write(20,"(i12, 3(2x, 1pe23.15),A)") ehist%g, sum(ehist%fit)/ehist%np, maxval(ehist%fit), fh
 
          call flush(20)
 
@@ -407,7 +406,7 @@ program depp
 
          ! Saving backup data
          call save_backup(sys_var, ehist%sname, ehist%ng, ehist%nu, ehist%np, &
-          timer%elapsed_time(), g, ehist%fit, ehist%pop, ehist%hist)
+          timer%elapsed_time(), ehist%g, ehist%fit, ehist%pop, ehist%hist)
 
       end if
 
@@ -449,7 +448,7 @@ program depp
 
       call timer%measure()
 
-      call write_output_files(sys_var, ehist%sname, ehist%nu, ehist%np, ibest, g, timer, &
+      call write_output_files(sys_var, ehist%sname, ehist%nu, ehist%np, ibest, ehist%g, timer, &
          convergence_info, ehist%xmin, ehist%xmax, ehist%fit, ehist%pop)
 
    end if

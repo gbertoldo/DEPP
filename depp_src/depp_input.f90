@@ -11,6 +11,8 @@ module input
 
    ! System
    type(class_system_variables) :: sys_var
+
+   ! Evolution history
    type(class_ehist) :: ehist
 
    ! Simulation
@@ -19,11 +21,7 @@ module input
    integer :: ibest     !< index of the best individual in the population
    real(8) :: xfit      !< fitness of the trial individual
    real(8), dimension(:),     allocatable :: x      !< trial individual
-   integer :: es        !< exit status (0=success; 1=failure)
    integer :: estatus   !< exit status (0=success; 1=failure)
-
-   ! Evolution history
-   integer :: g         !< generation
 
    ! RSM
    real(8) :: fh        !< Fraction of hybridization
