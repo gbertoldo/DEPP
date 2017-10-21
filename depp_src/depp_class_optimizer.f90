@@ -62,11 +62,11 @@ contains
 
 
       ! Initializing MPI module
-      call mpi_module_init()
+      call mod_mpi_init()
 
 
       ! Initializing random number generator module
-      !call initialize_random_generator(iproc)
+      !call initialize_random_generator(mpi%iproc)
 
 
       ! Initializing system variables
@@ -90,7 +90,7 @@ contains
       ! Checking the exit status of the module initialization
       if ( estatus == 1 ) then
          ! Finishing MPI
-         call mpi_abort(comm, code, code)
+         call mod_mpi_abort()
       end if
 
 
@@ -99,7 +99,7 @@ contains
 
 
       ! if iproc == 0, master processor writes the parameter to a file
-      if (iproc == 0) then
+      if (mpi%iproc == 0) then
 
          ! Writting parameters to the output file
          call write_parameters(sys_var, ehist%sname, reload)
@@ -169,7 +169,7 @@ contains
          call stopper%compute_stop_condition(ehist)
 
          ! Printing convergence measure of the current generation
-         if (iproc==0) then
+         if (mpi%iproc==0) then
 
             !write(*,*)  ehist%g, trim(convergence_info)
             !write(24,*) ehist%g, trim(convergence_info)
@@ -187,7 +187,7 @@ contains
          ehist%g = ehist%g+1
 
          ! Print time
-         if (iproc == 0) then
+         if (mpi%iproc == 0) then
 
             call timer%measure()
 
@@ -202,10 +202,10 @@ contains
          do ind = 1, ehist%np
 
             ! Selecting the processor
-            iaux = mod(ind, nproc-1) + 1
+            iaux = mod(ind, mpi%nproc-1) + 1
 
             ! Only slave processors calculate the fitness
-            if (iproc == iaux) then
+            if (mpi%iproc == iaux) then
 
                ! First generation needs special attention
                if ( ehist%g == 1 ) then
@@ -366,34 +366,34 @@ contains
                end if
 
                ! Sending informations to master processor
-               call mpi_send(    ind,  1,          mpi_integer, 0, tag, comm, code)
-               call mpi_send(      x, ehist%nu, mpi_double_precision, 0, tag, comm, code)
-               call mpi_send(   xfit,  1, mpi_double_precision, 0, tag, comm, code)
-               call mpi_send(rsm_tag,  1,          mpi_integer, 0, tag, comm, code)
+               call mpi_send(    ind,  1,          mpi_integer, 0, mpi%tag, mpi%comm, mpi%code)
+               call mpi_send(      x, ehist%nu, mpi_double_precision, 0, mpi%tag, mpi%comm, mpi%code)
+               call mpi_send(   xfit,  1, mpi_double_precision, 0, mpi%tag, mpi%comm, mpi%code)
+               call mpi_send(rsm_tag,  1,          mpi_integer, 0, mpi%tag, mpi%comm, mpi%code)
 
             end if
 
          end do
 
-         call mpi_barrier(comm, code)
+         call mod_mpi_barrier()
 
 
          ! If iproc == 0, master processor receives the information from slave processors,
          !                compares each individual with its trial and selects the best one,
          !                calculates the convergence coefficient and sends it to slaves.
-         if (iproc == 0) then
+         if (mpi%iproc == 0) then
 
             ! For each individual of the population
             do i = 1, ehist%np
 
                ! Selecting the processor
-               iaux = mod(i, nproc-1) + 1
+               iaux = mod(i, mpi%nproc-1) + 1
 
                ! Recieving informations from slaves
-               call mpi_recv(    ind,  1,          mpi_integer, iaux, tag, comm, status, code)
-               call mpi_recv(      x, ehist%nu, mpi_double_precision, iaux, tag, comm, status, code)
-               call mpi_recv(   xfit,  1, mpi_double_precision, iaux, tag, comm, status, code)
-               call mpi_recv(rsm_tag,  1,          mpi_integer, iaux, tag, comm, status, code)
+               call mpi_recv(    ind,  1,          mpi_integer, iaux, mpi%tag, mpi%comm, mpi%status, mpi%code)
+               call mpi_recv(      x, ehist%nu, mpi_double_precision, iaux, mpi%tag, mpi%comm, mpi%status, mpi%code)
+               call mpi_recv(   xfit,  1, mpi_double_precision, iaux, mpi%tag, mpi%comm, mpi%status, mpi%code)
+               call mpi_recv(rsm_tag,  1,          mpi_integer, iaux, mpi%tag, mpi%comm, mpi%status, mpi%code)
 
                ! Updating history
                ehist%hist(ehist%g,ind,1:ehist%nu) = x    ! Individual
@@ -430,8 +430,8 @@ contains
 
 
             ! Sending convergence measure to slave processors
-            do i = 1, nproc-1
-               call mpi_send(fh,    1, mpi_double_precision, i, tag, comm, code)
+            do i = 1, mpi%nproc-1
+               call mpi_send(fh,    1, mpi_double_precision, i, mpi%tag, mpi%comm, mpi%code)
             end do
 
             write(20,"(i12, 3(2x, 1pe23.15),A)") ehist%g, sum(ehist%fit)/ehist%np, maxval(ehist%fit), fh
@@ -447,40 +447,45 @@ contains
          end if
 
          ! If iproc /= 0, slave processors receive the convergence measure from the master processor
-         if ( iproc > 0 ) then
-            call mpi_recv(fh,    1, mpi_double_precision, 0, tag, comm, status, code)
+         if ( mpi%iproc > 0 ) then
+            call mpi_recv(fh,    1, mpi_double_precision, 0, mpi%tag, mpi%comm, mpi%status, mpi%code)
          end if
 
-         call mpi_barrier(comm, code)
+         call mod_mpi_barrier()
 
          ! If iproc == 0, master processor sends the updated population and its fitness to
          !                slave processors
          ! If iproc /= 0, slave processors receive the updated population and its fitness
-         if (iproc == 0) then
+         if (mpi%iproc == 0) then
 
             ! Sending the population and its fitness to slave processors
-            do i = 1, nproc-1
-               call mpi_send(ehist%hist, ehist%ng*ehist%np*(ehist%nu+1), mpi_double_precision, i, tag, comm, code)
-               call mpi_send(ehist%pop,         ehist%np*ehist%nu, mpi_double_precision, i, tag, comm, code)
-               call mpi_send(ehist%fit,            ehist%np, mpi_double_precision, i, tag, comm, code)
+            do i = 1, mpi%nproc-1
+               call mpi_send(ehist%hist, ehist%ng*ehist%np*(ehist%nu+1), mpi_double_precision, i&
+               , mpi%tag, mpi%comm, mpi%code)
+               call mpi_send(ehist%pop,         ehist%np*ehist%nu, mpi_double_precision, i &
+               , mpi%tag, mpi%comm, mpi%code)
+               call mpi_send(ehist%fit,            ehist%np, mpi_double_precision, i, mpi%tag, mpi%comm, mpi%code)
             end do
 
          else
 
             ! Receiving the population and its fitness from master processor
-            call mpi_recv(ehist%hist, ehist%ng*ehist%np*(ehist%nu+1), mpi_double_precision, 0, tag, comm, status, code)
-            call mpi_recv(ehist%pop,         ehist%np*ehist%nu, mpi_double_precision, 0, tag, comm, status, code)
-            call mpi_recv(ehist%fit,            ehist%np, mpi_double_precision, 0, tag, comm, status, code)
+            call mpi_recv(ehist%hist, ehist%ng*ehist%np*(ehist%nu+1), mpi_double_precision, 0&
+            , mpi%tag, mpi%comm, mpi%status, mpi%code)
+            call mpi_recv(ehist%pop,         ehist%np*ehist%nu, mpi_double_precision, 0&
+            , mpi%tag, mpi%comm, mpi%status, mpi%code)
+            call mpi_recv(ehist%fit,            ehist%np, mpi_double_precision, 0&
+            , mpi%tag, mpi%comm, mpi%status, mpi%code)
 
          end if
 
-         call mpi_barrier(comm, code)
+         call mod_mpi_barrier()
 
       end do
 
 
       ! Master processor: data post processing
-      if (iproc == 0) then
+      if (mpi%iproc == 0) then
 
          call timer%measure()
 
@@ -491,7 +496,7 @@ contains
 
 
       ! Finishing MPI
-      call mpi_finalize(code)
+      call mod_mpi_finalize()
 
    end associate
 
