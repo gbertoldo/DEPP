@@ -1,5 +1,5 @@
 
-!> \brief Provides a simple factory subroutine for creating individual generators
+!> \brief Provides a simple factory subroutine for creating search strategy objects
 
 module mod_search_strategy_factory
 

@@ -10,17 +10,38 @@
                          1 & fhm&      Model for the dynamical calculation of the factor of hybridization
                      2.0d0 & fnb&      Multiple of the minimum number of points for RSM fitting
                          1 & kw&       Kind of weighting function for RSM fitting (1=uniform, 2=exponential)
-                         2 & kpm&      Kind of population convergence measure (See options bellow)
                          2 & nu&       Number of unknowns
                         20 & np&       Size of population (recommended 10*nu)
-                       200 & ng&       Number of generations
-                        40 & GNoAcc&   Maximum number of generations allowed before stopping if no improvement was found
                     0.85d0 & dif&      Differentiation constant (recommended 0.85)
                      0.5d0 & crs&      Crossover probability (recommended 0.5)
                     -0.5d0 & crsh&     Crossover probability of the hybridized model (disable if crsh < 0)
                          0 & nstp&     Number of trials for adjusting the step of the RSM solution
                   0.0001d0 & netol&    Tolerance for distance when selecting neighbors points for RSM adjusting
-                  0.0005d0 & detol&    Tolerance for the convergence measure in the DE algorithm
+
+-----------------------------------------------------------------------------------------------------------------------------
+
+                                              STOP CONDITION PARAMETERS
+
+Stop condition is a composite of the following models. Choose a composition of models and set the corresponding parameters. 
+
+"max_generations, no_improvement, p_measure" & composite_stop_condition & List of stop condition models
+
+
+Model: max_generations
+----------------------
+                       200 & ng&       Maximum number of generations
+                       
+Model: no_improvement
+----------------------
+                        40 & GNoAcc&   Maximum number of generations allowed before stopping if no improvement was found
+
+Model: p_measure
+----------------------
+                         2 & kpm&      Kind of population convergence measure (See options bellow)
+                  0.0005d0 & ptol&     Tolerance for the population convergence measure
+
+-----------------------------------------------------------------------------------------------------------------------------
+
                         X1 & xname(1)& Name of the unknown
                    -500.d0 &  xmin(1)& Lower value for 1st unknown
                     500.d0 &  xmax(1)& Biggest value for 1st unknown

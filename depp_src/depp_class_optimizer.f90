@@ -9,12 +9,12 @@ module mod_class_optimizer
    use mod_class_ehist
    use hybrid
    use output
-   use stopping_condition_module
    use mod_mpi
    use mod_class_timer
    use mod_random_generator
    use mod_class_abstract_search_strategy
    use mod_search_strategy_factory
+   use mod_class_composite_stop_condition
 
    implicit none
 
@@ -26,10 +26,11 @@ module mod_class_optimizer
 
       private
 
-      type(class_system_variables) :: sys_var ! System variables
-      type(class_ehist)            ::   ehist ! Evolution history
-      type(class_timer)            ::   timer ! Timer
-      class(class_abstract_search_strategy), pointer :: searcher => null() ! Search strategy
+      type(class_system_variables)                   :: sys_var            ! System variables
+      type(class_ehist)                              :: ehist              ! Evolution history
+      type(class_timer)                              :: timer              ! Timer
+      class(class_abstract_search_strategy), pointer :: searcher => null() ! Search strategy object
+      type(class_composite_stop_condition)           :: stopper            ! Stop condition object
 
    contains
 
@@ -53,7 +54,11 @@ contains
 
 
       ! Creating labels
-      associate (sys_var => this%sys_var, timer => this%timer, ehist => this%ehist, searcher => this%searcher )
+      associate (sys_var  => this%sys_var, &
+                 timer    => this%timer,   &
+                 ehist    => this%ehist,   &
+                 searcher => this%searcher,&
+                 stopper  => this%stopper  )
 
 
       ! Initializing MPI module
@@ -89,8 +94,8 @@ contains
       end if
 
 
-      ! Initializers stopping condition module
-      call initialize_stopping_condition_module(sys_var)
+      ! Initializing stop condition object
+      call stopper%init(sys_var)
 
 
       ! if iproc == 0, master processor writes the parameter to a file
@@ -140,9 +145,12 @@ contains
       integer :: rsm_tag   !< Stores the return state of application of DE-RSM
 
 
-
       ! Creating labels
-      associate (sys_var => this%sys_var, timer => this%timer, ehist => this%ehist, searcher => this%searcher )
+      associate (sys_var  => this%sys_var, &
+                 timer    => this%timer,   &
+                 ehist    => this%ehist,   &
+                 searcher => this%searcher,&
+                 stopper  => this%stopper  )
 
 
 
@@ -158,18 +166,20 @@ contains
       ! condition is not satisfied
       do
 
-         call compute_stop_condition(ehist%nu, ehist%np, ehist%g, ehist%xmin, ehist%xmax, ehist%pop, ehist%fit)
+         call stopper%compute_stop_condition(ehist)
 
          ! Printing convergence measure of the current generation
          if (iproc==0) then
 
-            write(*,*)  ehist%g, trim(convergence_info)
-            write(24,*) ehist%g, trim(convergence_info)
-            call flush(24)
+            !write(*,*)  ehist%g, trim(convergence_info)
+            !write(24,*) ehist%g, trim(convergence_info)
+            !call flush(24)
+
+            write(*,*) stopper%convergence_info()
 
          end if
 
-         if ( is_stop_condition_satisfied() ) exit
+         if ( stopper%is_stop_condition_satisfied() ) exit
 
 
          ! Starting a new generation
@@ -475,7 +485,7 @@ contains
          call timer%measure()
 
          call write_output_files(sys_var, ehist%sname, ehist%nu, ehist%np, ehist%ibest, ehist%g, timer, &
-            convergence_info, ehist%xmin, ehist%xmax, ehist%fit, ehist%pop)
+            stopper%convergence_info(), ehist%xmin, ehist%xmax, ehist%fit, ehist%pop)
 
       end if
 
