@@ -31,8 +31,10 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
+		<Unit filename="depp_class_abstract_parallel_processed_data.f90" />
 		<Unit filename="depp_class_ehist.f90" />
 		<Unit filename="depp_class_optimizer.f90" />
+		<Unit filename="depp_class_parallel_processed_trial_population.f90" />
 		<Unit filename="depp_class_system_variables.f90" />
 		<Unit filename="depp_global_parameters.f90" />
 		<Unit filename="depp_history.f90" />

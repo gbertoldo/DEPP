@@ -21,11 +21,14 @@ depp_hybrid.f90
 ./stop_condition/depp_class_p_measure_stop_condition.f90
 ./stop_condition/depp_stop_condition_factory.f90
 ./stop_condition/depp_class_composite_stop_condition.f90
+depp_class_abstract_parallel_processed_data.f90
+depp_class_parallel_processed_trial_population.f90
 depp_class_optimizer.f90 
 depp_main.f90
 "
 
-mpif90 -Wall -O3 -o depp.x $flist
+#mpif90 -Wall -O3 -o depp.x $flist
+mpif90 -o depp.x $flist
 
 mv ./depp.x ../
 rm *.mod

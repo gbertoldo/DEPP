@@ -15,6 +15,7 @@ module mod_class_optimizer
    use mod_class_abstract_search_strategy
    use mod_search_strategy_factory
    use mod_class_composite_stop_condition
+   use mod_class_parallel_processed_trial_population
 
    implicit none
 
@@ -26,11 +27,12 @@ module mod_class_optimizer
 
       private
 
-      type(class_system_variables)                   :: sys_var            ! System variables
-      type(class_ehist)                              :: ehist              ! Evolution history
-      type(class_timer)                              :: timer              ! Timer
-      class(class_abstract_search_strategy), pointer :: searcher => null() ! Search strategy object
-      type(class_composite_stop_condition)           :: stopper            ! Stop condition object
+      type(class_system_variables)                    :: sys_var            ! System variables
+      type(class_ehist)                               :: ehist              ! Evolution history
+      type(class_timer)                               :: timer              ! Timer
+      class(class_abstract_search_strategy), pointer  :: searcher => null() ! Search strategy object
+      type(class_composite_stop_condition)            :: stopper            ! Stop condition object
+      type(class_parallel_processed_trial_population) :: trial_pop
 
    contains
 
@@ -92,6 +94,10 @@ contains
          ! Finishing MPI
          call mod_mpi_abort()
       end if
+
+
+      ! Trial population parallel processing
+      call this%trial_pop%init(sys_var, ehist, searcher)
 
 
       ! Initializing stop condition object
@@ -200,211 +206,14 @@ contains
 
          end if
 
-         ! For each individual of the population, another individual (trial individual)
-         ! is created and its fitness is calculated.
-         do ind = 1, ehist%np
 
-            ! Selecting the processor
-            iaux = mod(ind, mpi%nproc-1) + 1
+         call this%trial_pop%set_fh(fh)
 
-            ! Only slave processors calculate the fitness
-            if (mpi%iproc == iaux) then
+         call this%trial_pop%compute_concurrent()
 
-               ! First generation needs special attention
-               if ( ehist%g == 1 ) then
+         call this%trial_pop%exchange()
 
-                  ! rsm_tag stores the return state of application of DE-RSM
-                  rsm_tag(ind) = DE_RSM_RETURN%DE_APPLIED
-
-                  ! Calculating the fitness function
-                  fitloop1: do
-
-                     ! Creating the trial individual x
-                     call get_random_individual(ehist%nu, ehist%xmin, ehist%xmax, x(ind,:))
-
-                     call get_fitness(sys_var, ehist%sname, ind, ehist%nu, x(ind,:), ehist%xname, &
-                        xfit(ind), estatus)
-
-                     ! Analyzing the exit status of the external program
-                     select case (estatus)
-
-                        case (0) ! Success
-
-                           exit fitloop1
-
-                        case (1:10) ! Failure
-
-                           ! Failure in the calculation of fitness function. Saving informations.
-                           call save_fitness_failure(ehist%nu, ehist%g, ind, sys_var, ehist%sname, &
-                              x(ind,:), estatus)
-
-                        case default
-
-                           write(*,*) "ERROR: external program returned an unknown status. Stopping..."
-
-                           stop
-
-                     end select
-
-                  end do fitloop1
-
-               else
-
-
-                  ! Calculating the fitness function
-                  fitloop2: do
-
-                     ! Checking if RSM can be applied
-
-                     if ( rsm_check(ehist%np, ehist%g, fh) ) then
-
-                        ! rsm_tag stores the return state of application of DE-RSM
-                        rsm_tag(ind) = DE_RSM_RETURN%RSM_APPLIED
-
-                        ! Generating a RSM individual
-
-                        call get_rsm_optimum(ind, ehist%nu, ehist%np, ehist%ng, ehist%g, ehist%xmin,&
-                         ehist%xmax, ehist%pop, ehist%hist, x(ind,:), estatus)
-
-
-                        ! If RSM fails, generates a pure DE individual
-                        if ( estatus == 1 ) then
-
-                           ! rsm_tag stores the return state of application of DE-RSM
-                           rsm_tag(ind) = DE_RSM_RETURN%DE_APPLIED_AFTER_RSM_FAILURE
-
-                           ! Creating the trial individual x
-                           call searcher%get_trial(ind, ehist%pop, x(ind,:))
-
-                        end if
-
-                     else
-
-                        ! rsm_tag stores the return state of application of DE-RSM
-                        rsm_tag(ind) = DE_RSM_RETURN%DE_APPLIED
-
-                        ! Creating the trial individual x
-                          call searcher%get_trial(ind, ehist%pop, x(ind,:))
-
-                     end if
-
-
-                     ! Verifying the constraints. If the individual x is out of range,
-                     ! another one is created using pure DE
-                     do while ( is_X_out_of_range(ehist%nu, ehist%xmin, ehist%xmax, x(ind,:)) )
-
-                        ! Checking DE-RSM status
-                        select case (rsm_tag(ind))
-
-                           ! If DE was applied, do nothing.
-                           case (DE_RSM_RETURN%DE_APPLIED)
-
-                           ! If RSM was applied, a DE individual will be generated. Counts this application as a RSM failure.
-                           case (DE_RSM_RETURN%RSM_APPLIED)
-
-                              rsm_tag(ind) = DE_RSM_RETURN%DE_APPLIED_AFTER_RSM_FAILURE
-
-                           ! If DE was applied after a RSM failure, counts this application as a RSM failure.
-                           case (DE_RSM_RETURN%DE_APPLIED_AFTER_RSM_FAILURE)
-
-                           ! If black box evaluation failed, do nothing.
-                           case (DE_RSM_RETURN%BLACK_BOX_EVALUATION_FAILURE)
-
-                           case default
-
-                        end select
-
-
-                        ! Creating the trial individual x
-                        call searcher%get_trial(ind, ehist%pop, x(ind,:))
-
-                     end do
-
-
-                     ! Asking to the external program 'ffit' the fitness of individual 'x'
-                     call get_fitness(sys_var, ehist%sname, ind, ehist%nu, x(ind,:), ehist%xname, &
-                        xfit(ind), estatus)
-
-                     ! Analyzing the exit status of the external program
-                     select case (estatus)
-
-                        case (0) ! Success
-
-                           exit fitloop2
-
-                        case (1) ! Failure
-
-                           ! rsm_tag stores the return state of application of DE-RSM
-                           rsm_tag(ind) = DE_RSM_RETURN%BLACK_BOX_EVALUATION_FAILURE
-
-                           ! Failure in the calculation of fitness function. Saving informations.
-                           call save_fitness_failure(ehist%nu, ehist%g, ind, sys_var, ehist%sname, &
-                              x(ind,:), estatus)
-
-                           x(ind,:) = ehist%pop(ind,:)
-
-                           xfit(ind) = ehist%fit(ind)
-
-                           exit fitloop2
-
-                        case (2:10) ! Generate another individual
-
-                           ! rsm_tag stores the return state of application of DE-RSM
-                           rsm_tag(ind) = DE_RSM_RETURN%BLACK_BOX_EVALUATION_FAILURE
-
-                           ! Failure in the calculation of fitness function. Saving informations.
-                           call save_fitness_failure(ehist%nu, ehist%g, ind, sys_var, ehist%sname, &
-                              x(ind,:), estatus)
-
-                        case default
-
-                           write(*,*) "ERROR: external program returned an unknown status. Stopping..."
-
-                           stop
-
-                     end select
-
-                  end do fitloop2
-
-               end if
-
-
-            end if
-
-         end do
-
-         call mod_mpi_barrier()
-
-         do i = 1, ehist%np
-
-            ! Data of index 'i' was calculated by thread_map(i)
-            from_thread = mod(i, mpi%nproc-1) + 1
-
-            ! If the current thread is the same thread that calculated data i, send data to others thread
-            if ( mpi%iproc == from_thread ) then
-
-               do to_thread = 0, mpi%nproc-1
-
-                  if (to_thread/=from_thread) then
-
-                     call mpi_send(    x(i,:), ehist%nu, mpi_double_precision, to_thread, mpi%tag, mpi%comm, mpi%code)
-                     call mpi_send(   xfit(i),  1, mpi_double_precision, to_thread, mpi%tag, mpi%comm, mpi%code)
-                     call mpi_send(rsm_tag(i),  1,          mpi_integer, to_thread, mpi%tag, mpi%comm, mpi%code)
-
-                  end if
-
-               end do
-
-            ! Otherwise, receive data
-            else
-
-               call mpi_recv(    x(i,:), ehist%nu, mpi_double_precision, from_thread, mpi%tag, mpi%comm, mpi%status, mpi%code)
-               call mpi_recv(   xfit(i),  1, mpi_double_precision, from_thread, mpi%tag, mpi%comm, mpi%status, mpi%code)
-               call mpi_recv(rsm_tag(i),  1,          mpi_integer, from_thread, mpi%tag, mpi%comm, mpi%status, mpi%code)
-
-            end if
-
-         end do
+         call this%trial_pop%get_x_f_rsm(x, xfit, rsm_tag)
 
          call mod_mpi_barrier()
 
