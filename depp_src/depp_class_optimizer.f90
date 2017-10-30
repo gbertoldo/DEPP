@@ -10,7 +10,7 @@ module mod_class_optimizer
    use hybrid
    use output
    use mod_mpi
-   use mod_class_timer
+   use mod_class_btimer
    use mod_random_generator
    use mod_class_abstract_search_strategy
    use mod_search_strategy_factory
@@ -29,7 +29,7 @@ module mod_class_optimizer
 
       type(class_system_variables)                    :: sys_var            ! System variables
       type(class_ehist)                               :: ehist              ! Evolution history
-      type(class_timer)                               :: timer              ! Timer
+      type(class_btimer)                              :: timer              ! Timer
       class(class_abstract_search_strategy), pointer  :: searcher => null() ! Search strategy object
       type(class_composite_stop_condition)            :: stopper            ! Stop condition object
       type(class_parallel_processed_trial_population) :: trial_pop
@@ -114,15 +114,7 @@ contains
 
 
       ! Initializing timer
-      if ( reload == 0 ) then
-
-         call timer%start()
-
-      else
-
-         call timer%start(ehist%tcpu)
-
-      end if
+      call timer%init(sys_var)
 
       end associate
 
@@ -272,6 +264,8 @@ contains
 
             ! Saving backup data
             call ehist%save_backup(sys_var)
+
+            call timer%save_backup()
 
          end if
 

@@ -5,6 +5,7 @@ depp_global_parameters.f90
 ./util/depp_random_generator.f90 
 ./util/depp_class_ifile.f90 
 depp_class_system_variables.f90 
+./util/depp_btimer.f90 
 ./util/depp_qsort.f90 
 ./search_strategy/depp_class_abstract_search_strategy.f90 
 ./search_strategy/depp_class_DE_RAND_1.f90 
