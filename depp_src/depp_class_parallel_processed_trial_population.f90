@@ -108,6 +108,34 @@ contains
    end function
 
 
+   !> User defined. Tells MPI how to send each element of data from current thread to 'to_thread'.
+   subroutine send(this, i, to_thread)
+      implicit none
+      class(class_parallel_processed_trial_population) :: this
+      integer,                    intent(in) :: i
+      integer,                    intent(in) :: to_thread
+
+      call mpi_send(    this%x(i,:), this%ehist%nu, mpi_double_precision, to_thread, mpi%tag, mpi%comm, mpi%code)
+      call mpi_send(   this%xfit(i),  1, mpi_double_precision, to_thread, mpi%tag, mpi%comm, mpi%code)
+      call mpi_send(this%rsm_tag(i),  1,          mpi_integer, to_thread, mpi%tag, mpi%comm, mpi%code)
+
+   end subroutine
+
+
+   !> User defined. Tells MPI how to receive each element of data from 'from_thread' to current thread.
+   subroutine recv(this, i, from_thread)
+      implicit none
+      class(class_parallel_processed_trial_population) :: this
+      integer,                    intent(in) :: i
+      integer,                    intent(in) :: from_thread
+
+      call mpi_recv(    this%x(i,:), this%ehist%nu, mpi_double_precision, from_thread, mpi%tag, mpi%comm, mpi%status, mpi%code)
+      call mpi_recv(   this%xfit(i),  1, mpi_double_precision, from_thread, mpi%tag, mpi%comm, mpi%status, mpi%code)
+      call mpi_recv(this%rsm_tag(i),  1,          mpi_integer, from_thread, mpi%tag, mpi%comm, mpi%status, mpi%code)
+
+   end subroutine
+
+
    !> User defined. Defines the procedure for calculating each data element.
    subroutine compute(this,i)
       implicit none
@@ -130,49 +158,18 @@ contains
          ind = i
 
 
-         ! First generation needs special attention
-         if ( ehist%g == 1 ) then
+         ! Calculating the fitness function
+         fitloop: do
 
-            ! rsm_tag stores the return state of application of DE-RSM
-            rsm_tag(ind) = DE_RSM_RETURN%DE_APPLIED
 
-            ! Calculating the fitness function
-            fitloop1: do
+            if (ehist%g==1) then
 
                ! Creating the trial individual x
+               rsm_tag(ind) = DE_RSM_RETURN%DE_APPLIED
+
                call get_random_individual(ehist%nu, ehist%xmin, ehist%xmax, x(ind,:))
 
-               call get_fitness(sys_var, ehist%sname, ind, ehist%nu, x(ind,:), ehist%xname, &
-                  xfit(ind), estatus)
-
-               ! Analyzing the exit status of the external program
-               select case (estatus)
-
-                  case (0) ! Success
-
-                     exit fitloop1
-
-                  case (1:10) ! Failure
-
-                     ! Failure in the calculation of fitness function. Saving informations.
-                     call save_fitness_failure(ehist%nu, ehist%g, ind, sys_var, ehist%sname, &
-                        x(ind,:), estatus)
-
-                  case default
-
-                     write(*,*) "ERROR: external program returned an unknown status. Stopping..."
-
-                     stop
-
-               end select
-
-            end do fitloop1
-
-         else
-
-
-            ! Calculating the fitness function
-            fitloop2: do
+            else
 
                ! Checking if RSM can be applied
 
@@ -203,122 +200,94 @@ contains
                   ! rsm_tag stores the return state of application of DE-RSM
                   rsm_tag(ind) = DE_RSM_RETURN%DE_APPLIED
 
-                  ! Creating the trial individual x
-                    call searcher%get_trial(ind, ehist%pop, x(ind,:))
+                  call searcher%get_trial(ind, ehist%pop, x(ind,:))
 
                end if
 
-
-               ! Verifying the constraints. If the individual x is out of range,
-               ! another one is created using pure DE
-               do while ( is_X_out_of_range(ehist%nu, ehist%xmin, ehist%xmax, x(ind,:)) )
-
-                  ! Checking DE-RSM status
-                  select case (rsm_tag(ind))
-
-                     ! If DE was applied, do nothing.
-                     case (DE_RSM_RETURN%DE_APPLIED)
-
-                     ! If RSM was applied, a DE individual will be generated. Counts this application as a RSM failure.
-                     case (DE_RSM_RETURN%RSM_APPLIED)
-
-                        rsm_tag(ind) = DE_RSM_RETURN%DE_APPLIED_AFTER_RSM_FAILURE
-
-                     ! If DE was applied after a RSM failure, counts this application as a RSM failure.
-                     case (DE_RSM_RETURN%DE_APPLIED_AFTER_RSM_FAILURE)
-
-                     ! If black box evaluation failed, do nothing.
-                     case (DE_RSM_RETURN%BLACK_BOX_EVALUATION_FAILURE)
-
-                     case default
-
-                  end select
+            end if
 
 
-                  ! Creating the trial individual x
-                  call searcher%get_trial(ind, ehist%pop, x(ind,:))
+            ! Verifying the constraints. If the individual x is out of range,
+            ! another one is created using pure DE
+            do while ( is_X_out_of_range(ehist%nu, ehist%xmin, ehist%xmax, x(ind,:)) )
 
-               end do
+               ! Checking DE-RSM status
+               select case (rsm_tag(ind))
 
+                  ! If DE was applied, do nothing.
+                  case (DE_RSM_RETURN%DE_APPLIED)
 
-               ! Asking to the external program 'ffit' the fitness of individual 'x'
-               call get_fitness(sys_var, ehist%sname, ind, ehist%nu, x(ind,:), ehist%xname, &
-                  xfit(ind), estatus)
+                  ! If RSM was applied, a DE individual will be generated. Counts this application as a RSM failure.
+                  case (DE_RSM_RETURN%RSM_APPLIED)
 
-               ! Analyzing the exit status of the external program
-               select case (estatus)
+                     rsm_tag(ind) = DE_RSM_RETURN%DE_APPLIED_AFTER_RSM_FAILURE
 
-                  case (0) ! Success
+                  ! If DE was applied after a RSM failure, counts this application as a RSM failure.
+                  case (DE_RSM_RETURN%DE_APPLIED_AFTER_RSM_FAILURE)
 
-                     exit fitloop2
-
-                  case (1) ! Failure
-
-                     ! rsm_tag stores the return state of application of DE-RSM
-                     rsm_tag(ind) = DE_RSM_RETURN%BLACK_BOX_EVALUATION_FAILURE
-
-                     ! Failure in the calculation of fitness function. Saving informations.
-                     call save_fitness_failure(ehist%nu, ehist%g, ind, sys_var, ehist%sname, &
-                        x(ind,:), estatus)
-
-                     x(ind,:) = ehist%pop(ind,:)
-
-                     xfit(ind) = ehist%fit(ind)
-
-                     exit fitloop2
-
-                  case (2:10) ! Generate another individual
-
-                     ! rsm_tag stores the return state of application of DE-RSM
-                     rsm_tag(ind) = DE_RSM_RETURN%BLACK_BOX_EVALUATION_FAILURE
-
-                     ! Failure in the calculation of fitness function. Saving informations.
-                     call save_fitness_failure(ehist%nu, ehist%g, ind, sys_var, ehist%sname, &
-                        x(ind,:), estatus)
+                  ! If black box evaluation failed, do nothing.
+                  case (DE_RSM_RETURN%BLACK_BOX_EVALUATION_FAILURE)
 
                   case default
 
-                     write(*,*) "ERROR: external program returned an unknown status. Stopping..."
-
-                     stop
-
                end select
 
-            end do fitloop2
 
-         end if
+               ! Creating the trial individual x
+               call searcher%get_trial(ind, ehist%pop, x(ind,:))
+
+            end do
+
+
+            ! Asking to the external program 'ffit' the fitness of individual 'x'
+            call get_fitness(sys_var, ehist%sname, ind, ehist%nu, x(ind,:), ehist%xname, &
+               xfit(ind), estatus)
+
+            if (ehist%g==1 .and. estatus==1) estatus=2
+
+            ! Analyzing the exit status of the external program
+            select case (estatus)
+
+               case (0) ! Success
+
+                  exit fitloop
+
+               case (1) ! Failure
+
+                  ! rsm_tag stores the return state of application of DE-RSM
+                  rsm_tag(ind) = DE_RSM_RETURN%BLACK_BOX_EVALUATION_FAILURE
+
+                  ! Failure in the calculation of fitness function. Saving informations.
+                  call save_fitness_failure(ehist%nu, ehist%g, ind, sys_var, ehist%sname, &
+                     x(ind,:), estatus)
+
+                  x(ind,:) = ehist%pop(ind,:)
+
+                  xfit(ind) = ehist%fit(ind)
+
+                  exit fitloop
+
+               case (2:10) ! Generate another individual
+
+                  ! rsm_tag stores the return state of application of DE-RSM
+                  rsm_tag(ind) = DE_RSM_RETURN%BLACK_BOX_EVALUATION_FAILURE
+
+                  ! Failure in the calculation of fitness function. Saving informations.
+                  call save_fitness_failure(ehist%nu, ehist%g, ind, sys_var, ehist%sname, &
+                     x(ind,:), estatus)
+
+               case default
+
+                  write(*,*) "ERROR: external program returned an unknown status. Stopping..."
+
+                  stop
+
+            end select
+
+         end do fitloop
 
       end associate
 
    end subroutine
-
-
-   !> User defined. Tells MPI how to send each element of data from current thread to 'to_thread'.
-   subroutine send(this, i, to_thread)
-      implicit none
-      class(class_parallel_processed_trial_population) :: this
-      integer,                    intent(in) :: i
-      integer,                    intent(in) :: to_thread
-
-      call mpi_send(    this%x(i,:), this%ehist%nu, mpi_double_precision, to_thread, mpi%tag, mpi%comm, mpi%code)
-      call mpi_send(   this%xfit(i),  1, mpi_double_precision, to_thread, mpi%tag, mpi%comm, mpi%code)
-      call mpi_send(this%rsm_tag(i),  1,          mpi_integer, to_thread, mpi%tag, mpi%comm, mpi%code)
-
-   end subroutine
-
-
-   !> User defined. Tells MPI how to receive each element of data from 'from_thread' to current thread.
-   subroutine recv(this, i, from_thread)
-      implicit none
-      class(class_parallel_processed_trial_population) :: this
-      integer,                    intent(in) :: i
-      integer,                    intent(in) :: from_thread
-
-      call mpi_recv(    this%x(i,:), this%ehist%nu, mpi_double_precision, from_thread, mpi%tag, mpi%comm, mpi%status, mpi%code)
-      call mpi_recv(   this%xfit(i),  1, mpi_double_precision, from_thread, mpi%tag, mpi%comm, mpi%status, mpi%code)
-      call mpi_recv(this%rsm_tag(i),  1,          mpi_integer, from_thread, mpi%tag, mpi%comm, mpi%status, mpi%code)
-
-   end subroutine
-
 
 end module
