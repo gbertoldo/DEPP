@@ -67,6 +67,24 @@ contains
    end subroutine
 
 
+   ! \brief Add results and update RSM Dynamic Control
+   subroutine update_rsm_dynamic_control(rsm_tag, xfit, fit)
+      implicit none
+      integer, dimension(:), intent(in) :: rsm_tag !< Stores the return state of application of DE-RSM
+      real(8), dimension(:), intent(in) :: xfit    !< fitness of the trial individual
+      real(8), dimension(:), intent(in) :: fit     !< fitness of a given individual of the population
+
+      ! Inner variables
+      integer :: i
+
+      do i = 1, size(rsm_tag)
+
+         call add_to_rsm_dynamic_control(rsm_tag(i), xfit(i), fit(i))
+
+      end do
+
+   end subroutine
+
 
    ! \brief Add a result and update RSM Dynamic Control
    subroutine add_to_rsm_dynamic_control(rsm_tag, xfit, fit)

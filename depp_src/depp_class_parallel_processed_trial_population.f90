@@ -8,6 +8,7 @@ module mod_class_parallel_processed_trial_population
    use mod_class_system_variables
    use mod_class_ehist
    use mod_class_abstract_search_strategy
+   use mod_search_strategy_factory
 
    use hybrid
    use output
@@ -20,11 +21,9 @@ module mod_class_parallel_processed_trial_population
    !> \brief Provides a class for parallel processing a trial population.
    type, extends(class_abstract_parallel_processed_data), public :: class_parallel_processed_trial_population
 
-      integer :: v(10)
-
       class(class_system_variables),         pointer :: sys_var
       class(class_ehist),                    pointer :: ehist
-      class(class_abstract_search_strategy), pointer :: searcher
+      class(class_abstract_search_strategy), pointer :: searcher => null()
       real(8), allocatable                           :: xfit(:)    ! Fitness of the trial individual
       real(8), dimension(:,:), allocatable           :: x          ! Trial individual
       integer, allocatable                           :: rsm_tag(:) ! Stores the return state of application of DE-RSM
@@ -37,8 +36,8 @@ module mod_class_parallel_processed_trial_population
 
 
       procedure, public, pass :: init
-      procedure, public, pass :: set_fh
-      procedure, public, pass :: get_x_f_rsm
+      procedure, public, pass :: get_trial_population
+      procedure, public, pass :: update
 
 
       ! Procedures deferred from parent class
@@ -53,47 +52,55 @@ contains
 
 
    !> \brief Constructor
-   subroutine init(this, sys_var, ehist, searcher)
+   subroutine init(this, sys_var, ehist)
       implicit none
       class(class_parallel_processed_trial_population)  :: this
       class(class_system_variables),         target, intent(in) :: sys_var
       class(class_ehist),                    target, intent(in) :: ehist
-      class(class_abstract_search_strategy), target, intent(in) :: searcher
+
+      integer           :: estatus   ! Exit status (0=success; 1=failure)
+
 
       this%sys_var  => sys_var
       this%ehist    => ehist
-      this%searcher => searcher
 
       ! Allocating resources
       allocate(this%x(ehist%np,ehist%nu))
       allocate(this%xfit(ehist%np))
       allocate(this%rsm_tag(ehist%np))
 
+      ! Initializes hybrid module and checks hybridization necessary condition for RSM
+      call initialize_hybrid_module(sys_var,estatus)
+      ! Checking the exit status of the module initialization
+      if ( estatus == 1 ) then
+         ! Finishing MPI
+         call mod_mpi_abort()
+      end if
+
+      ! To be fixed
+      this%fh = 0.35d0
+
+      ! Initializing search strategy object
+      call create_search_strategy("DE/RAND/1", this%searcher)
+
+
    end subroutine
 
 
    !> \brief To be removed
-   subroutine set_fh(this, fh)
-      implicit none
-      class(class_parallel_processed_trial_population)  :: this
-      real(8), intent(in) :: fh
-
-      this%fh = fh
-
-   end subroutine
-
-
-   !> \brief To be removed
-   subroutine get_x_f_rsm(this, x, xfit, rsm_tag)
+   subroutine get_trial_population(this, x, xfit)
       implicit none
       class(class_parallel_processed_trial_population)  :: this
       real(8),                              intent(out) :: xfit(:)    ! Fitness of the trial individual
       real(8), dimension(:,:),              intent(out) :: x          ! Trial individual
-      integer,                              intent(out) :: rsm_tag(:) ! Stores the return state of application of DE-RSM
+
+
+      call this%compute_concurrent()
+
+      call this%update()
 
       xfit = this%xfit
       x    = this%x
-      rsm_tag = this%rsm_tag
 
    end subroutine
 
@@ -136,6 +143,21 @@ contains
    end subroutine
 
 
+
+   subroutine update(this)
+      implicit none
+      class(class_parallel_processed_trial_population) :: this
+
+      call this%exchange()
+
+      call update_rsm_dynamic_control(this%rsm_tag, this%xfit, this%ehist%fit)
+
+      ! Calculating the hybridization factor
+      this%fh = get_hybridization_factor()
+
+   end subroutine
+
+
    !> User defined. Defines the procedure for calculating each data element.
    subroutine compute(this,i)
       implicit none
@@ -145,6 +167,7 @@ contains
       ! Inner variables
       integer :: ind
       integer :: estatus
+
 
       ! Creating labels
       associate (sys_var  => this%sys_var, &

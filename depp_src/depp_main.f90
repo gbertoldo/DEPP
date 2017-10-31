@@ -14,19 +14,19 @@
 !!          Guilherme Bertoldo
 !!
 !!                 E-mail: glbertoldo@gmail.com
-!!             Curriculum: http://buscatextual.cnpq.br/buscatextual/visualizacv.do?id=H769069
+!!             Curriculum: http://lattes.cnpq.br/0176403556779673
 !!
 !!
 !! \par Institution
 !!          Federal University of Technology - Paraná - UTFPR
 !!
 !!
-!! \date Apr, 2016.
+!! \date Nov, 2017.
 !!
 !! \version 2.0
 !!
-!! \par SVN CHECKOUT
-!!          http://depp.googlecode.com/svn/trunk/
+!! \par GitHub repository
+!!          https://github.com/gbertoldo/DEPP
 !!
 !! \section Introduction
 !!
@@ -35,7 +35,7 @@
 !! This algorithm also contains an hybridization with the Response Surface Methodology
 !! (RSM) that may accelerate the convergence. The program deals only with maximization.
 !! Minimization can be taken into account by multiplying the fitness function by -1.
-!! The code implementation is MPI-FORTRAN 90.
+!! The code implementation is MPI-FORTRAN.
 
 !> \brief Main program
 program depp
