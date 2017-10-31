@@ -122,9 +122,9 @@ contains
       integer,                    intent(in) :: i
       integer,                    intent(in) :: to_thread
 
-      call mpi_send(    this%x(i,:), this%ehist%nu, mpi_double_precision, to_thread, mpi%tag, mpi%comm, mpi%code)
-      call mpi_send(   this%xfit(i),  1, mpi_double_precision, to_thread, mpi%tag, mpi%comm, mpi%code)
-      call mpi_send(this%rsm_tag(i),  1,          mpi_integer, to_thread, mpi%tag, mpi%comm, mpi%code)
+      call mpi_send(    this%x(i,:), this%ehist%nu, mpi_double_precision, to_thread, mpio%tag, mpio%comm, mpio%code)
+      call mpi_send(   this%xfit(i),  1, mpi_double_precision, to_thread, mpio%tag, mpio%comm, mpio%code)
+      call mpi_send(this%rsm_tag(i),  1,          mpi_integer, to_thread, mpio%tag, mpio%comm, mpio%code)
 
    end subroutine
 
@@ -136,9 +136,9 @@ contains
       integer,                    intent(in) :: i
       integer,                    intent(in) :: from_thread
 
-      call mpi_recv(    this%x(i,:), this%ehist%nu, mpi_double_precision, from_thread, mpi%tag, mpi%comm, mpi%status, mpi%code)
-      call mpi_recv(   this%xfit(i),  1, mpi_double_precision, from_thread, mpi%tag, mpi%comm, mpi%status, mpi%code)
-      call mpi_recv(this%rsm_tag(i),  1,          mpi_integer, from_thread, mpi%tag, mpi%comm, mpi%status, mpi%code)
+      call mpi_recv(    this%x(i,:), this%ehist%nu, mpi_double_precision, from_thread, mpio%tag, mpio%comm, mpio%status, mpio%code)
+      call mpi_recv(   this%xfit(i),  1, mpi_double_precision, from_thread, mpio%tag, mpio%comm, mpio%status, mpio%code)
+      call mpi_recv(this%rsm_tag(i),  1,          mpi_integer, from_thread, mpio%tag, mpio%comm, mpio%status, mpio%code)
 
    end subroutine
 

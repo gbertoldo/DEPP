@@ -59,7 +59,7 @@ contains
 
 
          ! Initializing random number generator module
-         !call initialize_random_generator(mpi%iproc)
+         !call initialize_random_generator(mpio%iproc)
 
 
          ! Initializing system variables
@@ -79,8 +79,8 @@ contains
 
 
 ! TODO (guilherme#1#): Find a more appropriate way of writing output
-         ! if iproc == 0, master processor writes the parameter to a file
-         if (mpi%iproc == 0) then
+         ! if master processor, writes the parameter to a file
+         if (mpio%master) then
 
             ! Writting parameters to the output file
             call write_parameters(sys_var, ehist%sname, 0)
@@ -135,7 +135,7 @@ contains
             call stopper%compute_stop_condition(ehist)
 
             ! Printing convergence measure of the current generation
-            if (mpi%iproc==0) then
+            if (mpio%master) then
 
                write(*,*) stopper%convergence_info()
 
@@ -149,7 +149,7 @@ contains
 
 
             ! Print time
-            if (mpi%iproc == 0) then
+            if (mpio%master) then
 
                call timer%measure()
 
@@ -187,7 +187,7 @@ contains
             end do
 
 
-            if (mpi%iproc == 0) then
+            if (mpio%master) then
 
                ! For each individual of the population
                do i = 1, ehist%np
@@ -220,7 +220,7 @@ contains
 
 
          ! Master processor: data post processing
-         if (mpi%iproc == 0) then
+         if (mpio%master) then
 
             ! Measuring cpu time
             call timer%measure()

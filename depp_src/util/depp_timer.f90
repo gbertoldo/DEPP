@@ -3,15 +3,13 @@
 
 module mod_class_timer
 
+   use mpi
+
    implicit none
-
-   include 'mpif.h'
-
 
 
    ! All members are private by default
    private
-
 
 
    ! Class declaration

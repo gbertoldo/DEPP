@@ -1,11 +1,19 @@
 !> \brief This module stores the global variables of MPI
 module mod_mpi
+
+   use mpi
+
    implicit none
 
-   include 'mpif.h'
+   !include 'mpif.h'
+
+
+   ! Makes everything private, except otherwise stated
+   !private
+
 
    ! MPI main variables
-   type :: mpi_var
+   type, public :: class_mpi
 
       integer :: status(mpi_status_size)  !< mpi: vector with information and source tag
       integer :: iproc                    !< mpi: identification number of the process
@@ -13,39 +21,60 @@ module mod_mpi
       integer :: nproc                    !< mpi: number of processes
       integer :: tag                      !< mpi: message label
       integer :: comm                     !< mpi: MPI communicator
+      logical :: master                   !< true if master
 
    end type
 
-   type(mpi_var) :: mpi
+
+   ! MPI object
+   type(class_mpi), public :: mpio
+
 
 contains
+
 
    !> \brief Initializes MPI module
    subroutine mod_mpi_init()
       implicit none
 
-      ! Initializing MPI (from now on the code is parallel)
-      call mpi_init(mpi%code)
+
+      ! Initializing MPI
+      call mpi_init(mpio%code)
 
 
       ! Initializing MPI variables
-      mpi%comm = mpi_comm_world
-      mpi%tag = 42
+      mpio%comm = mpi_comm_world
+      mpio%tag  = 42
 
 
       ! Checking for MPI initialization errors
-      if (mpi%code /= mpi_success) then
+      if (mpio%code /= mpi_success) then
+
          write(*,*) " =====  Error in the MPI initialization. Stopping...  ====="
-         call mpi_abort(mpi%comm, mpi%code, mpi%code)
+
+         call mpi_abort(mpio%comm, mpio%code, mpio%code)
+
       endif
 
 
       ! Getting the total number of processors
-      call mpi_comm_size(mpi%comm, mpi%nproc, mpi%code)
+      call mpi_comm_size(mpio%comm, mpio%nproc, mpio%code)
 
 
       ! Getting the ID number of each processor
-      call mpi_comm_rank(mpi%comm, mpi%iproc, mpi%code)
+      call mpi_comm_rank(mpio%comm, mpio%iproc, mpio%code)
+
+
+      ! Defining if master or not
+      if (mpio%iproc==0) then
+
+         mpio%master = .true.
+
+      else
+
+         mpio%master = .false.
+
+      end if
 
 
    end subroutine
@@ -55,7 +84,7 @@ contains
    subroutine mod_mpi_barrier()
       implicit none
 
-      call mpi_barrier(mpi%comm, mpi%code)
+      call mpi_barrier(mpio%comm, mpio%code)
 
    end subroutine
 
@@ -64,7 +93,7 @@ contains
    subroutine mod_mpi_abort()
       implicit none
 
-      call mpi_abort(mpi%comm, mpi%code, mpi%code)
+      call mpi_abort(mpio%comm, mpio%code, mpio%code)
 
    end subroutine
 
@@ -73,7 +102,7 @@ contains
    subroutine mod_mpi_finalize()
       implicit none
 
-      call mpi_finalize(mpi%code)
+      call mpi_finalize(mpio%code)
 
    end subroutine
 

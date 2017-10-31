@@ -93,7 +93,7 @@ contains
 
       do i = 1, this%data_size()
 
-         if ( mpi%iproc == thread_map(i) ) call this%compute(i)
+         if ( mpio%iproc == thread_map(i) ) call this%compute(i)
 
       end do
 
@@ -117,9 +117,9 @@ contains
          from_thread = thread_map(i)
 
          ! If the current thread is the same thread that calculated data i, send data to others thread
-         if ( mpi%iproc == from_thread ) then
+         if ( mpio%iproc == from_thread ) then
 
-            do to_thread = 0, mpi%nproc-1
+            do to_thread = 0, mpio%nproc-1
 
                if ( to_thread /= from_thread ) call this%send(i, to_thread)
 
@@ -145,10 +145,10 @@ contains
       integer, intent(in) :: i
 
       ! This rule leaves all the work to slaves.
-      thread_map = mod(i, mpi%nproc-1) + 1
+      thread_map = mod(i, mpio%nproc-1) + 1
 
       ! This rule shares the work among all threads, including master thread.
-      !thread_map = mod(i, mpi%nproc)
+      !thread_map = mod(i, mpio%nproc)
 
    end function
 
