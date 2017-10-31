@@ -5,12 +5,6 @@ module mod_mpi
 
    implicit none
 
-   !include 'mpif.h'
-
-
-   ! Makes everything private, except otherwise stated
-   !private
-
 
    ! MPI main variables
    type, public :: class_mpi

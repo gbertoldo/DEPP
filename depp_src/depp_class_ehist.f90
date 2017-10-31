@@ -1,5 +1,5 @@
 
-!> \brief Provides a class for generating evolution history objects
+!> \brief Provides a class for generating evolution history objects.
 !! These objects must contain information about the population, its fitness,
 !! current generation etc.
 
@@ -23,7 +23,6 @@ module mod_class_ehist
       integer :: np                                    !< Population size
       integer :: ng                                    !< Maximum number of generations
       integer :: ibest                                 !< Index of the best individual in the population
-      real(8) :: tcpu                                  !< CPU time
       real(8), dimension(:),     allocatable :: fit    !< Fitness of the current population
       real(8), dimension(:,:),   allocatable :: pop    !< Current population
 
@@ -45,8 +44,11 @@ module mod_class_ehist
    contains
 
       procedure, public,  pass :: init
-      procedure, private, pass :: reload
+      procedure, public,  pass :: new_generation
+      procedure, public,  pass :: add_trial_population
+      procedure, public,  pass :: select_individuals
       procedure, public,  pass :: save_backup
+      procedure, private, pass :: load_backup
 
    end type
 
@@ -99,8 +101,6 @@ contains
 
       end do
 
-      this%tcpu = 0.d0
-
 
       ! If reload=0, data is initialized, otherwise the population and its fitness are read from the backup file
       if ( reload == 0 ) then
@@ -114,7 +114,7 @@ contains
       else
 
          ! Loading data
-         call this%reload(sys_var)
+         call this%load_backup(sys_var)
 
       end if
 
@@ -123,36 +123,68 @@ contains
 
 
 
-
-   ! \brief Loads the backup data
-   subroutine reload(this, sys_var)
+   !> \brief Adds a new generation to evolution history
+   subroutine new_generation(this)
       implicit none
       class(class_ehist) :: this
-      class(class_system_variables), intent(in) :: sys_var
+
+      this%g = this%g + 1
+
+   end subroutine
+
+
+
+   !> \brief Add a trial population to evolution history
+   subroutine add_trial_population(this, pop, fit)
+      implicit none
+      class(class_ehist)                  :: this
+      real(8), dimension(:,:), intent(in) :: pop ! Trial individuals population
+      real(8), dimension(:),   intent(in) :: fit ! Fitness of the population
 
       ! Inner variables
+      integer :: i
 
-      open(23, file = trim(sys_var%absfolderout) // trim(this%sname) // "-ehist-backup.txt")
+      ! Updating history
 
-      read(23,*) this%sname
-      read(23,*) this%g
-      read(23,*) this%nu
-      read(23,*) this%np
-      read(23,*) this%ng
-      read(23,*) this%ibest
-      read(23,*) this%tcpu
-      read(23,*) this%fit
-      read(23,*) this%pop
-      read(23,*) this%hist
-      read(23,*) this%xmin
-      read(23,*) this%xmax
-      read(23,*) this%xname
+      do i = 1, this%np
 
-      close(23)
+         this%hist(this%g,i,1:this%nu) = pop(i,:)  ! Trial population
+         this%hist(this%g,i,        0) = fit(i)    ! Fitness of the trial population
 
-   end subroutine reload
+      end do
+
+   end subroutine
 
 
+
+   !> \brief Selects the best individuals
+   subroutine select_individuals(this)
+      implicit none
+      class(class_ehist) :: this
+
+      ! Inner variables
+      integer :: i
+      real(8) :: xfit
+
+      ! For each individual of the population
+      do i = 1, this%np
+
+         xfit = this%hist(this%g,i,0)
+
+         ! Selecting the best individual
+         if ( xfit >= this%fit(i)) then
+
+            this%pop(i,:) = this%hist(this%g,i,1:)
+
+            this%fit(i)   = xfit
+
+            if ( xfit >= this%fit(this%ibest)) this%ibest = i
+
+         end if
+
+      end do
+
+   end subroutine
 
 
 
@@ -170,7 +202,6 @@ contains
       write(23,*) this%np
       write(23,*) this%ng
       write(23,*) this%ibest
-      write(23,*) this%tcpu
       write(23,*) this%fit
       write(23,*) this%pop
       write(23,*) this%hist
@@ -180,7 +211,36 @@ contains
 
       close(23)
 
-   end subroutine save_backup
+   end subroutine
+
+
+
+   ! \brief Loads the backup data
+   subroutine load_backup(this, sys_var)
+      implicit none
+      class(class_ehist) :: this
+      class(class_system_variables), intent(in) :: sys_var
+
+      ! Inner variables
+
+      open(23, file = trim(sys_var%absfolderout) // trim(this%sname) // "-ehist-backup.txt")
+
+      read(23,*) this%sname
+      read(23,*) this%g
+      read(23,*) this%nu
+      read(23,*) this%np
+      read(23,*) this%ng
+      read(23,*) this%ibest
+      read(23,*) this%fit
+      read(23,*) this%pop
+      read(23,*) this%hist
+      read(23,*) this%xmin
+      read(23,*) this%xmax
+      read(23,*) this%xname
+
+      close(23)
+
+   end subroutine
 
 
 end module

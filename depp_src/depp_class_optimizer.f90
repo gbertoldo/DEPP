@@ -124,7 +124,7 @@ contains
          allocate(x(ehist%np,ehist%nu))
          allocate(xfit(ehist%np))
 
-
+         ! Processors synchronization
          call mod_mpi_barrier()
 
 
@@ -145,7 +145,7 @@ contains
 
 
             ! Starting a new generation
-            ehist%g = ehist%g+1
+            call ehist%new_generation()
 
 
             ! Print time
@@ -163,30 +163,19 @@ contains
             call searcher%get_trial_population(x, xfit)
 
 
+            ! Processors synchronization
             call mod_mpi_barrier()
 
 
-            ! For each individual of the population
-            do i = 1, ehist%np
-
-               ! Updating history
-               ehist%hist(ehist%g,i,1:ehist%nu) = x(i,:)  ! Individual
-               ehist%hist(ehist%g,i,         0) = xfit(i) ! Fitness of the individual
-
-               ! Selecting the best individual
-               if ( xfit(i) >= ehist%fit(i)) then
-
-                  ehist%pop(i,:) = x(i,:)
-
-                  ehist%fit(i) = xfit(i)
-
-                  if ( xfit(i) >= ehist%fit(ehist%ibest)) ehist%ibest = i
-
-               end if
-
-            end do
+            ! Adds the trial population, calculated by searcher, to the evolution history
+            call ehist%add_trial_population(x,xfit)
 
 
+            ! Selects best individuals among trial population and current population
+            call ehist%select_individuals()
+
+
+            ! Processors synchronization
             if (mpio%master) then
 
                ! For each individual of the population
