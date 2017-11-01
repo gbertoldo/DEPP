@@ -4,6 +4,7 @@ depp_global_parameters.f90
 ./util/depp_timer.f90 
 ./util/depp_random_generator.f90 
 ./util/depp_class_ifile.f90 
+depp_class_log_output_control.f90
 depp_class_system_variables.f90 
 ./util/depp_btimer.f90 
 ./util/depp_qsort.f90 

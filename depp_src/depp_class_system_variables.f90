@@ -3,12 +3,9 @@
 
 module mod_class_system_variables
 
-   ! Input file reader
    use mod_class_ifile
-
-   ! Global parameters module
    use mod_global_parameters
-
+   use mod_class_log_output_control
 
    implicit none
 
@@ -18,6 +15,7 @@ module mod_class_system_variables
    ! Type system variables contains information about paths and filenames
    type, public :: class_system_variables
 
+      character(str_size) :: sname                        !< simulation id
       character(str_size) :: folderin  = "./depp_input/"  !< folder the for input files
       character(str_size) :: folderout = "./depp_output/" !< folder the for output files
       character(str_size) :: ifilename = "input_file.txt" !< stores the name of the parameters input file
@@ -26,9 +24,15 @@ module mod_class_system_variables
       character(str_size) :: parfile                      !< name of the parameters input file
       character(str_size) :: absparfile                   !< absolute path and name of the parameters input file
       character(str_size) :: logfile                      !< name of the log file
+      character(str_size) :: abslogfile                   !< absolute path to log file
       character(str_size) :: fdir                         !< name of working directory for fitness calculation
       character(str_size) :: ffit                         !< name of executable for fitness calculation
       character(str_size) :: CWD                          !< current working directory
+
+      ! Defines an instance of class_log_output_control
+      type(class_log_output_control) :: logger            !< Logger for output data
+
+
    contains
 
       procedure, public, pass :: init
@@ -37,20 +41,19 @@ module mod_class_system_variables
 
 contains
 
-   !> \brief Read simulation variables from input file
+   !> \brief Reads simulation variables from input file
    subroutine init(this)
       implicit none
       class(class_system_variables) :: this
 
       ! Inner variables
       type(class_ifile)       :: ifile
-      character(len=str_size) :: sname
-
+      integer                 :: reload
+      logical                 :: lexist
 
 
       ! Getting the current working directory
       call get_environment_variable('PWD',this%CWD)
-
 
 
       ! Absolute path to input folder
@@ -59,13 +62,12 @@ contains
 
       ! Reading the name of the input file
       call ifile%init(filename=trim(this%absfolderin)//trim(this%ifilename), field_separator='&')
-
       call ifile%load()
-
       call ifile%get_value(this%parfile,"parfile")
 
-      this%absparfile = trim(this%absfolderin) // "/" // trim(this%parfile)
 
+      ! Absolute path to parameter file
+      this%absparfile = trim(this%absfolderin) // "/" // trim(this%parfile)
 
 
       ! Reading the input file
@@ -74,18 +76,47 @@ contains
 
       call ifile%load()
 
-      call ifile%get_value(this%fdir, "fdir")
-      call ifile%get_value(this%ffit, "ffit")
-      call ifile%get_value(sname,     "sname")
+      call ifile%get_value(this%fdir,    "fdir")
+      call ifile%get_value(this%ffit,    "ffit")
+      call ifile%get_value(this%sname,  "sname")
+      call ifile%get_value(reload,     "reload")
 
 
       ! folderout for current simulation
-      this%folderout = trim(this%folderout) // trim(sname) // "/"
+      this%folderout = trim(this%folderout) // trim(this%sname) // "/"
 
 
       ! Absolute path to input folder
       this%absfolderout = trim(this%CWD) // "/" // trim(this%folderout)
 
+
+      ! Creating output folder
+      inquire(file = trim(this%absfolderout), exist = lexist)
+
+      if (lexist) then
+
+         if (reload == 0) then
+            call system("rm -r " // trim(this%absfolderout))
+            call system("mkdir " // trim(this%absfolderout))
+         end if
+
+      else
+
+         call system("mkdir " // trim(this%absfolderout))
+
+      end if
+
+
+      ! Log file
+      this%logfile = trim(this%sname) // "-logfile.txt"
+
+
+      ! Absolute path to log file
+      this%abslogfile = trim(this%absfolderout) // trim(this%logfile)
+
+
+      ! Initializing logger
+      call this%logger%init(trim(this%abslogfile))
 
    end subroutine
 

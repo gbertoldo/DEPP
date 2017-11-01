@@ -31,34 +31,97 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
-		<Unit filename="depp_class_abstract_parallel_processed_data.f90" />
-		<Unit filename="depp_class_ehist.f90" />
-		<Unit filename="depp_class_optimizer.f90" />
-		<Unit filename="depp_class_parallel_processed_trial_population.f90" />
-		<Unit filename="depp_class_system_variables.f90" />
-		<Unit filename="depp_global_parameters.f90" />
-		<Unit filename="depp_history.f90" />
-		<Unit filename="depp_hybrid.f90" />
-		<Unit filename="depp_main.f90" />
-		<Unit filename="depp_mpi.f90" />
-		<Unit filename="depp_output.f90" />
-		<Unit filename="depp_rsm.f90" />
-		<Unit filename="depp_rsm_dynamic_control.f90" />
-		<Unit filename="search_strategy/depp_class_DE_RAND_1.f90" />
-		<Unit filename="search_strategy/depp_class_abstract_search_strategy.f90" />
-		<Unit filename="search_strategy/depp_search_strategy_factory.f90" />
-		<Unit filename="stop_condition/depp_class_abstract_stop_condition.f90" />
-		<Unit filename="stop_condition/depp_class_composite_stop_condition.f90" />
-		<Unit filename="stop_condition/depp_class_max_generations_stop_condition.f90" />
-		<Unit filename="stop_condition/depp_class_no_improvement_stop_condition.f90" />
-		<Unit filename="stop_condition/depp_class_p_measure_stop_condition.f90" />
-		<Unit filename="stop_condition/depp_no_improvement_stopping_condition.f90" />
-		<Unit filename="stop_condition/depp_stop_condition_factory.f90" />
-		<Unit filename="util/depp_class_ifile.f90" />
-		<Unit filename="util/depp_qsort.f90" />
-		<Unit filename="util/depp_random_generator.f90" />
-		<Unit filename="util/depp_timer.f90" />
-		<Unit filename="util/depp_tools.f90" />
+		<Unit filename="depp_class_abstract_parallel_processed_data.f90">
+			<Option weight="1" />
+		</Unit>
+		<Unit filename="depp_class_ehist.f90">
+			<Option weight="2" />
+		</Unit>
+		<Unit filename="depp_class_log_output_control.f90" />
+		<Unit filename="depp_class_optimizer.f90">
+			<Option weight="7" />
+		</Unit>
+		<Unit filename="depp_class_parallel_processed_trial_population.f90">
+			<Option weight="4" />
+		</Unit>
+		<Unit filename="depp_class_system_variables.f90">
+			<Option weight="1" />
+		</Unit>
+		<Unit filename="depp_global_parameters.f90">
+			<Option weight="0" />
+		</Unit>
+		<Unit filename="depp_history.f90">
+			<Option weight="0" />
+		</Unit>
+		<Unit filename="depp_hybrid.f90">
+			<Option weight="3" />
+		</Unit>
+		<Unit filename="depp_main.f90">
+			<Option weight="8" />
+		</Unit>
+		<Unit filename="depp_mpi.f90">
+			<Option weight="0" />
+		</Unit>
+		<Unit filename="depp_output.f90">
+			<Option weight="2" />
+		</Unit>
+		<Unit filename="depp_rsm.f90">
+			<Option weight="0" />
+		</Unit>
+		<Unit filename="depp_rsm_dynamic_control.f90">
+			<Option weight="0" />
+		</Unit>
+		<Unit filename="search_strategy/depp_class_DE_RAND_1.f90">
+			<Option weight="1" />
+		</Unit>
+		<Unit filename="search_strategy/depp_class_DE_RSM.f90">
+			<Option weight="0" />
+		</Unit>
+		<Unit filename="search_strategy/depp_class_abstract_search_strategy.f90">
+			<Option weight="0" />
+		</Unit>
+		<Unit filename="search_strategy/depp_search_strategy_factory.f90">
+			<Option weight="2" />
+		</Unit>
+		<Unit filename="stop_condition/depp_class_abstract_stop_condition.f90">
+			<Option weight="3" />
+		</Unit>
+		<Unit filename="stop_condition/depp_class_composite_stop_condition.f90">
+			<Option weight="6" />
+		</Unit>
+		<Unit filename="stop_condition/depp_class_max_generations_stop_condition.f90">
+			<Option weight="4" />
+		</Unit>
+		<Unit filename="stop_condition/depp_class_no_improvement_stop_condition.f90">
+			<Option weight="4" />
+		</Unit>
+		<Unit filename="stop_condition/depp_class_p_measure_stop_condition.f90">
+			<Option weight="4" />
+		</Unit>
+		<Unit filename="stop_condition/depp_no_improvement_stopping_condition.f90">
+			<Option weight="0" />
+		</Unit>
+		<Unit filename="stop_condition/depp_stop_condition_factory.f90">
+			<Option weight="5" />
+		</Unit>
+		<Unit filename="util/depp_btimer.f90">
+			<Option weight="2" />
+		</Unit>
+		<Unit filename="util/depp_class_ifile.f90">
+			<Option weight="0" />
+		</Unit>
+		<Unit filename="util/depp_qsort.f90">
+			<Option weight="0" />
+		</Unit>
+		<Unit filename="util/depp_random_generator.f90">
+			<Option weight="0" />
+		</Unit>
+		<Unit filename="util/depp_timer.f90">
+			<Option weight="0" />
+		</Unit>
+		<Unit filename="util/depp_tools.f90">
+			<Option weight="2" />
+		</Unit>
 		<Extensions>
 			<envvars />
 			<code_completion />
