@@ -2,6 +2,9 @@
 !> \brief Defines a class for printing log information
 
 module mod_class_log_output_control
+
+   use mod_mpi
+
    implicit none
 
 
@@ -17,7 +20,7 @@ module mod_class_log_output_control
    type, public :: class_log_output_control
 
       private
-      integer         :: fileid(2)              !< File ID's
+      integer         :: fileid(2) !< File ID's
 
    contains
 
@@ -49,7 +52,8 @@ contains
          ! Log file
          this%fileid(2) = 100
 
-         open(this%fileid(2),file=logfile)
+         ! Only master
+         if (mpio%master) open(this%fileid(2),file=logfile)
 
       end if
 
@@ -66,11 +70,16 @@ contains
       ! Inner variables
       integer :: i
 
-      do i = 1, size(this%fileid)
+      ! Only master
+      if (mpio%master) then
 
-         write(this%fileid(i),*) trim(msg)
+         do i = 1, size(this%fileid)
 
-      end do
+            write(this%fileid(i),*) trim(msg)
+
+         end do
+
+      end if
 
    end subroutine
 
@@ -84,11 +93,16 @@ contains
       ! Inner variables
       integer :: i
 
-      do i = 2, size(this%fileid)
+      ! Only master
+      if (mpio%master) then
 
-         close(this%fileid(i))
+         do i = 2, size(this%fileid)
 
-      end do
+            close(this%fileid(i))
+
+         end do
+
+      end if
 
    end subroutine
 

@@ -3,6 +3,7 @@
 
 module mod_class_system_variables
 
+   use mod_mpi
    use mod_class_ifile
    use mod_global_parameters
    use mod_class_log_output_control
@@ -90,19 +91,24 @@ contains
       this%absfolderout = trim(this%CWD) // "/" // trim(this%folderout)
 
 
-      ! Creating output folder
-      inquire(file = trim(this%absfolderout), exist = lexist)
+      ! Only for master
+      if (mpio%master) then
 
-      if (lexist) then
+         ! Creating output folder
+         inquire(file = trim(this%absfolderout), exist = lexist)
 
-         if (reload == 0) then
-            call system("rm -r " // trim(this%absfolderout))
+         if (lexist) then
+
+            if (reload == 0) then
+               call system("rm -r " // trim(this%absfolderout))
+               call system("mkdir " // trim(this%absfolderout))
+            end if
+
+         else
+
             call system("mkdir " // trim(this%absfolderout))
+
          end if
-
-      else
-
-         call system("mkdir " // trim(this%absfolderout))
 
       end if
 
@@ -117,6 +123,7 @@ contains
 
       ! Initializing logger
       call this%logger%init(trim(this%abslogfile))
+
 
    end subroutine
 

@@ -25,21 +25,6 @@ contains
       write(*,"(//, a, /)") &
          "  =======  DIFFERENTIAL EVOLUTION PARALLEL PROGRAM  =======  "
 
-      inquire(file = trim(sys_var%absfolderout), exist = lexist)
-
-      if (lexist) then
-
-         if (reload == 0) then
-            call system("rm -r " // trim(sys_var%absfolderout))
-            call system("mkdir " // trim(sys_var%absfolderout))
-         end if
-
-      else
-
-         call system("mkdir " // trim(sys_var%absfolderout))
-
-      end if
-
 
       open(22, file = trim(sys_var%absfolderout) // trim(sname) // "-summary.txt")
 
