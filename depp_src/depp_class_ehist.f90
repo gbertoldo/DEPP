@@ -49,6 +49,11 @@ module mod_class_ehist
       procedure, public,  pass :: select_individuals
       procedure, public,  pass :: save_backup
       procedure, private, pass :: load_backup
+      procedure, public,  pass :: trial_population_info
+      procedure, public,  pass :: current_population_info
+      procedure, public,  pass :: current_population_statistics_info
+      procedure, public,  pass :: final_solution_info
+      procedure, public,  pass :: info
 
    end type
 
@@ -241,6 +246,163 @@ contains
       close(23)
 
    end subroutine
+
+
+
+   !> \brief Returns a string with trial population information
+   function trial_population_info(this) result(str)
+      implicit none
+      class(class_ehist)            :: this
+      character(len=:), allocatable :: str
+
+      ! Inner variables
+      integer                       :: i
+      character                     :: endl=char(10) ! End line char
+      character(len=100000)         :: caux1
+      character(len=:), allocatable :: caux2
+
+
+      caux1 = ""
+      caux2 = endl // endl
+
+      write(caux1,*) caux2, "Generation: ", this%g, endl, "Trial population:"
+      caux2 = trim(caux1) // endl
+
+      do i = 1, this%np
+
+         write(caux1,"(a, a, i4, a, 10(1pe23.15, 2x))") trim(caux2) &
+         , "The performance of the",  i, "th individual is ", this%hist(this%g,i,0), this%hist(this%g,i,1:)
+
+         caux2 = trim(caux1) // endl
+
+      end do
+
+      str = trim(caux2)
+
+   end function
+
+
+
+   !> \brief Returns a string with current population information
+   function current_population_info(this) result(str)
+      implicit none
+      class(class_ehist)            :: this
+      character(len=:), allocatable :: str
+
+      ! Inner variables
+      integer                       :: i
+      character                     :: endl=char(10) ! End line char
+      character(len=100000)         :: caux1
+      character(len=:), allocatable :: caux2
+
+
+      caux1 = ""
+      caux2 = endl // endl
+
+      write(caux1,*) caux2, "Generation: ", this%g, endl, "Current population:"
+      caux2 = trim(caux1) // endl
+
+      do i = 1, this%np
+
+         write(caux1,"(a, a, i4, a, 10(1pe23.15, 2x))") trim(caux2) &
+         , "The performance of the",  i, "th individual is ", this%fit(i), this%pop(i,:)
+
+         caux2 = trim(caux1) // endl
+
+      end do
+
+      str = trim(caux2)
+
+   end function
+
+
+
+   !> \brief Returns a string with current population statistics information
+   function current_population_statistics_info(this) result(str)
+      implicit none
+      class(class_ehist)            :: this
+      character(len=:), allocatable :: str
+
+      ! Inner variables
+      character                     :: endl=char(10) ! End line char
+      character(len=100000)         :: caux1
+      character(len=:), allocatable :: caux2
+
+      caux1 = ""
+      caux2 = endl // "Current population statistics:" // endl
+
+      write(caux1,"(A, A, 1(2x, 1pe23.15))") caux2, "   --->  Mean fitness: ", sum(this%fit)/this%np
+
+      caux2 = trim(caux1) // endl
+
+      write(caux1,"(A, A, 1(2x, 1pe23.15))") caux2, "   --->  Max. fitness: ", maxval(this%fit)
+
+      caux2 = trim(caux1) // endl
+
+      str = caux2
+
+   end function
+
+
+
+   !> \brief Returns final solution information
+   function final_solution_info(this) result(str)
+      implicit none
+      class(class_ehist)            :: this
+      character(len=:), allocatable :: str
+
+      ! Inner variables
+      integer                       :: j
+      character                     :: endl=char(10) ! End line char
+      character(len=100000)         :: caux1
+      character(len=:), allocatable :: caux2
+
+
+      caux1 = ""
+      caux2 = endl // endl // endl
+
+      write(caux1,*) caux2, " ====================  SOLUTION  ===================== "
+
+      caux2 = trim(caux1) // endl // endl
+
+
+      do j = 1, this%nu
+
+         write(caux1,"(a, 1pe23.15, a, i2, a, i2, a)") caux2, this%pop(this%ibest,j), &
+            " = x(", j, "):    The best value for the ", j, " unknown"
+
+         caux2 = trim(caux1) // endl
+
+      end do
+
+      caux2 = caux2 // endl // endl
+
+      write(caux1,"(a, 1pe23.15, a)") caux2, this%fit(this%ibest), " = fittest: The best fitness found"
+
+      caux2 = trim(caux1) // endl // endl
+
+      write(caux1,"(a,I23, a)") caux2, this%g, " = g:       Final number of generations"
+
+      caux2 = trim(caux1) // endl
+
+      str = caux2
+
+   end function
+
+
+
+   !> \brief Returns a string with current generation information
+   function info(this) result(str)
+      implicit none
+      class(class_ehist)            :: this
+      character(len=:), allocatable :: str
+
+
+      str = this%trial_population_info()                 &
+         // this%current_population_info()               &
+         // this%current_population_statistics_info()
+
+   end function
 
 
 end module

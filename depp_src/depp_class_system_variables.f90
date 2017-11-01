@@ -7,6 +7,7 @@ module mod_class_system_variables
    use mod_class_ifile
    use mod_global_parameters
    use mod_class_log_output_control
+   use mod_class_calendar
 
    implicit none
 
@@ -32,6 +33,7 @@ module mod_class_system_variables
 
       ! Defines an instance of class_log_output_control
       type(class_log_output_control) :: logger            !< Logger for output data
+      type(class_calendar)           :: calendar          !< Instance of calendar class
 
 
    contains
@@ -125,8 +127,13 @@ contains
       call this%logger%init(trim(this%abslogfile))
 
 
+      call this%logger%print("  =======  DIFFERENTIAL EVOLUTION PARALLEL PROGRAM  =======  ")
+      call this%logger%print("")
+      call this%logger%print(this%calendar%get_date() // " : System date")
+      call this%logger%print(this%calendar%get_time() // " : System time")
+      call this%logger%print("")
+      call this%logger%print("")
+
    end subroutine
-
-
 
 end module

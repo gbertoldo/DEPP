@@ -87,7 +87,7 @@ contains
       ! Inner variables
       character(len=str_size) caux
 
-      write(caux,"(A, I7, A, I7, A)") "Current generation: ", this%g, ". Tolerance: ", this%ng, "."
+      write(caux,"(A, I7, A, I7, A)") "   --->  Current generation: ", this%g, ". Tolerance: ", this%ng, "."
 
       str = trim(caux)
 

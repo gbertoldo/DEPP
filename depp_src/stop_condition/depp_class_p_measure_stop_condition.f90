@@ -96,7 +96,7 @@ contains
       character(len=str_size) caux
 
       write(caux,"(A, ES14.7, A, ES14.7, A)") &
-         "Population convergence measure: ", &
+         "   --->  Population convergence measure: ", &
          this%pcm, ". Tolerance: ", this%ptol, "."
 
       str = trim(caux)

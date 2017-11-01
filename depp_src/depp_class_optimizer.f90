@@ -10,7 +10,6 @@ module mod_class_optimizer
    use mod_class_ehist
    use mod_class_composite_stop_condition
    use mod_class_parallel_processed_trial_population
-   use output
 
    implicit none
 
@@ -78,16 +77,6 @@ contains
          call stopper%init(sys_var)
 
 
-! TODO (guilherme#1#): Find a more appropriate way of writing output
-         ! if master processor, writes the parameter to a file
-         if (mpio%master) then
-
-            ! Writting parameters to the output file
-            call write_parameters(sys_var, ehist%sname, 0)
-
-         end if
-
-
          ! Initializing timer
          call timer%init(sys_var)
 
@@ -132,15 +121,15 @@ contains
          ! condition is not satisfied
          do
 
+            ! Computing stop condition
             call stopper%compute_stop_condition(ehist)
 
+
             ! Printing convergence measure of the current generation
-            if (mpio%master) then
+            call sys_var%logger%print(stopper%convergence_info())
 
-               write(*,*) stopper%convergence_info()
 
-            end if
-
+            ! Checking stop condition
             if ( stopper%is_stop_condition_satisfied() ) exit
 
 
@@ -148,15 +137,11 @@ contains
             call ehist%new_generation()
 
 
-            ! Print time
-            if (mpio%master) then
+            ! Printing CPU time
+            call timer%measure()
 
-               call timer%measure()
+            call sys_var%logger%print("Accumulated CPU time: " // timer%formatted_elapsed_time())
 
-               write(*,"(/, a, a)")        "Accumulated CPU time: ", timer%formatted_elapsed_time()
-               write(*,"(/, a, i4, a, /)") "Processing the", ehist%g, "th generation..."
-
-            end if
 
             ! Generates a trial population and calculates its fitness function
             ! based on the evolution history (ehist)
@@ -178,19 +163,7 @@ contains
             ! Processors synchronization
             if (mpio%master) then
 
-               ! For each individual of the population
-               do i = 1, ehist%np
-
-                  write(*,"(a, i4, a, 10(1pe23.15, 2x))") "The performance of the",  i, "th individual is ", xfit(i), x(i,:)
-                  write(21,"(2(i12), 100(2x, 1pe23.15))") ehist%g, i, xfit(i), x(i,:)
-
-                  call flush(21)
-
-               end do
-
-               write(20,"(i12, 3(2x, 1pe23.15),A)") ehist%g, sum(ehist%fit)/ehist%np, maxval(ehist%fit)
-
-               call flush(20)
+               call sys_var%logger%print(ehist%info())
 
                ! Calculating the ellapsed CPU time
                call timer%measure()
@@ -208,17 +181,10 @@ contains
          end do
 
 
-         ! Master processor: data post processing
-         if (mpio%master) then
-
-            ! Measuring cpu time
-            call timer%measure()
-
-            ! Writing data to output file
-            call write_output_files(sys_var, ehist%sname, ehist%nu, ehist%np, ehist%ibest, ehist%g, timer, &
-               stopper%convergence_info(), ehist%xmin, ehist%xmax, ehist%fit, ehist%pop)
-
-         end if
+         ! Printing final solution
+         call sys_var%logger%print(ehist%final_solution_info())
+         call sys_var%logger%print(stopper%convergence_info())
+         call sys_var%logger%print(timer%formatted_elapsed_time() // " : Accumulated CPU time")
 
 
          ! Finishing MPI

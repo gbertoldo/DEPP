@@ -145,7 +145,7 @@ contains
       character(len=str_size) caux
 
       write(caux,"(A, I7, A, I7, A)") &
-         "Number of generations without improving best fitness: ", &
+         "   --->  Number of generations without improving best fitness: ", &
          this%nwi, ". Tolerance: ", this%GNoAcc, "."
 
       str = trim(caux)

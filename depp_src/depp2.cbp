@@ -107,6 +107,7 @@
 		<Unit filename="util/depp_btimer.f90">
 			<Option weight="2" />
 		</Unit>
+		<Unit filename="util/depp_class_calendar.f90" />
 		<Unit filename="util/depp_class_ifile.f90">
 			<Option weight="0" />
 		</Unit>
