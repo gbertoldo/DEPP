@@ -98,26 +98,23 @@
 		<Unit filename="stop_condition/depp_class_p_measure_stop_condition.f90">
 			<Option weight="4" />
 		</Unit>
-		<Unit filename="stop_condition/depp_no_improvement_stopping_condition.f90">
-			<Option weight="0" />
-		</Unit>
 		<Unit filename="stop_condition/depp_stop_condition_factory.f90">
 			<Option weight="5" />
 		</Unit>
-		<Unit filename="util/depp_btimer.f90">
+		<Unit filename="util/depp_class_btimer.f90">
 			<Option weight="2" />
 		</Unit>
 		<Unit filename="util/depp_class_calendar.f90" />
 		<Unit filename="util/depp_class_ifile.f90">
 			<Option weight="0" />
 		</Unit>
+		<Unit filename="util/depp_class_timer.f90">
+			<Option weight="0" />
+		</Unit>
 		<Unit filename="util/depp_qsort.f90">
 			<Option weight="0" />
 		</Unit>
 		<Unit filename="util/depp_random_generator.f90">
-			<Option weight="0" />
-		</Unit>
-		<Unit filename="util/depp_timer.f90">
 			<Option weight="0" />
 		</Unit>
 		<Unit filename="util/depp_tools.f90">

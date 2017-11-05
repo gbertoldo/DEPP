@@ -1,13 +1,13 @@
 flist="
 depp_mpi.f90 
 depp_global_parameters.f90 
-./util/depp_timer.f90 
+./util/depp_class_timer.f90 
 ./util/depp_random_generator.f90 
 ./util/depp_class_ifile.f90 
 ./util/depp_class_calendar.f90
 depp_class_log_output_control.f90
 depp_class_system_variables.f90 
-./util/depp_btimer.f90 
+./util/depp_class_btimer.f90 
 ./util/depp_qsort.f90 
 ./search_strategy/depp_class_abstract_search_strategy.f90 
 ./search_strategy/depp_class_DE_RAND_1.f90 

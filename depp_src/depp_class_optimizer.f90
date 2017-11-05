@@ -94,7 +94,6 @@ contains
       class(class_optimizer) :: this
 
       ! Inner variables
-      integer                              :: i       ! Dummy variable
       real(8), allocatable                 :: xfit(:) ! Fitness of the trial individual
       real(8), dimension(:,:), allocatable :: x       ! Trial individual
 
@@ -160,7 +159,7 @@ contains
             call ehist%select_individuals()
 
 
-            ! Processors synchronization
+            ! Only for master
             if (mpio%master) then
 
                call sys_var%logger%print(ehist%info())
