@@ -2,6 +2,9 @@
 !> \brief Defines an abstract class for creating search strategy objects
 
 module mod_class_abstract_search_strategy
+
+   use mod_class_ehist
+
    implicit none
 
    ! Makes everything private, except otherwise stated
@@ -18,13 +21,15 @@ module mod_class_abstract_search_strategy
 
    abstract interface
 
-      subroutine get_trial_interface(this, ind, pop, x)
+      subroutine get_trial_interface(this, ind, ehist, x, estatus)
          import class_abstract_search_strategy
+         import class_ehist
          implicit none
          class(class_abstract_search_strategy) :: this
-         integer,                  intent(in)  :: ind !< number of the individual
-         real(8), dimension(:,:),  intent(in)  :: pop !< population
-         real(8), dimension(:),    intent(out) :: x
+         integer,                  intent(in)  :: ind   ! Number of the individual of the population
+         class(class_ehist),       intent(in)  :: ehist ! Evolution history
+         real(8), dimension(:),    intent(out) :: x     ! Trial individual
+         integer,                  intent(out) :: estatus ! to be removed
 
       end subroutine
 

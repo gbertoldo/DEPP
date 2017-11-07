@@ -30,12 +30,10 @@ module rsm_dynamic_control
 
       integer ::                   DE_APPLIED
       integer ::                  RSM_APPLIED
-      integer :: DE_APPLIED_AFTER_RSM_FAILURE
-      integer :: BLACK_BOX_EVALUATION_FAILURE
 
    end type
 
-   type(DE_RSM_RETURN_CODE), parameter, public :: DE_RSM_RETURN = DE_RSM_RETURN_CODE(0,1,2,3)
+   type(DE_RSM_RETURN_CODE), parameter, public :: DE_RSM_RETURN = DE_RSM_RETURN_CODE(0,1)
 
 contains
 
@@ -118,15 +116,6 @@ contains
                r_rsm(ireg) = 0.d0
 
             end if
-
-
-         ! If RSM was not applied, its is not possible to  evaluate the success of improving the fitness function
-         case (DE_RSM_RETURN%DE_APPLIED_AFTER_RSM_FAILURE)
-
-
-         ! If black box evaluation failed, do nothing
-         case (DE_RSM_RETURN%BLACK_BOX_EVALUATION_FAILURE)
-
 
          case default
 

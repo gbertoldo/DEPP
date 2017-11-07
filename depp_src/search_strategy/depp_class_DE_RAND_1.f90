@@ -4,8 +4,8 @@
 module mod_class_DE_RAND_1
 
    use mod_random_generator
-
    use mod_class_abstract_search_strategy
+   use mod_class_ehist
 
    implicit none
 
@@ -43,12 +43,13 @@ contains
 
 
    !> \brief Generates a trial individual
-   subroutine get_trial(this, ind, pop, x)
+   subroutine get_trial(this, ind, ehist, x, estatus)
       implicit none
-      class(class_DE_RAND_1)               :: this
-      integer,                 intent(in)  :: ind !< number of the individual
-      real(8), dimension(:,:), intent(in)  :: pop !< population
-      real(8), dimension(:),   intent(out) :: x
+      class(class_DE_RAND_1)                :: this
+      integer,                  intent(in)  :: ind   ! Number of the individual of the population
+      class(class_ehist),       intent(in)  :: ehist ! Evolution history
+      real(8), dimension(:),    intent(out) :: x     ! Trial individual
+      integer,                  intent(out) :: estatus ! to be removed
 
 
       ! Inner variables
@@ -59,14 +60,14 @@ contains
 
       ! Detecting nu and np
       nu = size(x)
-      np = size(pop,dim=1)
+      np = size(ehist%pop,dim=1)
 
       ! Choosing three individuals from the population
       call select_individuals(np, ind, r)
 
-      x = pop(r(3),:) + this%dif*(pop(r(1),:) - pop(r(2),:))
+      x = ehist%pop(r(3),:) + this%dif*(ehist%pop(r(1),:) - ehist%pop(r(2),:))
 
-      call crossing_over(ind, nu, np, this%crs, pop, x)
+      call crossing_over(ind, nu, np, this%crs, ehist%pop, x)
 
    end subroutine
 
