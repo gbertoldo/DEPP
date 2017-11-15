@@ -23,7 +23,14 @@ module mod_class_DE_RSM
 
       private
       real(8) :: fh
-      integer, allocatable                           :: rsm_tag(:) ! Stores the return state of application of DE-RSM
+
+      ! These data are calculated separately by each thread and must be exchanged
+      ! before the next generation.
+      integer, allocatable                           :: rsm_tag(:)   ! Stores the return state of application of DE-RSM
+      real(8), allocatable                           :: curnt_fit(:) ! Fitness of the current individuals
+      real(8), allocatable                           :: trial_fit(:) ! Fitness of the trial individuals
+
+
       class(class_abstract_search_strategy), pointer :: searcher => null()
 
 
@@ -31,7 +38,9 @@ module mod_class_DE_RSM
 
       procedure, public, pass :: init
       procedure, public, pass :: get_trial
+      procedure, public, pass :: feed_back
 
+      procedure, public, pass :: data_size
       procedure, public, pass :: send
       procedure, public, pass :: recv
       procedure, public, pass :: update
@@ -62,11 +71,24 @@ contains
 
       call create_search_strategy(sys_var,   "DE/RAND/1",      this%searcher)
       allocate(this%rsm_tag(np))
+      allocate(this%trial_fit(np))
+      allocate(this%curnt_fit(np))
 
       this%fh=0.35
 
    end subroutine
 
+
+
+   !> User defined. Returns the size of the number of elements of the data vector that
+   !! must be shared among threads.
+   integer function data_size(this)
+      implicit none
+      class(class_DE_RSM) :: this
+
+      data_size = size(this%rsm_tag)
+
+   end function
 
 
    !> User defined. Tells MPI how to send each element of data from current thread to 'to_thread'.
@@ -76,7 +98,9 @@ contains
       integer,                    intent(in) :: i
       integer,                    intent(in) :: to_thread
 
-      call mpi_send(this%rsm_tag(i),  1,          mpi_integer, to_thread, mpio%tag, mpio%comm, mpio%code)
+      call mpi_send(  this%rsm_tag(i),  1,          mpi_integer, to_thread, mpio%tag, mpio%comm, mpio%code)
+      call mpi_send(this%trial_fit(i),  1, mpi_double_precision, to_thread, mpio%tag, mpio%comm, mpio%code)
+      call mpi_send(this%curnt_fit(i),  1, mpi_double_precision, to_thread, mpio%tag, mpio%comm, mpio%code)
 
    end subroutine
 
@@ -88,23 +112,23 @@ contains
       integer,                    intent(in) :: i
       integer,                    intent(in) :: from_thread
 
-      call mpi_recv(this%rsm_tag(i),  1,          mpi_integer, from_thread, mpio%tag, mpio%comm, mpio%status, mpio%code)
+      call mpi_recv(  this%rsm_tag(i),  1,          mpi_integer, from_thread, mpio%tag, mpio%comm, mpio%status, mpio%code)
+      call mpi_recv(this%trial_fit(i),  1, mpi_double_precision, from_thread, mpio%tag, mpio%comm, mpio%status, mpio%code)
+      call mpi_recv(this%curnt_fit(i),  1, mpi_double_precision, from_thread, mpio%tag, mpio%comm, mpio%status, mpio%code)
 
    end subroutine
 
 
-   subroutine update(this, xfit, fit)
+   subroutine update(this)
       implicit none
       class(class_DE_RSM) :: this
-      real(8), dimension(:), intent(in) :: xfit    !< fitness of the trial individual
-      real(8), dimension(:), intent(in) :: fit     !< fitness of a given individual of the population
 
       ! Inner variables
       integer :: i
 
       do i = 1, size(this%rsm_tag)
 
-         call add_to_rsm_dynamic_control(this%rsm_tag(i), xfit(i), fit(i))
+         call add_to_rsm_dynamic_control(this%rsm_tag(i), this%trial_fit(i), this%curnt_fit(i))
 
       end do
 
@@ -193,15 +217,18 @@ contains
    end subroutine
 
 
-   !> \brief Generates a trial individual
-   subroutine set_fh(this, fh)
+   subroutine feed_back(this, ind, ehist, fit, ecode)
       implicit none
       class(class_DE_RSM)                   :: this
-      real(8),                  intent(in)  :: fh
+      integer,                  intent(in)  :: ind     ! Number of the individual of the population
+      class(class_ehist),       intent(in)  :: ehist   ! Evolution history
+      real(8),                  intent(in)  :: fit     ! Fitness of the trial individual
+      integer,                  intent(in)  :: ecode   ! Error code
 
-
-      this%fh = fh
+      this%curnt_fit(ind) = ehist%fit(ind)
+      this%trial_fit(ind) = fit
 
    end subroutine
+
 
 end module

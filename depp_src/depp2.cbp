@@ -77,6 +77,7 @@
 		<Unit filename="search_strategy/depp_class_DE_RSM.f90">
 			<Option weight="0" />
 		</Unit>
+		<Unit filename="search_strategy/depp_class_abstract_PPD_search_strategy.f90" />
 		<Unit filename="search_strategy/depp_class_abstract_search_strategy.f90">
 			<Option weight="0" />
 		</Unit>

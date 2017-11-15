@@ -10,6 +10,7 @@ depp_class_system_variables.f90
 ./util/depp_class_btimer.f90 
 ./util/depp_qsort.f90 
 depp_class_ehist.f90 
+depp_class_abstract_parallel_processed_data.f90
 ./search_strategy/depp_class_abstract_search_strategy.f90 
 ./search_strategy/depp_class_DE_RAND_1.f90 
 ./search_strategy/depp_search_strategy_factory.f90 
@@ -17,7 +18,6 @@ depp_class_ehist.f90
 depp_rsm.f90 
 depp_rsm_dynamic_control.f90 
 depp_hybrid.f90 
-depp_class_abstract_parallel_processed_data.f90
 ./search_strategy/depp_class_DE_RSM.f90 
 depp_output.f90 
 ./stop_condition/depp_class_abstract_stop_condition.f90

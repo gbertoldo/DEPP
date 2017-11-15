@@ -28,8 +28,9 @@ module mod_class_abstract_parallel_processed_data
       procedure(compute_interface),   deferred, private, pass :: compute
       procedure(send_interface),      deferred, private, pass :: send
       procedure(recv_interface),      deferred, private, pass :: recv
+      procedure(update_interface),    deferred, private, pass :: update
       procedure,                                public,  pass :: compute_concurrent
-      procedure,                                public,  pass :: exchange
+      procedure,                                private, pass :: exchange
 
    end type
 
@@ -78,6 +79,16 @@ module mod_class_abstract_parallel_processed_data
 
       end subroutine
 
+
+      !> User defined. This function may be used to perform extra calculations after parallel computation
+      !! and data synchronization.
+      subroutine update_interface(this)
+         import class_abstract_parallel_processed_data
+         implicit none
+         class(class_abstract_parallel_processed_data) :: this
+
+      end subroutine
+
    end interface
 
 
@@ -96,6 +107,9 @@ contains
          if ( mpio%iproc == thread_map(i) ) call this%compute(i)
 
       end do
+
+      ! Exchanging data among threads
+      call this%exchange()
 
    end subroutine
 

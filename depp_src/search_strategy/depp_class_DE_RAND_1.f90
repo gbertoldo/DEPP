@@ -24,6 +24,7 @@ module mod_class_DE_RAND_1
 
       procedure, public, pass :: init
       procedure, public, pass :: get_trial
+      procedure, public, pass :: feed_back
 
    end type
 
@@ -71,6 +72,16 @@ contains
 
    end subroutine
 
+
+   subroutine feed_back(this, ind, ehist, fit, ecode)
+      implicit none
+      class(class_DE_RAND_1)                :: this
+      integer,                  intent(in)  :: ind     ! Number of the individual of the population
+      class(class_ehist),       intent(in)  :: ehist   ! Evolution history
+      real(8),                  intent(in)  :: fit     ! Fitness of the trial individual
+      integer,                  intent(in)  :: ecode   ! Error code
+
+   end subroutine
 
 
    !> \brief Selects three distinct individuals of the population.

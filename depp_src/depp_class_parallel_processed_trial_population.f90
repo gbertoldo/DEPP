@@ -23,7 +23,7 @@ module mod_class_parallel_processed_trial_population
 
       class(class_system_variables),         pointer :: sys_var
       class(class_ehist),                    pointer :: ehist
-      class(class_DE_RSM), pointer :: searcher => null()
+      class(class_abstract_search_strategy), pointer :: searcher => null()
       real(8), allocatable                           :: xfit(:)    ! Fitness of the trial individual
       real(8), dimension(:,:), allocatable           :: x          ! Trial individual
 
@@ -32,7 +32,6 @@ module mod_class_parallel_processed_trial_population
 
       procedure, public, pass :: init
       procedure, public, pass :: get_trial_population
-      procedure, public, pass :: update
 
 
       ! Procedures deferred from parent class
@@ -40,6 +39,7 @@ module mod_class_parallel_processed_trial_population
       procedure, private, pass :: compute
       procedure, private, pass :: send
       procedure, private, pass :: recv
+      procedure, private, pass :: update
 
    end type
 
@@ -68,8 +68,24 @@ contains
 
       !call create_search_strategy(sys_var,      "DE-RSM",   this%searcher)
       allocate(class_DE_RSM::this%searcher)
-      call  this%searcher%init(sys_var,ehist%np)
 
+
+      associate ( searcher => this%searcher)
+
+         ! Initializing the object
+         select type (searcher)
+
+   !         type is ( class_DE_RAND_1 )
+   !
+   !            call ind_gen%init()
+
+            type is ( class_DE_RSM )
+
+               call searcher%init(sys_var,ehist%np)
+
+         end select
+
+      end associate
 
    end subroutine
 
@@ -137,9 +153,7 @@ contains
       implicit none
       class(class_parallel_processed_trial_population) :: this
 
-      call this%exchange()
-
-      call this%searcher%update(this%xfit, this%ehist%fit)
+      call this%searcher%update()
 
    end subroutine
 
@@ -188,6 +202,9 @@ contains
                xfit(ind), estatus)
 
             if (ehist%g==1 .and. estatus==1) estatus=2
+
+
+            call searcher%feed_back(ind, ehist, xfit(ind), estatus)
 
 
             ! Analyzing the exit status of the external program

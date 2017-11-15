@@ -13,14 +13,14 @@ module mod_search_strategy_factory
 contains
 
    !> Creates an instance of the individual generator
-   subroutine create_search_strategy(sys_var, model, ind_gen)
+   subroutine create_search_strategy(sys_var, model, searcher)
       implicit none
       class(class_system_variables),                  intent(in)  :: sys_var
       character(len=*),                               intent(in)  :: model
-      class(class_abstract_search_strategy), pointer, intent(out) :: ind_gen
+      class(class_abstract_search_strategy), pointer, intent(out) :: searcher
 
 
-      if ( .not. associated(ind_gen) ) then
+      if ( .not. associated(searcher) ) then
 
          ! Reading configuration file
 
@@ -29,12 +29,12 @@ contains
 
          if ( trim(model) == "DE/RAND/1" ) then
 
-            allocate(class_DE_RAND_1::ind_gen)
+            allocate(class_DE_RAND_1::searcher)
 
 
 !         else if ( trim(model) == "DE-RSM" ) then
 !
-!            allocate(class_DE_RSM::ind_gen)
+!            allocate(class_DE_RSM::searcher)
 
 
          else
@@ -47,15 +47,15 @@ contains
 
 
          ! Initializing the object
-         select type (ind_gen)
+         select type (searcher)
 
             type is ( class_DE_RAND_1 )
 
-               call ind_gen%init()
+               call searcher%init()
 
 !            type is ( class_DE_RSM )
 !
-!               call ind_gen%init(sys_var)
+!               call searcher%init(sys_var)
 
          end select
 
