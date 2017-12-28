@@ -44,13 +44,12 @@ contains
 
 
    !> \brief Generates a trial individual
-   subroutine get_trial(this, ind, ehist, x, estatus)
+   subroutine get_trial(this, ind, ehist, x)
       implicit none
       class(class_DE_RAND_1)                :: this
       integer,                  intent(in)  :: ind   ! Number of the individual of the population
       class(class_ehist),       intent(in)  :: ehist ! Evolution history
       real(8), dimension(:),    intent(out) :: x     ! Trial individual
-      integer,                  intent(out) :: estatus ! to be removed
 
 
       ! Inner variables

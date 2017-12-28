@@ -4,7 +4,6 @@
 module mod_class_DE_RSM
 
    use mod_class_abstract_search_strategy
-   use mod_search_strategy_factory
    use mod_random_generator
    use mod_class_system_variables
    use mod_mpi
@@ -50,11 +49,12 @@ module mod_class_DE_RSM
 contains
 
    !> \brief Constructor
-   subroutine init(this, sys_var, np)
+   subroutine init(this, sys_var, np, searcher)
       implicit none
       class(class_DE_RSM) :: this
       class(class_system_variables), intent(in) :: sys_var
       integer, intent(in) :: np
+      class(class_abstract_search_strategy), pointer, intent(in) :: searcher
 
       ! Inner variables
       integer :: estatus
@@ -69,7 +69,8 @@ contains
          call mod_mpi_abort()
       end if
 
-      call create_search_strategy(sys_var,   "DE/RAND/1",      this%searcher)
+      this%searcher => searcher
+
       allocate(this%rsm_tag(np))
       allocate(this%trial_fit(np))
       allocate(this%curnt_fit(np))
@@ -98,9 +99,9 @@ contains
       integer,                    intent(in) :: i
       integer,                    intent(in) :: to_thread
 
-      call mpi_send(  this%rsm_tag(i),  1,          mpi_integer, to_thread, mpio%tag, mpio%comm, mpio%code)
-      call mpi_send(this%trial_fit(i),  1, mpi_double_precision, to_thread, mpio%tag, mpio%comm, mpio%code)
-      call mpi_send(this%curnt_fit(i),  1, mpi_double_precision, to_thread, mpio%tag, mpio%comm, mpio%code)
+      call mod_mpi_send(to_thread, this%rsm_tag(i))
+      call mod_mpi_send(to_thread, this%trial_fit(i))
+      call mod_mpi_send(to_thread, this%curnt_fit(i))
 
    end subroutine
 
@@ -112,9 +113,9 @@ contains
       integer,                    intent(in) :: i
       integer,                    intent(in) :: from_thread
 
-      call mpi_recv(  this%rsm_tag(i),  1,          mpi_integer, from_thread, mpio%tag, mpio%comm, mpio%status, mpio%code)
-      call mpi_recv(this%trial_fit(i),  1, mpi_double_precision, from_thread, mpio%tag, mpio%comm, mpio%status, mpio%code)
-      call mpi_recv(this%curnt_fit(i),  1, mpi_double_precision, from_thread, mpio%tag, mpio%comm, mpio%status, mpio%code)
+      call mod_mpi_recv(from_thread, this%rsm_tag(i))
+      call mod_mpi_recv(from_thread, this%trial_fit(i))
+      call mod_mpi_recv(from_thread, this%curnt_fit(i))
 
    end subroutine
 
@@ -140,15 +141,15 @@ contains
 
 
    !> \brief Generates a trial individual
-   subroutine get_trial(this, ind, ehist, x, estatus)
+   subroutine get_trial(this, ind, ehist, x)
       implicit none
       class(class_DE_RSM)                   :: this
       integer,                  intent(in)  :: ind   ! Number of the individual of the population
       class(class_ehist),       intent(in)  :: ehist ! Evolution history
       real(8), dimension(:),    intent(out) :: x     ! Trial individual
-      integer,                  intent(out) :: estatus ! to be removed
 
 
+      integer :: estatus
       integer :: rsmstatus
 
 
@@ -180,7 +181,7 @@ contains
                estatus = DE_RSM_RETURN%DE_APPLIED
 
                ! Creating the trial individual x
-               call this%searcher%get_trial(ind, ehist, x, estatus)
+               call this%searcher%get_trial(ind, ehist, x)
 
                estatus = DE_RSM_RETURN%DE_APPLIED
 
@@ -191,7 +192,7 @@ contains
             ! rsm_tag stores the return state of application of DE-RSM
             estatus = DE_RSM_RETURN%DE_APPLIED
 
-            call this%searcher%get_trial(ind, ehist, x, estatus)
+            call this%searcher%get_trial(ind, ehist, x)
 
             estatus = DE_RSM_RETURN%DE_APPLIED
 
@@ -205,7 +206,7 @@ contains
       do while ( is_X_out_of_range(ehist%nu, ehist%xmin, ehist%xmax, x) )
 
          ! Creating the trial individual x
-         call this%searcher%get_trial(ind, ehist, x, estatus)
+         call this%searcher%get_trial(ind, ehist, x)
 
          estatus = DE_RSM_RETURN%DE_APPLIED
 

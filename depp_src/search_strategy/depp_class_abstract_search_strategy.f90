@@ -27,7 +27,7 @@ module mod_class_abstract_search_strategy
    abstract interface
 
 
-      subroutine get_trial_interface(this, ind, ehist, x, estatus)
+      subroutine get_trial_interface(this, ind, ehist, x)
          import class_abstract_search_strategy
          import class_ehist
          implicit none
@@ -35,7 +35,6 @@ module mod_class_abstract_search_strategy
          integer,                  intent(in)  :: ind     ! Number of the individual of the population
          class(class_ehist),       intent(in)  :: ehist   ! Evolution history
          real(8), dimension(:),    intent(out) :: x       ! Trial individual
-         integer,                  intent(out) :: estatus ! to be removed
 
       end subroutine
 

@@ -93,10 +93,6 @@ contains
       implicit none
       class(class_optimizer) :: this
 
-      ! Inner variables
-      real(8), allocatable                 :: xfit(:) ! Fitness of the trial individual
-      real(8), dimension(:,:), allocatable :: x       ! Trial individual
-
 
       ! Creating labels
       associate (                      &
@@ -107,10 +103,6 @@ contains
             stopper  => this%stopper   )
 
 
-
-         ! Allocating resources
-         allocate(x(ehist%np,ehist%nu))
-         allocate(xfit(ehist%np))
 
          ! Processors synchronization
          call mod_mpi_barrier()
@@ -143,16 +135,9 @@ contains
 
 
             ! Generates a trial population and calculates its fitness function
-            ! based on the evolution history (ehist)
-            call searcher%get_trial_population(x, xfit)
-
-
-            ! Processors synchronization
-            call mod_mpi_barrier()
-
-
-            ! Adds the trial population, calculated by searcher, to the evolution history
-            call ehist%add_trial_population(x,xfit)
+            ! based on the evolution history (ehist). The trial population is added
+            ! to the evolution history.
+            call searcher%get_trial_population()
 
 
             ! Selects best individuals among trial population and current population
