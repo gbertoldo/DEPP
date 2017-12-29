@@ -1,46 +1,43 @@
-                function14RSM & sname&    Simulation name
-                         0 & reload&   Upload backup data and continue computation (0=no; 1=yes)
-         '$PWD/interface/' & fdir&     Name of working directory for fitness calculation
-             'functions.x' & ffit&     Name of executable for fitness calculation
-                         1 & kss&      Kind of search strategy. (See options bellow)
-                         2 & kh&       Kind of hybridization (See options bellow)
-                    0.35d0 & fh&       Fraction of hybridization
-                    0.10d0 & fhmin&    Minimum fraction of hybridization
-                    0.90d0 & fhmax&    Maximum fraction of hybridization
-                         1 & fhm&      Model for the dynamical calculation of the factor of hybridization
-                     2.0d0 & fnb&      Multiple of the minimum number of points for RSM fitting
-                         1 & kw&       Kind of weighting function for RSM fitting (1=uniform, 2=exponential)
-                         2 & nu&       Number of unknowns
-                        20 & np&       Size of population (recommended 10*nu)
-                    0.85d0 & dif&      Differentiation constant (recommended 0.85)
-                     0.5d0 & crs&      Crossover probability (recommended 0.5)
-                    -0.5d0 & crsh&     Crossover probability of the hybridized model (disable if crsh < 0)
-                         0 & nstp&     Number of trials for adjusting the step of the RSM solution
-                  0.0001d0 & netol&    Tolerance for distance when selecting neighbors points for RSM adjusting
+===========================================================================================================================================
 
------------------------------------------------------------------------------------------------------------------------------
+                                              DEPP MAIN CONFIGURATION FILE
+                                              
+All data must follow the input pattern: "value & variable & description", where '&' is the separation field delimiter.
 
-                                              STOP CONDITION PARAMETERS
+-------------------------------------------------------------------------------------------------------------------------------------------
+
+             function14RSM &                sname  &  Simulation name
+                         0 &               reload  &  Upload backup data and continue computation (0=no; 1=yes)
+         '$PWD/interface/' &                 fdir  &  Name of working directory for fitness calculation
+             'functions.x' &                 ffit  &  Name of executable for fitness calculation
+                         2 &                   nu  &  Number of unknowns
+                        20 &                   np  &  Size of population (recommended 10*nu)
+   'de_rsm_parameters.txt' & search_strategy_conf  &  Search strategy configuration file
+
+===========================================================================================================================================
+
+                                               STOP CONDITION PARAMETERS
+
+-------------------------------------------------------------------------------------------------------------------------------------------
 
 Stop condition is a composite of the following models. Choose a composition of models and set the corresponding parameters. 
 
 "max_generations, no_improvement, p_measure" & composite_stop_condition & List of stop condition models
+                       200 &                   ng  &  Maximum number of generations (Model: max_generations)
+                        40 &               GNoAcc  &  Max. num. of gen. before stopping if no improvement was found (Model: no_improvement)
+                         2 &                  kpm  &  Kind of population convergence measure (See options bellow) (Model: p_measure)
+                  0.0005d0 &                 ptol  &  Tolerance for the population convergence measure (Model: p_measure)
 
+Kind of population convergence measure (kpm):
 
-Model: max_generations
-----------------------
-                       200 & ng&       Maximum number of generations
-                       
-Model: no_improvement
-----------------------
-                        40 & GNoAcc&   Maximum number of generations allowed before stopping if no improvement was found
+1 - Population convergence measure of Feoktistov using dimensional variables
+2 - Population convergence measure of Feoktistov using dimensionless variables
 
-Model: p_measure
-----------------------
-                         2 & kpm&      Kind of population convergence measure (See options bellow)
-                  0.0005d0 & ptol&     Tolerance for the population convergence measure
+===========================================================================================================================================
 
------------------------------------------------------------------------------------------------------------------------------
+                                               VARIABLES AND CONSTRAINTS
+
+-------------------------------------------------------------------------------------------------------------------------------------------
 
                         X1 & xname(1)& Name of the unknown
                    -500.d0 &  xmin(1)& Lower value for 1st unknown
@@ -54,47 +51,6 @@ Model: p_measure
                         X4 & xname(4)& Name of the unknown
                    -500.d0 &  xmin(4)& Lower value for 4th unknown
                     500.d0 &  xmax(4)& Biggest value for 4th unknown
-
-
-
-
-Kind of Search Strategy (kss):
-------------------------------
-
-1 - Search strategy SS01: uses three distinct random individuals of the population
-    to generate the trial individual. Strategy Rand3 of Feoktistov (2006)
-         
-2 - Search strategy SS02: generates a trial individual from two randomly selected individuals
-    of the population and the best individual. Strategy Rand2-Best of Feoktistov (2006).
     
-    
-         
-Kind of hybridization (kh):
----------------------------
-
-NONE              - No hybridization (pure DE)
-   
-DE-RSM-INCOMPLETE - Response Surface Methodology. Selects the nf-1 individuals closest to the selected individual. Fits an incomplete
-                    quadratic model and returns the maximizer of this model.
-
-DE-RSM-COMPLETE   - Response Surface Methodology. Selects the nf-1 individuals closest to the selected individual. Fits a complete
-                    quadratic model and returns the maximizer of this model.
-
-
-
-Model for calculation of the factor of hybridization (fhm):
------------------------------------------------------------
-
-0 - fh = constant
-
-1 - fh = probability of success of the previous application of RSM
-
-    
-
-Kind of population convergence measure (kpm):
----------------------------------------------
-
-1 - Population convergence measure of Feoktistov using dimensional variables
-
-2 - Population convergence measure of Feoktistov using dimensionless variables
+===========================================================================================================================================
 

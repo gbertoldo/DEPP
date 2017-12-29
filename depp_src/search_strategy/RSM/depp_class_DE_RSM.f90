@@ -3,14 +3,16 @@
 
 module mod_class_DE_RSM
 
+   use mod_class_abstract_search_strategy_factory
    use mod_class_abstract_search_strategy
    use mod_random_generator
    use mod_class_system_variables
    use mod_mpi
    use mod_class_ehist
    use hybrid
-   use tools
-   use mod_mpi
+   use mod_search_tools
+   use mod_class_ifile
+   use mod_global_parameters
 
    implicit none
 
@@ -49,19 +51,53 @@ module mod_class_DE_RSM
 contains
 
    !> \brief Constructor
-   subroutine init(this, sys_var, np, searcher)
+   subroutine init(this, sys_var, conf_file_name, search_strategy_factory)
       implicit none
-      class(class_DE_RSM) :: this
-      class(class_system_variables), intent(in) :: sys_var
-      integer, intent(in) :: np
-      class(class_abstract_search_strategy), pointer, intent(in) :: searcher
+      class(class_DE_RSM)                                       :: this
+      class(class_system_variables),                 intent(in) :: sys_var
+      character(len=*),                              intent(in) :: conf_file_name
+      class(class_abstract_search_strategy_factory), intent(in) :: search_strategy_factory
 
       ! Inner variables
-      integer :: estatus
+      integer             :: estatus
+      type(class_ifile)   :: ifile1
+      type(class_ifile)   :: ifile2
+      character(str_size) :: de_conf_file_name
+      character(str_size) :: CID
+      integer             :: np
+      real(8)             :: fh
+
+
+      call ifile1%init(filename=sys_var%absparfile, field_separator='&')
+      call ifile2%init(filename=conf_file_name,     field_separator='&')
+
+      call ifile1%load()
+      call ifile2%load()
+
+      call ifile1%get_value( np,  "np")
+      call ifile2%get_value( fh,  "fh")
+      call ifile2%get_value(CID, "CID")
+
+      if (trim(CID)/="DE-RSM") then
+
+         call sys_var%logger%print("class_DE_RSM: unexpected CID. Stopping.")
+
+         call mod_mpi_finalize()
+
+      end if
+
+      ! Creating DE search strategy
+
+      call ifile2%get_value(de_conf_file_name,"search_strategy_conf")
+
+      de_conf_file_name = trim(sys_var%absfolderin) // trim(de_conf_file_name)
+
+      call search_strategy_factory%create(sys_var, de_conf_file_name, this%searcher)
+
 
       ! Initializes hybrid module and checks hybridization necessary condition for RSM
 
-      call initialize_hybrid_module(sys_var,estatus)
+      call initialize_hybrid_module(sys_var, conf_file_name, estatus)
 
       ! Checking the exit status of the module initialization
       if ( estatus == 1 ) then
@@ -69,13 +105,10 @@ contains
          call mod_mpi_abort()
       end if
 
-      this%searcher => searcher
-
       allocate(this%rsm_tag(np))
       allocate(this%trial_fit(np))
       allocate(this%curnt_fit(np))
 
-      this%fh=0.35
 
    end subroutine
 

@@ -7,7 +7,7 @@ module hybrid
    use rsm
    use rsm_dynamic_control
    use qsort
-   use tools
+   use mod_search_tools
    use mod_class_ifile
    use mod_class_system_variables
 
@@ -24,9 +24,10 @@ contains
 
 
    !> \brief Initializes hybrid module and checks hybridization necessary condition for RSM
-   subroutine initialize_hybrid_module(sys_var, es)
+   subroutine initialize_hybrid_module(sys_var, conf_file_name, es)
       implicit none
       class(class_system_variables), intent(in) :: sys_var
+      character(len=*), intent(in) :: conf_file_name
       integer, intent(out)  :: es    !< Exit status (0=success, 1=failure)
 
 
@@ -39,25 +40,28 @@ contains
       real(8) :: fhmax !< Maximum hybridization factor
       integer :: fhm   !< Model for the dynamical calculation of the factor of hybridization
 
-      type(class_ifile) :: ifile
+      type(class_ifile) :: ifile1
+      type(class_ifile) :: ifile2
 
-      call ifile%init(filename=trim(sys_var%absfolderin)//trim(sys_var%parfile), field_separator="&")
+      call ifile1%init(filename=trim(sys_var%absfolderin)//trim(sys_var%parfile), field_separator="&")
+      call ifile2%init(filename=conf_file_name, field_separator="&")
 
-      call ifile%load()
+      call ifile1%load()
+      call ifile2%load()
 
-      call ifile%get_value(nstp,"nstp")
-      call ifile%get_value(crsh,"crsh")
-      call ifile%get_value(kw,"kw")    !< Kind of weight
-      call ifile%get_value(kh,"kh")    !< Kind of hybridization (see input file)
-      call ifile%get_value(nu,"nu")    !< Number of unknowns
-      call ifile%get_value(np,"np")    !< Size of the population
-      call ifile%get_value(ng,"ng")    !< Maximum number of generations
-      call ifile%get_value(fnb,"fnb")   !< Multiple of the minimum number of points for RSM fitting
-      call ifile%get_value(fh,"fh")    !< Initial hybridization factor
-      call ifile%get_value(fhmin,"fhmin") !< Minimum hybridization factor
-      call ifile%get_value(fhmax,"fhmax") !< Maximum hybridization factor
-      call ifile%get_value(fhm,"fhm")   !< Model for the dynamical calculation of the factor of hybridization
-      call ifile%get_value(netol,"netol")
+      call ifile2%get_value(nstp,"nstp")
+      call ifile2%get_value(crsh,"crsh")
+      call ifile2%get_value(kw,"kw")    !< Kind of weight
+      call ifile2%get_value(kh,"kh")    !< Kind of hybridization (see input file)
+      call ifile1%get_value(nu,"nu")    !< Number of unknowns
+      call ifile1%get_value(np,"np")    !< Size of the population
+      call ifile1%get_value(ng,"ng")    !< Maximum number of generations
+      call ifile2%get_value(fnb,"fnb")   !< Multiple of the minimum number of points for RSM fitting
+      call ifile2%get_value(fh,"fh")    !< Initial hybridization factor
+      call ifile2%get_value(fhmin,"fhmin") !< Minimum hybridization factor
+      call ifile2%get_value(fhmax,"fhmax") !< Maximum hybridization factor
+      call ifile2%get_value(fhm,"fhm")   !< Model for the dynamical calculation of the factor of hybridization
+      call ifile2%get_value(netol,"netol")
 
 
       ! Initializing RSM Dynamic Control module

@@ -6,6 +6,11 @@ module mod_class_DE_RAND_1
    use mod_random_generator
    use mod_class_abstract_search_strategy
    use mod_class_ehist
+   use mod_class_ifile
+   use mod_class_system_variables
+   use mod_mpi
+   use mod_global_parameters
+   use mod_search_tools
 
    implicit none
 
@@ -31,14 +36,30 @@ module mod_class_DE_RAND_1
 contains
 
    !> \brief Constructor
-   subroutine init(this)
+   subroutine init(this, sys_var, conf_file_name)
       implicit none
-      class(class_DE_RAND_1) :: this
+      class(class_DE_RAND_1)                    :: this
+      class(class_system_variables), intent(in) :: sys_var
+      character(len=*),              intent(in) :: conf_file_name
 
-      this%dif = 0.85d0
-      this%crs = 0.5d0
+      ! Inner variables
+      type(class_ifile)   :: ifile
+      character(str_size) :: CID
 
-      print*, "Initializing DE/RAND/1..."
+      call ifile%init(filename=conf_file_name, field_separator='&')
+      call ifile%load()
+      call ifile%get_value(CID,"CID")
+
+      if (trim(CID)/="DE/RAND/1") then
+
+         call sys_var%logger%print("class_DE_RAND_1: unexpected CID. Stopping.")
+
+         call mod_mpi_finalize()
+
+      end if
+
+      call ifile%get_value(this%dif,"dif")
+      call ifile%get_value(this%crs,"crs")
 
    end subroutine
 
@@ -81,86 +102,5 @@ contains
       integer,                  intent(in)  :: ecode   ! Error code
 
    end subroutine
-
-
-   !> \brief Selects three distinct individuals of the population.
-   subroutine select_individuals(np, ind, r)
-      implicit none
-      integer, intent(in)  :: np    !< population size
-      integer, intent(in)  :: ind   !< number of the individual
-      integer, intent(out) :: r(3)  !< indexes of selected individuals
-
-      real(8) :: rnd
-
-      r = ind
-
-      do while (r(1) == ind)
-
-         call rand_number(rnd)
-
-         r(1) = int(rnd*np) + 1
-
-      end do
-
-      do while (r(2) == r(1) .or. r(2) == ind)
-
-         call rand_number(rnd)
-
-         r(2) = int(rnd*np) + 1
-
-      end do
-
-      do while (r(3) == r(1) .or. r(3) == r(2) .or. r(3) == ind)
-
-         call rand_number(rnd)
-
-         r(3) = int(rnd*np) + 1
-
-      end do
-
-   end subroutine select_individuals
-
-
-
-   !> \brief Performs the crossing over
-   subroutine crossing_over(ind, nu, np, crs, pop, x)
-      implicit none
-      integer, intent(in)    :: ind          !< number of the individual
-      integer, intent(in)    :: nu           !< number of unknowns
-      integer, intent(in)    :: np           !< population size
-      real(8), intent(in)    :: crs          !< crossover constant
-      real(8), intent(in)    :: pop(np,nu)   !< population
-      real(8), intent(inout) :: x(nu)        !< trial individual
-
-      ! Inner variables
-      integer :: j
-      integer :: irnd
-      real(8) :: rnd
-
-
-      call rand_number(rnd)
-
-      irnd = int(rnd*nu) + 1
-
-      do j = 1, nu
-
-         call rand_number(rnd)
-
-         if (rnd < crs .or. irnd == j) then
-
-            !x(j) = x(j)
-
-         else
-
-            x(j) = pop(ind,j)
-
-         end if
-
-      end do
-
-   end subroutine crossing_over
-
-
-
 
 end module

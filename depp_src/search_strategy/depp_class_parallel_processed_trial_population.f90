@@ -8,12 +8,13 @@ module mod_class_parallel_processed_trial_population
    use mod_class_system_variables
    use mod_class_ehist
    use mod_class_abstract_search_strategy
-   use mod_search_strategy_factory
+   use mod_class_search_strategy_factory
    use mod_class_abstract_fitness_calculator
    use mod_class_fitness_calculator_factory
    use mod_class_fitness_calculator_exit_code
    use mod_class_ifile
-   use tools
+   use mod_search_tools
+   use mod_global_parameters
 
    implicit none
 
@@ -62,10 +63,10 @@ contains
       class(class_ehist),            target, intent(in) :: ehist
 
       ! Inner variables
-      type(class_ifile) :: ifile
-      integer           :: kss
-      integer           :: kh
+      type(class_ifile)                      :: ifile
       type(class_fitness_calculator_factory) :: fit_calculator_factory
+      type(class_search_strategy_factory)    :: search_strategy_factory
+      character(len=str_size)                :: search_strategy_conf
 
 
       ! Associating pointers
@@ -81,10 +82,11 @@ contains
       ! Creating the search strategy object
       call ifile%init( filename=this%sys_var%absparfile, field_separator="&" )
       call ifile%load()
-      call ifile%get_value( kss, "kss")
-      call ifile%get_value(  kh,  "kh")
+      call ifile%get_value(search_strategy_conf,  "search_strategy_conf")
 
-      call create_search_strategy(sys_var, kh, kss, this%searcher)
+      search_strategy_conf = trim(sys_var%absfolderin) // trim(search_strategy_conf)
+
+      call search_strategy_factory%create(sys_var, search_strategy_conf, this%searcher)
 
 
       ! Since the individual searcher is run in parallel, it may contains data that need
@@ -170,7 +172,7 @@ contains
    subroutine compute(this,i)
       implicit none
       class(class_parallel_processed_trial_population) :: this
-      integer, intent(in) :: i
+      integer, intent(in)                              :: i
 
       ! Inner variables
       integer :: ecode
