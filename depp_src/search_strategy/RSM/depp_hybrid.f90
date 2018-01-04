@@ -4,21 +4,25 @@
 !! of the Differential Evolution algorithm with the Response Surface Methodology.
 module hybrid
 
-   use rsm
    use rsm_dynamic_control
    use qsort
    use mod_search_tools
    use mod_class_ifile
    use mod_class_system_variables
 
+   use mod_class_abstract_RSM
+   use mod_class_RSM_factory
+   use mod_global_parameters
+
    implicit none
 
    integer, private :: nf !< Number of points for fitting the objective function to the polynomial
-   integer, private :: kh
    integer, private :: kw
    integer, private :: nstp
    real(8), private :: crsh
    real(8), private :: netol
+   type(class_RSM_factory)            :: RSM_factory
+   class(class_abstract_RSM), pointer :: RSM => null()
 
 contains
 
@@ -40,6 +44,8 @@ contains
       real(8) :: fhmax !< Maximum hybridization factor
       integer :: fhm   !< Model for the dynamical calculation of the factor of hybridization
 
+      character(str_size) :: RS_model
+
       type(class_ifile) :: ifile1
       type(class_ifile) :: ifile2
 
@@ -52,7 +58,7 @@ contains
       call ifile2%get_value(nstp,"nstp")
       call ifile2%get_value(crsh,"crsh")
       call ifile2%get_value(kw,"kw")    !< Kind of weight
-      call ifile2%get_value(kh,"kh")    !< Kind of hybridization (see input file)
+      call ifile2%get_value(RS_model,"RS_model")  ! Response Surface model
       call ifile1%get_value(nu,"nu")    !< Number of unknowns
       call ifile1%get_value(np,"np")    !< Size of the population
       call ifile1%get_value(ng,"ng")    !< Maximum number of generations
@@ -71,50 +77,19 @@ contains
       ! Initializing exit status
       es = 0
 
+      call RSM_factory%create(RS_model, RSM)
 
-      if ( kh > 0 ) then
+      ! Number of points for fitting the objective function to the polynomial
+      nf = ceiling( fnb * dble(RSM%dim(nu)) ) + 1
 
-         select case (kh)
+      if ( np * (ng-1) <= 2 * nf ) then
 
-            case (1) ! Incomplete quadratic model
+         write(*,*) "ERROR: maximum number of generations ng is insufficient to apply RSM."
+         write(*,*) "Minimum ng recommended: ", int(dble(10*nf)/dble(np))+1
 
-               ! Number of points for fitting the objective function to the polynomial
-               nf = ceiling( fnb * dble(2*nu+1) ) + 1
-
-               ! Sets the parameters of rsm module
-               call initialize_rsm_module(1, nu)
-
-            case (2) ! Complete quadratic model
-
-               ! Number of points for fitting the objective function to the polynomial
-               nf = ceiling( fnb * dble((nu+1)*(nu+2) / 2) ) + 1
-
-               ! Sets the parameters of rsm module
-               call initialize_rsm_module(2, nu)
-
-            case default
-
-               write(*,*) "ERROR: invalid kfm option."
-
-               nf = 0
-
-               es = 1
-
-         end select
-
-
-         if ( np * (ng-1) <= 2 * nf ) then
-
-            write(*,*) "ERROR: maximum number of generations ng is insufficient to apply RSM."
-            write(*,*) "Minimum ng recommended: ", int(dble(10*nf)/dble(np))+1
-
-            es = 1
-
-         end if
-
+         es = 1
 
       end if
-
 
    end subroutine initialize_hybrid_module
 
@@ -133,7 +108,7 @@ contains
 
       call random_number(rnd)
 
-      if ( 0 < kh .and. ( 2 * nf <= np * (g-1)) .and. rnd <= fh ) rsm_check = .true.
+      if ( associated(RSM) .and. ( 2 * nf <= np * (g-1)) .and. rnd <= fh ) rsm_check = .true.
 
    end function rsm_check
 
@@ -189,8 +164,14 @@ contains
 
 
       ! Searching for the best solution
-      call get_optimum_solution(nf, nu, dm, fm, wm, x, ko, es)
+      !call get_optimum_solution(nf, nu, dm, fm, wm, x, ko, es)
 
+      call RSM%fit(dm, fm, wm, es)
+
+      ! Checking for errors
+      if ( es /= 0 ) return
+
+      call RSM%get_optimizer(dm, x, ko, es)
 
       ! Checking for errors
       if ( es /= 0 ) return
@@ -207,22 +188,12 @@ contains
 
       end if
 
-
-
-
-      ! Adjusting the step of the current best individual of dm to the rsm individual x
-      call adjusts_rsm_step(kw, nu, np, ng, g, nstp, netol, xmin, xmax, dm, fm, hist, x, es)
-
-
       ! Checking for errors
       if ( es /= 0 ) return
 
 
-
-
       ! Crossing over
       if ( crsh >= 0.d0 ) call crossing_over(ind, nu, np, crsh, pop, x)
-
 
 
    end subroutine get_rsm_optimum
@@ -436,186 +407,58 @@ contains
    end subroutine select_fitting_individuals
 
 
-
-
-   !> \brief If the RSM optimizer is out of the fitting domain, the estimated
-   !! value of the objective function is evaluated and a new optimizer may be
-   !! calculated
-   subroutine adjusts_rsm_step(kw, nu, np, ng, g, nstp, netol, xmin, xmax, dm, fm, hist, x, es)
+   !> \brief Calculates the weights wm
+   subroutine get_weights(kw, m, fm, wm)
       implicit none
-      integer, intent(in) :: kw    !< Kind of weighting function
-      integer, intent(in) :: nu    !< Number of variables
-      integer, intent(in) :: np    !< Size of the population
-      integer, intent(in) :: ng    !< Number of generations
-      integer, intent(in) :: g     !< Current generation
-      integer, intent(in) :: nstp  !< Number of trials for adjusting the step
-      real(8), intent(in) :: netol !< Tolerance for distance when selecting neighbors points
-      real(8), dimension(nu),         intent(in)    :: xmin  !< Lower bound of the domain of optimization
-      real(8), dimension(nu),         intent(in)    :: xmax  !< Upper bound of the domain of optimization
-      real(8), dimension(nf,nu),      intent(in)    :: dm    !< Design matrix (each row is an x point)
-      real(8), dimension(nf),         intent(in)    :: fm    !< 'Measures of f'
-      real(8), dimension(ng,np,0:nu), intent(in)    :: hist  !< History up to previous generation
-      real(8), dimension(nu),         intent(inout) :: x     !< Coordinates of the optimizer
-      integer,                        intent(out)   :: es    !< Exit status: 0 = success, 1 = failure
+      integer, intent(in) :: kw !< Kind of weight (1=uniform, 2=exp. decrease from max. f)
+      integer, intent(in) :: m  !< Number of 'measures'
+      real(8), dimension(m),   intent(in)  :: fm !< 'Measures of f'
+      real(8), dimension(m),   intent(out) :: wm !< Weight of 'Measures of f'
 
+      ! Parameters
+      real(8), parameter :: tol = sqrt(epsilon(1.d0))
 
       ! Inner variables
-      integer :: i      ! Dummy
-      integer :: dtag   ! Tag
-      real(8) :: f0     ! Maximum value of f in the fitting domain
-      real(8) :: x0(nu) ! Maximizer of f in the fitting domain
-      real(8) :: Px     ! Estimated value of f(x)
+      integer :: k
+      integer :: kmax
 
 
-      ! Initializing exit status
+      select case (kw)
 
-      es = 0
+         case (1) ! Uniform weighting
 
+            wm = 1.d0
 
-      ! Checking the number of trials
+         case (2) ! Exponential decrease from maximum f
 
-      if (nstp == 0) then
+            kmax = maxloc(fm,1)
 
-         return
+            if ( abs(fm(kmax)) > tol ) then
 
-      end if
+               do k = 1, m
 
+                  wm(k) = exp( ( fm(k) - fm(kmax) ) / fm(kmax) )
 
-      ! Getting x0 and f0
-
-      f0 = maxval(fm)
-
-      x0 = dm(maxloc(fm,1),:)
-
-
-      ! Checking if x is in the fitting domain
-
-      dtag = 0
-
-      do i = 1, nu
-
-         if ( x(i) < minval(dm(:,i)) .or. maxval(dm(:,i)) < x(i) ) dtag = 1 ! Out of range!
-
-      end do
-
-
-
-
-      ! If outside the fitting domain, adjusts rsm step
-
-      if ( dtag == 0 ) then ! Inside the fitting domain. Returning...
-
-         return
-
-      else ! Outside the fitting domain. Adjusting rsm step...
-
-
-         ! Trunking x into domain of optimization
-
-         do i = 1, nu
-
-            if ( x(i) < xmin(i) ) x(i) = xmin(i)
-
-            if ( xmax(i) < x(i) ) x(i) = xmax(i)
-
-         end do
-
-
-
-         do i = 1, nstp
-
-            call fit_pol(kw, nu, np, ng, g, netol, hist, xmin, xmax, x, Px, es)
-
-
-            if ( f0 <= Px .and. es == 0 ) then
-
-               es = 0
-
-               return
+               end do
 
             else
 
-               es = 1
+               do k = 1, m
 
-               x = ( x + x0 ) / 2.d0
+                  wm(k) = exp( fm(k) - fm(kmax) )
+
+               end do
 
             end if
 
-         end do
+         case default
 
-      end if
+            wm = 1.d0
 
-   end subroutine adjusts_rsm_step
+      end select
 
+   end subroutine get_weights
 
-
-
-   !> \brief Fits the polynomial model near the optimizer and returns its fitted objective function
-   subroutine fit_pol(kw, nu, np, ng, g, netol, hist, xmin, xmax, x, Px, es)
-      implicit none
-      integer, intent(in) :: kw    !< Kind of weighting function
-      integer, intent(in) :: nu    !< Number of variables
-      integer, intent(in) :: np    !< Size of the population
-      integer, intent(in) :: ng    !< Number of generations
-      integer, intent(in) :: g     !< Current generation
-      real(8), intent(in) :: netol !< Tolerance for distance when selecting neighbors points
-      real(8), dimension(ng,np,0:nu), intent(in)  :: hist !< History up to previous generation
-      real(8), dimension(nu),         intent(in)  :: xmin !< Lower bound of the domain of optimization
-      real(8), dimension(nu),         intent(in)  :: xmax !< Upper bound of the domain of optimization
-      real(8), dimension(nu),         intent(in)  :: x    !< Coordinates of the optimizer
-      real(8),                        intent(out) :: Px   !< Estimated value of the objective function
-      integer,                        intent(out) :: es   !< Exit status: 0 = success, 1 = failure
-
-
-      ! Inner variables
-
-      real(8), dimension(nf,nu)    :: dm   ! Design matrix (each row is an x point)
-      real(8), dimension(nf)       :: fm   ! 'Measures of f'
-      real(8), dimension(nf)       :: wm   ! Weighting function
-
-      real(8), allocatable, dimension(:) :: cp ! Fitting coefficients
-
-
-      ! Allocating cp
-
-      allocate( cp(get_nb()))
-
-
-      ! Initializing es
-
-      es = 1
-
-
-      ! Selects the fitting individuals for a given target individual
-      call select_fitting_individuals(nu, np, ng, g, netol, hist, x, xmin, xmax, dm, fm, es)
-
-
-      ! Checking for errors
-      if ( es /= 0 ) return
-
-
-      ! Calculates the weights wm
-      call get_weights(kw, nf, fm, wm)
-
-
-
-      ! Fitting coefficients
-      call get_fit_coefficients(nf, nu, dm, fm, wm, cp, es)
-
-
-      ! Checking for errors
-      if ( es /= 0 ) return
-
-
-      ! Calculating the estimated value of the objective function
-      Px = Pol(nu, cp, x)
-
-
-      ! Deallocating cp
-
-      deallocate( cp )
-
-   end subroutine fit_pol
 
 
 end module hybrid

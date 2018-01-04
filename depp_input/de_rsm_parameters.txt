@@ -8,8 +8,7 @@ All data must follow the input pattern: "value & variable & description", where 
 
                   'DE-RSM' &                  CID  &  Class ID of this configuration file
        'de_parameters.txt' & search_strategy_conf  &  DE search strategy configuration file
-                         1 &                  kss  &  Kind of search strategy. (See options bellow)
-                         2 &                   kh  &  Kind of hybridization (See options bellow)
+    'Incomplete_Quadratic' &             RS_model  &  Response Surface model
                     0.35d0 &                   fh  &  Fraction of hybridization
                     0.10d0 &                fhmin  &  Minimum fraction of hybridization
                     0.90d0 &                fhmax  &  Maximum fraction of hybridization

@@ -1,6 +1,7 @@
 flist="
 depp_mpi.f90 
 depp_global_parameters.f90 
+./util/depp_gauss_solver.f90
 ./util/depp_class_timer.f90 
 ./util/depp_random_generator.f90 
 ./util/depp_class_ifile.f90 
@@ -20,7 +21,10 @@ depp_output.f90
 ./search_strategy/depp_class_abstract_search_strategy.f90 
 ./search_strategy/depp_class_abstract_search_strategy_factory.f90
 ./search_strategy/DE/depp_class_DE_RAND_1.f90 
-./search_strategy/RSM/depp_rsm.f90 
+./search_strategy/RSM/depp_class_abstract_RSM.f90
+./search_strategy/RSM/depp_class_RSM_Quadratic_Model.f90
+./search_strategy/RSM/depp_class_RSM_Incomplete_Quadratic_Model.f90
+./search_strategy/RSM/depp_class_RSM_factory.f90
 ./search_strategy/RSM/depp_rsm_dynamic_control.f90 
 ./search_strategy/RSM/depp_hybrid.f90 
 ./search_strategy/RSM/depp_class_DE_RSM.f90 
