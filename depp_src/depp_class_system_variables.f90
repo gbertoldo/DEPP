@@ -5,7 +5,7 @@ module mod_class_system_variables
 
    use mod_mpi
    use mod_class_ifile
-   use mod_global_parameters
+   use mod_string
    use mod_class_log_output_control
    use mod_class_calendar
 

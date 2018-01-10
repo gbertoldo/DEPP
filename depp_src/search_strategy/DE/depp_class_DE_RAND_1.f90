@@ -9,7 +9,7 @@ module mod_class_DE_RAND_1
    use mod_class_ifile
    use mod_class_system_variables
    use mod_mpi
-   use mod_global_parameters
+   use mod_string
    use mod_search_tools
 
    implicit none
@@ -65,12 +65,13 @@ contains
 
 
    !> \brief Generates a trial individual
-   subroutine get_trial(this, ind, ehist, x)
+   subroutine get_trial(this, ind, ehist, x, es)
       implicit none
       class(class_DE_RAND_1)                :: this
       integer,                  intent(in)  :: ind   ! Number of the individual of the population
       class(class_ehist),       intent(in)  :: ehist ! Evolution history
       real(8), dimension(:),    intent(out) :: x     ! Trial individual
+      integer, optional,        intent(out) :: es    ! Exit status
 
 
       ! Inner variables

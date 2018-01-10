@@ -3,6 +3,8 @@
 
 module mod_class_RSM_factory
 
+   use mod_mpi
+   use mod_class_system_variables
    use mod_class_abstract_RSM
    use mod_class_RSM_Quadratic_Model
    use mod_class_RSM_Incomplete_Quadratic_Model
@@ -25,9 +27,10 @@ contains
 
 
    !> \brief Creates the RSM object
-   subroutine create(this, option, obj)
+   subroutine create(this, sys_var, option, obj)
       implicit none
       class(class_RSM_factory)                        :: this
+      class(class_system_variables),      intent(in)  :: sys_var
       character(len=*),                   intent(in)  :: option
       class(class_abstract_RSM), pointer, intent(out) :: obj
 
@@ -41,9 +44,9 @@ contains
 
       else
 
-         write(*,*) "class_RSM_factory: Unknown response surface model. Stopping..."
+         call sys_var%logger%print("class_RSM_factory: Unknown response surface model. Stopping...")
 
-         stop
+         call mod_mpi_finalize()
 
       end if
 

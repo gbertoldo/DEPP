@@ -9,10 +9,11 @@ module mod_class_DE_RSM
    use mod_class_system_variables
    use mod_mpi
    use mod_class_ehist
-   use hybrid
+   use mod_class_RSM_search_strategy
    use mod_search_tools
    use mod_class_ifile
-   use mod_global_parameters
+   use mod_string
+   use rsm_dynamic_control
 
    implicit none
 
@@ -23,6 +24,7 @@ module mod_class_DE_RSM
    type, public, extends(class_abstract_search_strategy) :: class_DE_RSM
 
       private
+      integer :: nf
       real(8) :: fh
 
       ! These data are calculated separately by each thread and must be exchanged
@@ -32,7 +34,8 @@ module mod_class_DE_RSM
       real(8), allocatable                           :: trial_fit(:) ! Fitness of the trial individuals
 
 
-      class(class_abstract_search_strategy), pointer :: searcher => null()
+      class(class_abstract_search_strategy), pointer :: de_searcher  => null()
+      class(class_abstract_search_strategy), pointer :: rsm_searcher => null()
 
 
    contains
@@ -63,9 +66,13 @@ contains
       type(class_ifile)   :: ifile1
       type(class_ifile)   :: ifile2
       character(str_size) :: de_conf_file_name
+      character(str_size) :: rsm_conf_file_name
       character(str_size) :: CID
       integer             :: np
       real(8)             :: fh
+      real(8)                 :: fhmin    ! Minimum hybridization factor
+      real(8)                 :: fhmax    ! Maximum hybridization factor
+      integer                 :: fhm      ! Model for the dynamical calculation of the factor of hybridization
 
 
       call ifile1%init(filename=sys_var%absparfile, field_separator='&')
@@ -77,6 +84,9 @@ contains
       call ifile1%get_value( np,  "np")
       call ifile2%get_value( fh,  "fh")
       call ifile2%get_value(CID, "CID")
+      call ifile2%get_value(     fhmin,    "fhmin")  ! Minimum hybridization factor
+      call ifile2%get_value(     fhmax,    "fhmax")  ! Maximum hybridization factor
+      call ifile2%get_value(       fhm,      "fhm")  ! Model for the dynamical calculation of the factor of hybridization
 
       if (trim(CID)/="DE-RSM") then
 
@@ -86,28 +96,47 @@ contains
 
       end if
 
+
       ! Creating DE search strategy
 
-      call ifile2%get_value(de_conf_file_name,"search_strategy_conf")
+      call ifile2%get_value(de_conf_file_name,"de_search_strategy_conf")
 
       de_conf_file_name = trim(sys_var%absfolderin) // trim(de_conf_file_name)
 
-      call search_strategy_factory%create(sys_var, de_conf_file_name, this%searcher)
+      call search_strategy_factory%create(sys_var, de_conf_file_name, this%de_searcher)
 
 
-      ! Initializes hybrid module and checks hybridization necessary condition for RSM
+      ! Creating RSM search strategy
 
-      call initialize_hybrid_module(sys_var, conf_file_name, estatus)
+      call ifile2%get_value(rsm_conf_file_name,"rsm_search_strategy_conf")
 
-      ! Checking the exit status of the module initialization
-      if ( estatus == 1 ) then
-         ! Finishing MPI
-         call mod_mpi_abort()
-      end if
+      rsm_conf_file_name = trim(sys_var%absfolderin) // trim(rsm_conf_file_name)
 
-      allocate(this%rsm_tag(np))
+      call search_strategy_factory%create(sys_var, rsm_conf_file_name, this%rsm_searcher)
+
+
+      ! Getting nf
+      associate (rsm_searcher => this%rsm_searcher)
+
+         select type (rsm_searcher)
+
+            type is ( class_RSM_search_strategy )
+
+               this%nf = rsm_searcher%get_nf()
+
+         end select
+
+      end associate
+
+
+      ! Allocating resources
+
+      allocate(this%rsm_tag(np)  )
       allocate(this%trial_fit(np))
       allocate(this%curnt_fit(np))
+
+      ! Initializing RSM Dynamic Control module
+      call initialize_rsm_dynamic_control(np, fh, fhmin, fhmax, fhm)
 
 
    end subroutine
@@ -132,7 +161,7 @@ contains
       integer,                    intent(in) :: i
       integer,                    intent(in) :: to_thread
 
-      call mod_mpi_send(to_thread, this%rsm_tag(i))
+      call mod_mpi_send(to_thread, this%rsm_tag(i)  )
       call mod_mpi_send(to_thread, this%trial_fit(i))
       call mod_mpi_send(to_thread, this%curnt_fit(i))
 
@@ -146,7 +175,7 @@ contains
       integer,                    intent(in) :: i
       integer,                    intent(in) :: from_thread
 
-      call mod_mpi_recv(from_thread, this%rsm_tag(i))
+      call mod_mpi_recv(from_thread, this%rsm_tag(i)  )
       call mod_mpi_recv(from_thread, this%trial_fit(i))
       call mod_mpi_recv(from_thread, this%curnt_fit(i))
 
@@ -174,12 +203,13 @@ contains
 
 
    !> \brief Generates a trial individual
-   subroutine get_trial(this, ind, ehist, x)
+   subroutine get_trial(this, ind, ehist, x, es)
       implicit none
       class(class_DE_RSM)                   :: this
       integer,                  intent(in)  :: ind   ! Number of the individual of the population
       class(class_ehist),       intent(in)  :: ehist ! Evolution history
       real(8), dimension(:),    intent(out) :: x     ! Trial individual
+      integer, optional,        intent(out) :: es    ! Exit status
 
 
       integer :: estatus
@@ -197,15 +227,14 @@ contains
 
          ! Checking if RSM can be applied
 
-         if ( rsm_check(ehist%np, ehist%g, this%fh) ) then
+         if ( is_rsm_applicable(this%nf, ehist%np, ehist%g, this%fh) ) then
 
             ! rsm_tag stores the return state of application of DE-RSM
             estatus = DE_RSM_RETURN%RSM_APPLIED
 
             ! Generating a RSM individual
 
-            call get_rsm_optimum(ind, ehist%nu, ehist%np, ehist%ng, ehist%g, ehist%xmin,&
-                   ehist%xmax, ehist%pop, ehist%hist, x, rsmstatus)
+            call this%rsm_searcher%get_trial(ind, ehist, x, rsmstatus)
 
             ! If RSM fails, generates a pure DE individual
             if ( rsmstatus == 1 ) then
@@ -214,7 +243,7 @@ contains
                estatus = DE_RSM_RETURN%DE_APPLIED
 
                ! Creating the trial individual x
-               call this%searcher%get_trial(ind, ehist, x)
+               call this%de_searcher%get_trial(ind, ehist, x)
 
                estatus = DE_RSM_RETURN%DE_APPLIED
 
@@ -225,7 +254,7 @@ contains
             ! rsm_tag stores the return state of application of DE-RSM
             estatus = DE_RSM_RETURN%DE_APPLIED
 
-            call this%searcher%get_trial(ind, ehist, x)
+            call this%de_searcher%get_trial(ind, ehist, x)
 
             estatus = DE_RSM_RETURN%DE_APPLIED
 
@@ -239,7 +268,7 @@ contains
       do while ( is_X_out_of_range(ehist%nu, ehist%xmin, ehist%xmax, x) )
 
          ! Creating the trial individual x
-         call this%searcher%get_trial(ind, ehist, x)
+         call this%de_searcher%get_trial(ind, ehist, x)
 
          estatus = DE_RSM_RETURN%DE_APPLIED
 
@@ -264,5 +293,24 @@ contains
 
    end subroutine
 
+
+   !> \brief Checks if the RSM may be applied
+   logical function is_rsm_applicable(nf, np, g, fh)
+      implicit none
+      integer, intent(in)   :: nf
+      integer, intent(in)   :: np    !< Size of the population
+      integer, intent(in)   :: g     !< Current generation
+      real(8), intent(in)   :: fh    !< Fraction of hybridization
+
+      ! Inner variables
+      real(8) :: rnd ! Random number
+
+      is_rsm_applicable = .false.
+
+      call random_number(rnd)
+
+      if ( ( 2 * nf <= np * (g-1)) .and. rnd <= fh ) is_rsm_applicable = .true.
+
+   end function
 
 end module

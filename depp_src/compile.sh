@@ -1,17 +1,16 @@
 flist="
 depp_mpi.f90 
-depp_global_parameters.f90 
 ./util/depp_gauss_solver.f90
 ./util/depp_class_timer.f90 
 ./util/depp_random_generator.f90 
 ./util/depp_class_ifile.f90 
 ./util/depp_class_calendar.f90
+./util/depp_string.f90
 depp_class_log_output_control.f90
 depp_class_system_variables.f90 
 ./util/depp_class_btimer.f90 
 ./util/depp_qsort.f90 
 depp_class_ehist.f90 
-depp_output.f90 
 ./fitness_calculator/depp_class_fitness_calculator_exit_code.f90
 ./fitness_calculator/depp_class_abstract_fitness_calculator.f90
 ./fitness_calculator/depp_class_external_fitness_calculator.f90
@@ -26,7 +25,7 @@ depp_output.f90
 ./search_strategy/RSM/depp_class_RSM_Incomplete_Quadratic_Model.f90
 ./search_strategy/RSM/depp_class_RSM_factory.f90
 ./search_strategy/RSM/depp_rsm_dynamic_control.f90 
-./search_strategy/RSM/depp_hybrid.f90 
+./search_strategy/RSM/depp_class_RSM_search_strategy.f90
 ./search_strategy/RSM/depp_class_DE_RSM.f90 
 ./search_strategy/depp_class_search_strategy_factory.f90 
 ./search_strategy/depp_class_parallel_processed_trial_population.f90

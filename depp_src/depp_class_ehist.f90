@@ -5,7 +5,7 @@
 
 module mod_class_ehist
 
-   use mod_global_parameters
+   use mod_string
    use mod_class_system_variables
    use mod_class_ifile
 

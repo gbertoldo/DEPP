@@ -35,8 +35,8 @@ contains
    !> \brief Minimum number of points necessary to fit the response surface
    integer function dim(this, n)
       implicit none
-      class(class_RSM_Quadratic_Model)     :: this
-      integer, optional, intent(in)        :: n
+      class(class_RSM_Quadratic_Model) :: this
+      integer, optional, intent(in)    :: n
 
       if ( present(n) ) then
 

@@ -14,7 +14,7 @@ module mod_class_parallel_processed_trial_population
    use mod_class_fitness_calculator_exit_code
    use mod_class_ifile
    use mod_search_tools
-   use mod_global_parameters
+   use mod_string
 
    implicit none
 

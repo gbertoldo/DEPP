@@ -1,0 +1,31 @@
+===========================================================================================================================================
+
+                                              DEPP RSM CONFIGURATION FILE
+                                              
+All data must follow the input pattern: "value & variable & description", where '&' is the separation field delimiter.
+
+-------------------------------------------------------------------------------------------------------------------------------------------
+
+                     'RSM' &                  CID  &  Class ID of this configuration file
+               'Quadratic' &             RS_model  &  Response Surface model
+    'Incomplete_Quadratic' &           x RS_model  &  Response Surface model
+                    -0.5d0 &                 crsh  &  Crossover probability of the hybridized model (disable if crsh < 0)
+                         1 &                   kw  &  Kind of weighting function for RSM fitting (1=uniform, 2=exponential)
+                     2.0d0 &                  fnb  &  Multiple of the minimum number of points for RSM fitting
+                  0.0001d0 &                netol  &  Tolerance for distance when selecting neighbors points for RSM adjusting
+
+-------------------------------------------------------------------------------------------------------------------------------------------
+
+COMMENTS:
+         
+RS-Model:
+---------------------------
+   
+Incomplete_Quadratic - Response Surface Methodology. Selects the nf-1 individuals closest to the selected individual. Fits an incomplete
+                       quadratic model and returns the maximizer of this model.
+
+Quadratic            - Response Surface Methodology. Selects the nf-1 individuals closest to the selected individual. Fits a complete
+                       quadratic model and returns the maximizer of this model.
+
+===========================================================================================================================================
+

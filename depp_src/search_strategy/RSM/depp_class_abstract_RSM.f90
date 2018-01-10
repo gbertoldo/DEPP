@@ -21,8 +21,8 @@ module mod_class_abstract_RSM
       integer function dim_interface(this, n)
          import class_abstract_RSM
          implicit none
-         class(class_abstract_RSM)            :: this
-         integer, optional, intent(in)        :: n
+         class(class_abstract_RSM)     :: this
+         integer, optional, intent(in) :: n
 
       end function
 
@@ -48,11 +48,11 @@ module mod_class_abstract_RSM
       subroutine get_optimizer_interface(this, dm, x, ko, es)
          import class_abstract_RSM
          implicit none
-         class(class_abstract_RSM)          :: this
-         real(8), dimension(:,:), intent(in)  :: dm   !< Design matrix (each row is an x point)
-         real(8), dimension(:), intent(out) ::    x !< Coordinates of the optimizer
-         integer,               intent(out) ::   ko !< ko: -1 = minimizer, 0 = saddle point, 1 = maximizer
-         integer,               intent(out) ::   es !< Exit status: 0 = success, 1 = failure
+         class(class_abstract_RSM)            :: this
+         real(8), dimension(:,:), intent(in)  ::   dm !< Design matrix (each row is an x point)
+         real(8), dimension(:),   intent(out) ::    x !< Coordinates of the optimizer
+         integer,                 intent(out) ::   ko !< ko: -1 = minimizer, 0 = saddle point, 1 = maximizer
+         integer,                 intent(out) ::   es !< Exit status: 0 = success, 1 = failure
 
       end subroutine
 

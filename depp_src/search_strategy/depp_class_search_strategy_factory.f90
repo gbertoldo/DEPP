@@ -3,13 +3,15 @@
 
 module mod_class_search_strategy_factory
 
-   use mod_class_abstract_search_strategy_factory
-   use mod_class_system_variables
-   use mod_class_abstract_search_strategy
+   use mod_string
    use mod_class_ifile
-   use mod_global_parameters
+   use mod_class_system_variables
+   use mod_class_abstract_search_strategy_factory
+   use mod_class_abstract_search_strategy
    use mod_class_DE_RAND_1
    use mod_class_DE_RSM
+   use mod_class_RSM_search_strategy
+   use mod_mpi
 
    implicit none
 
@@ -50,7 +52,11 @@ contains
 
          ! Allocating the selected model
 
-         if ( trim(CID) == "DE-RSM" ) then
+         if ( trim(CID) == "RSM" ) then
+
+            allocate(class_RSM_search_strategy::searcher)
+
+         else if ( trim(CID) == "DE-RSM" ) then
 
             allocate(class_DE_RSM::searcher)
 
@@ -60,9 +66,9 @@ contains
 
          else
 
-            write(*,*) "class_search_strategy_factory: Unknown search strategy model. Stopping."
+            call sys_var%logger%print("class_search_strategy_factory: Unknown search strategy model. Stopping.")
 
-            stop
+            call mod_mpi_finalize()
 
          end if
 
@@ -70,7 +76,7 @@ contains
          ! Initializing the object
          select type (searcher)
 
-            type is ( class_DE_RAND_1 )
+            type is ( class_RSM_search_strategy )
 
                call searcher%init(sys_var, conf_file_name)
 
@@ -78,12 +84,17 @@ contains
 
                call searcher%init(sys_var, conf_file_name, this)
 
+            type is ( class_DE_RAND_1 )
+
+               call searcher%init(sys_var, conf_file_name)
+
          end select
 
       else
 
-         write(*,*) "class_search_strategy_factory: Pointer already associated. Stopping."
-         stop
+         call sys_var%logger%print("class_search_strategy_factory: Pointer already associated. Stopping.")
+
+         call mod_mpi_finalize()
 
       end if
 

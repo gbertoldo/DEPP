@@ -8,7 +8,7 @@ module mod_class_max_generation_stop_condition
    use mod_class_ehist
    use mod_class_system_variables
    use mod_class_ifile
-   use mod_global_parameters
+   use mod_string
 
    implicit none
 

@@ -134,7 +134,7 @@ contains
    real(8) function P(this, x)
       implicit none
       class(class_RSM_Incomplete_Quadratic_Model)  :: this
-      real(8), dimension(:), intent(in) :: x    !< Independent variables
+      real(8), dimension(:),            intent(in) :: x    !< Independent variables
 
       ! Inner variables
 
@@ -154,11 +154,11 @@ contains
    !> \brief Returns the response surface optimizer
    subroutine get_optimizer(this, dm, x, ko, es)
       implicit none
-      class(class_RSM_Incomplete_Quadratic_Model)     :: this
-      real(8), dimension(:,:), intent(in)  ::   dm !< Design matrix (each row is an x point)
-      real(8), dimension(:),   intent(out) ::    x !< Coordinates of the optimizer
-      integer,                 intent(out) ::   ko !< ko: -1 = minimizer, 0 = saddle point, 1 = maximizer
-      integer,                 intent(out) ::   es !< Exit status: 0 = success, 1 = failure
+      class(class_RSM_Incomplete_Quadratic_Model) :: this
+      real(8), dimension(:,:),        intent(in)  ::   dm !< Design matrix (each row is an x point)
+      real(8), dimension(:),          intent(out) ::    x !< Coordinates of the optimizer
+      integer,                        intent(out) ::   ko !< ko: -1 = minimizer, 0 = saddle point, 1 = maximizer
+      integer,                        intent(out) ::   es !< Exit status: 0 = success, 1 = failure
 
 
       ! Inner variables
@@ -245,12 +245,12 @@ contains
    !! based on the points used for fitting
    subroutine get_kind_of_optimum(this, m, n, dm, x, ko)
       implicit none
-      class(class_RSM_Incomplete_Quadratic_Model)     :: this
-      integer,                 intent(in)  :: m    !< Number of 'measures'
-      integer,                 intent(in)  :: n    !< Number of variables
-      real(8), dimension(m,n), intent(in)  :: dm   !< Design matrix (each row is an x point)
-      real(8), dimension(n),   intent(in)  :: x    !< Critical point
-      integer,                 intent(out) :: ko   !< ko: -1 = minimizer, 0 = saddle point, 1 = maximizer
+      class(class_RSM_Incomplete_Quadratic_Model) :: this
+      integer,                        intent(in)  :: m    !< Number of 'measures'
+      integer,                        intent(in)  :: n    !< Number of variables
+      real(8), dimension(m,n),        intent(in)  :: dm   !< Design matrix (each row is an x point)
+      real(8), dimension(n),          intent(in)  :: x    !< Critical point
+      integer,                        intent(out) :: ko   !< ko: -1 = minimizer, 0 = saddle point, 1 = maximizer
 
       ! Inner variables
       integer :: k
