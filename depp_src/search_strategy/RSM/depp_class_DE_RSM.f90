@@ -13,7 +13,7 @@ module mod_class_DE_RSM
    use mod_search_tools
    use mod_class_ifile
    use mod_string
-   use rsm_dynamic_control
+   use mod_class_DE_RSM_hybridization_control
 
    implicit none
 
@@ -24,8 +24,6 @@ module mod_class_DE_RSM
    type, public, extends(class_abstract_search_strategy) :: class_DE_RSM
 
       private
-      integer :: nf
-      real(8) :: fh
 
       ! These data are calculated separately by each thread and must be exchanged
       ! before the next generation.
@@ -33,7 +31,10 @@ module mod_class_DE_RSM
       real(8), allocatable                           :: curnt_fit(:) ! Fitness of the current individuals
       real(8), allocatable                           :: trial_fit(:) ! Fitness of the trial individuals
 
+      ! Hybridization control
+      type(class_DE_RSM_hybridization_control)       :: hybrid_control
 
+      ! Search strategies
       class(class_abstract_search_strategy), pointer :: de_searcher  => null()
       class(class_abstract_search_strategy), pointer :: rsm_searcher => null()
 
@@ -62,17 +63,18 @@ contains
       class(class_abstract_search_strategy_factory), intent(in) :: search_strategy_factory
 
       ! Inner variables
-      integer             :: estatus
-      type(class_ifile)   :: ifile1
-      type(class_ifile)   :: ifile2
-      character(str_size) :: de_conf_file_name
-      character(str_size) :: rsm_conf_file_name
-      character(str_size) :: CID
-      integer             :: np
-      real(8)             :: fh
-      real(8)                 :: fhmin    ! Minimum hybridization factor
-      real(8)                 :: fhmax    ! Maximum hybridization factor
-      integer                 :: fhm      ! Model for the dynamical calculation of the factor of hybridization
+      integer             :: estatus            ! Exit status
+      type(class_ifile)   :: ifile1             ! Input file
+      type(class_ifile)   :: ifile2             ! Input file
+      character(str_size) :: de_conf_file_name  ! DE configuration file
+      character(str_size) :: rsm_conf_file_name ! RSM configuration file
+      character(str_size) :: CID                ! Class ID
+      integer             :: np                 ! Population size
+      real(8)             :: fh                 ! Hybridization fraction/Initial hybridization fraction
+      real(8)             :: fhmin              ! Minimum hybridization factor
+      real(8)             :: fhmax              ! Maximum hybridization factor
+      integer             :: fhm                ! Model for the dynamical calculation of the factor of hybridization
+      integer             :: nf                 ! Number of fitting points for response surface adjustment
 
 
       call ifile1%init(filename=sys_var%absparfile, field_separator='&')
@@ -81,12 +83,12 @@ contains
       call ifile1%load()
       call ifile2%load()
 
-      call ifile1%get_value( np,  "np")
-      call ifile2%get_value( fh,  "fh")
-      call ifile2%get_value(CID, "CID")
-      call ifile2%get_value(     fhmin,    "fhmin")  ! Minimum hybridization factor
-      call ifile2%get_value(     fhmax,    "fhmax")  ! Maximum hybridization factor
-      call ifile2%get_value(       fhm,      "fhm")  ! Model for the dynamical calculation of the factor of hybridization
+      call ifile1%get_value(        np,    "np")
+      call ifile2%get_value(       CID,   "CID")
+      call ifile2%get_value(        fh,    "fh")
+      call ifile2%get_value(     fhmin, "fhmin")
+      call ifile2%get_value(     fhmax, "fhmax")
+      call ifile2%get_value(       fhm,   "fhm")
 
       if (trim(CID)/="DE-RSM") then
 
@@ -122,7 +124,7 @@ contains
 
             type is ( class_RSM_search_strategy )
 
-               this%nf = rsm_searcher%get_nf()
+               nf = rsm_searcher%get_nf()
 
          end select
 
@@ -135,9 +137,8 @@ contains
       allocate(this%trial_fit(np))
       allocate(this%curnt_fit(np))
 
-      ! Initializing RSM Dynamic Control module
-      call initialize_rsm_dynamic_control(np, fh, fhmin, fhmax, fhm)
-
+      ! Initializing the hybridization control object
+      call this%hybrid_control%init(sys_var, np, nf, fh, fhmin, fhmax, fhm)
 
    end subroutine
 
@@ -182,6 +183,7 @@ contains
    end subroutine
 
 
+   !> Performs update tasks before the next generation.
    subroutine update(this)
       implicit none
       class(class_DE_RSM) :: this
@@ -191,12 +193,11 @@ contains
 
       do i = 1, size(this%rsm_tag)
 
-         call add_to_rsm_dynamic_control(this%rsm_tag(i), this%trial_fit(i), this%curnt_fit(i))
+         call this%hybrid_control%add(this%rsm_tag(i), this%trial_fit(i), this%curnt_fit(i))
 
       end do
 
-      ! Calculating the hybridization factor
-      this%fh = get_hybridization_factor()
+      call this%hybrid_control%update()
 
    end subroutine
 
@@ -215,6 +216,7 @@ contains
       integer :: estatus
       integer :: rsmstatus
 
+      if (present(es)) es = 0
 
       if (ehist%g==1) then
 
@@ -227,7 +229,7 @@ contains
 
          ! Checking if RSM can be applied
 
-         if ( is_rsm_applicable(this%nf, ehist%np, ehist%g, this%fh) ) then
+         if ( this%hybrid_control%is_rsm_applicable(ehist%g) ) then
 
             ! rsm_tag stores the return state of application of DE-RSM
             estatus = DE_RSM_RETURN%RSM_APPLIED
@@ -244,8 +246,6 @@ contains
 
                ! Creating the trial individual x
                call this%de_searcher%get_trial(ind, ehist, x)
-
-               estatus = DE_RSM_RETURN%DE_APPLIED
 
             end if
 
@@ -293,24 +293,5 @@ contains
 
    end subroutine
 
-
-   !> \brief Checks if the RSM may be applied
-   logical function is_rsm_applicable(nf, np, g, fh)
-      implicit none
-      integer, intent(in)   :: nf
-      integer, intent(in)   :: np    !< Size of the population
-      integer, intent(in)   :: g     !< Current generation
-      real(8), intent(in)   :: fh    !< Fraction of hybridization
-
-      ! Inner variables
-      real(8) :: rnd ! Random number
-
-      is_rsm_applicable = .false.
-
-      call random_number(rnd)
-
-      if ( ( 2 * nf <= np * (g-1)) .and. rnd <= fh ) is_rsm_applicable = .true.
-
-   end function
 
 end module

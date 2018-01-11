@@ -24,7 +24,7 @@ depp_class_ehist.f90
 ./search_strategy/RSM/depp_class_RSM_Quadratic_Model.f90
 ./search_strategy/RSM/depp_class_RSM_Incomplete_Quadratic_Model.f90
 ./search_strategy/RSM/depp_class_RSM_factory.f90
-./search_strategy/RSM/depp_rsm_dynamic_control.f90 
+./search_strategy/RSM/depp_class_DE_RSM_hybridization_control.f90
 ./search_strategy/RSM/depp_class_RSM_search_strategy.f90
 ./search_strategy/RSM/depp_class_DE_RSM.f90 
 ./search_strategy/depp_class_search_strategy_factory.f90 
