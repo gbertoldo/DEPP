@@ -135,7 +135,8 @@ contains
 
 
       ! Calling the external program for fitness calculation
-      call system("(cd " // trim(this%fdir) // " && exec ./" // trim(this%ffit) // ") < " // trim(arqpar) // " > /dev/null")
+      call execute_command_line("(cd " // trim(this%fdir) // " && exec ./" &
+                                // trim(this%ffit) // ") < " // trim(arqpar) // " > /dev/null")
 
 
       ! Reading the solution

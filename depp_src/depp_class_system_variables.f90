@@ -102,13 +102,13 @@ contains
          if (lexist) then
 
             if (reload == 0) then
-               call system("rm -r " // trim(this%absfolderout))
-               call system("mkdir " // trim(this%absfolderout))
+               call execute_command_line("rm -r " // trim(this%absfolderout))
+               call execute_command_line("mkdir " // trim(this%absfolderout))
             end if
 
          else
 
-            call system("mkdir " // trim(this%absfolderout))
+            call execute_command_line("mkdir " // trim(this%absfolderout))
 
          end if
 
