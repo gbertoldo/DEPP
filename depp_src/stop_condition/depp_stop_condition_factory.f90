@@ -8,6 +8,7 @@ module mod_stop_condition_factory
    use mod_class_max_generation_stop_condition
    use mod_class_p_measure_stop_condition
    use mod_class_no_improvement_stop_condition
+   use mod_mpi
 
    implicit none
 
@@ -42,9 +43,9 @@ contains
 
          else
 
-            write(*,*) "Unknown stop condition model: " // trim(model) // ". Stopping."
+            call sys_var%logger%print("Unknown stop condition model: " // trim(model) // ". Stopping.")
 
-            stop
+            call mod_mpi_finalize()
 
          end if
 
@@ -68,8 +69,9 @@ contains
 
       else
 
-         write(*,*) "Variable already associated. Stopping."
-         stop
+         call sys_var%logger%print("Variable already associated. Stopping.")
+
+         call mod_mpi_finalize()
 
       end if
 

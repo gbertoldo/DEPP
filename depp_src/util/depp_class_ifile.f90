@@ -10,6 +10,9 @@
 !!
 
 module mod_class_ifile
+
+   use mod_mpi
+
    implicit none
 
 
@@ -342,7 +345,7 @@ contains
 
       write(*,*) "Variable ", trim(adjustl(varname)), " not found. Stopping."
 
-      stop
+      call mod_mpi_finalize()
 
    end subroutine
 
@@ -376,7 +379,7 @@ contains
 
       write(*,*) "Variable ", trim(adjustl(varname)), " not found. Stopping."
 
-      stop
+      call mod_mpi_finalize()
 
    end subroutine
 
@@ -411,7 +414,7 @@ contains
 
       write(*,*) "Variable ", trim(adjustl(varname)), " not found. Stopping."
 
-      stop
+      call mod_mpi_finalize()
 
    end subroutine
 

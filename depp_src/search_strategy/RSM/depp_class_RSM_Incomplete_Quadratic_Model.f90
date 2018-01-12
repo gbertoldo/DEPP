@@ -5,6 +5,7 @@ module mod_class_RSM_Incomplete_Quadratic_Model
    use mod_class_abstract_RSM
    use mod_gauss_solver
    use mod_RSM_tools
+   use mod_mpi
 
    implicit none
 
@@ -242,7 +243,7 @@ contains
 
             write(*,*) "Function phi: error, out of range."
 
-            stop
+            call mod_mpi_finalize()
 
          end if
 
