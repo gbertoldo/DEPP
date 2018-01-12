@@ -20,6 +20,7 @@ depp_class_ehist.f90
 ./search_strategy/depp_class_abstract_search_strategy.f90 
 ./search_strategy/depp_class_abstract_search_strategy_factory.f90
 ./search_strategy/DE/depp_class_DE_RAND_1.f90 
+./search_strategy/RSM/depp_RSM_tools.f90
 ./search_strategy/RSM/depp_class_abstract_RSM.f90
 ./search_strategy/RSM/depp_class_RSM_Quadratic_Model.f90
 ./search_strategy/RSM/depp_class_RSM_Incomplete_Quadratic_Model.f90

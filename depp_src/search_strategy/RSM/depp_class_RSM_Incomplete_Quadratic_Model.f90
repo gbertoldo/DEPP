@@ -4,6 +4,7 @@ module mod_class_RSM_Incomplete_Quadratic_Model
 
    use mod_class_abstract_RSM
    use mod_gauss_solver
+   use mod_RSM_tools
 
    implicit none
 
@@ -25,7 +26,6 @@ module mod_class_RSM_Incomplete_Quadratic_Model
       procedure, public,  pass :: get_optimizer        !< Returns the response surface optimizer
 
       procedure, private, pass :: phi                  !< Base function
-      procedure, private, pass :: get_kind_of_optimum  !< Determines if the critical point is a maximizer, minimizer or saddle point
 
    end type
 
@@ -192,9 +192,19 @@ contains
          end do
 
          ! Determines if x is a maximizer, minimizer or saddle point
-         call this%get_kind_of_optimum(m, n, dm, x, ko)
+         call get_kind_of_optimum(m, n, dm, x, Pol, ko)
 
       end associate
+
+   contains
+
+      real(8) function Pol(x)
+         implicit none
+         real(8), dimension(:) :: x
+
+         Pol = this%P(x)
+
+      end function
 
    end subroutine
 
@@ -239,79 +249,5 @@ contains
       end associate
 
    end function
-
-
-   !> \brief Determines if the optimum is a maximizer, minimizer or a saddle point
-   !! based on the points used for fitting
-   subroutine get_kind_of_optimum(this, m, n, dm, x, ko)
-      implicit none
-      class(class_RSM_Incomplete_Quadratic_Model) :: this
-      integer,                        intent(in)  :: m    !< Number of 'measures'
-      integer,                        intent(in)  :: n    !< Number of variables
-      real(8), dimension(m,n),        intent(in)  :: dm   !< Design matrix (each row is an x point)
-      real(8), dimension(n),          intent(in)  :: x    !< Critical point
-      integer,                        intent(out) :: ko   !< ko: -1 = minimizer, 0 = saddle point, 1 = maximizer
-
-      ! Inner variables
-      integer :: k
-      real(8) :: fc
-      real(8) :: Pc
-      real(8) :: Pmin
-      real(8) :: Pmax
-      real(8) :: xmin(n)
-      real(8) :: xmax(n)
-
-      xmin = x
-      xmax = x
-
-      Pmax = -huge(1.d0)
-      Pmin =  huge(1.d0)
-
-      fc = this%P(x)
-
-
-      ! Searching for maximum and minimum
-
-      do k = 1, m
-
-         Pc = this%P(dm(k,:))
-
-         if ( Pc < Pmin ) then
-
-            Pmin = Pc
-
-            xmin = dm(k,:)
-
-         end if
-
-         if ( Pmax < Pc ) then
-
-            Pmax = Pc
-
-            xmax = dm(k,:)
-
-         end if
-
-      end do
-
-
-      ! Selecting ko
-
-      if ( fc <= Pmin) then
-
-         ko = -1
-
-      else if ( Pmax <= fc ) then
-
-         ko = 1
-
-      else
-
-         ko = 0
-
-      end if
-
-   end subroutine
-
 
 end module
