@@ -14,6 +14,7 @@ module mod_class_RSM_search_strategy
    use mod_class_RSM_factory
    use mod_string
    use mod_class_ehist
+   use mod_random_generator
 
    implicit none
 
@@ -365,7 +366,7 @@ contains
 
          xa = (histl(ox(j),1:nu)-histl(ox(i),1:nu))/(xmax-xmin)
 
-         call random_number(rnd)
+         call rand_number(rnd)
 
          if ( norm2(xa) > netol .and. rnd < nep ) then
 

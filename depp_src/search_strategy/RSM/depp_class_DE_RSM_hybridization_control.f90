@@ -5,6 +5,7 @@ module mod_class_DE_RSM_hybridization_control
 
    use mod_mpi
    use mod_class_system_variables
+   use mod_random_generator
 
    implicit none
 
@@ -142,7 +143,7 @@ contains
 
       is_rsm_applicable = .false.
 
-      call random_number(rnd)
+      call rand_number(rnd)
 
       if ( ( 2 * this%nf <= this%np * (g-1)) .and. rnd <= this%fh ) is_rsm_applicable = .true.
 
