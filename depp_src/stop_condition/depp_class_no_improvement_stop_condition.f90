@@ -9,6 +9,7 @@ module mod_class_no_improvement_stop_condition
    use mod_class_system_variables
    use mod_class_ifile
    use mod_string
+   use mod_mpi
 
    implicit none
 
@@ -20,17 +21,22 @@ module mod_class_no_improvement_stop_condition
    type, public, extends(class_abstract_stop_condition) :: class_no_improvement_stop_condition
 
       private
-      integer                            :: GNoAcc   !< Maximum number of generations allowed before stopping if no improvement was found
-      real(8), allocatable, dimension(:) :: fbest    !< Register the last GNoAcc best values of the fitness function
-      logical                            :: stopflag !< Stop flag
-      integer                            :: nwi      !< Number of generations without improvement
+      integer                            :: GNoAcc      !< Maximum number of generations allowed before stopping if no improvement was found
+      real(8), allocatable, dimension(:) :: fbest       !< Register the last GNoAcc best values of the fitness function
+      logical                            :: stopflag    !< Stop flag
+      integer                            :: nwi         !< Number of generations without improvement
+      integer                            :: ireg        !< Current register
+      character(len=:), allocatable      :: backup_file !< Backup file
 
    contains
 
-      procedure, public, pass :: init                        !< Constructor
-      procedure, public, pass :: compute_stop_condition      !< Computes stop condition
-      procedure, public, pass :: is_stop_condition_satisfied !< Checks if stop condition is satisfied
-      procedure, public, pass :: convergence_info            !< Returns a string containing convergence information
+      procedure, public,  pass :: init                        !< Constructor
+      procedure, public,  pass :: compute_stop_condition      !< Computes stop condition
+      procedure, public,  pass :: is_stop_condition_satisfied !< Checks if stop condition is satisfied
+      procedure, public,  pass :: convergence_info            !< Returns a string containing convergence information
+      procedure, private, pass :: save_backup                 !< Saves a backup of the class state
+      procedure, private, pass :: load_backup                 !< Loads a backup of the class state
+
 
    end type
 
@@ -45,6 +51,7 @@ contains
 
       ! Inner variables
       integer :: i
+      integer :: reload
       type(class_ifile) :: ifile
 
 
@@ -52,6 +59,11 @@ contains
       call ifile%init(filename=trim(sys_var%absparfile), field_separator="&")
       call ifile%load()
       call ifile%get_value(this%GNoAcc,"GNoAcc")
+      call ifile%get_value(reload,"reload")
+
+      ! Backup file
+      this%backup_file = trim(sys_var%absfolderout) // "class_no_improvement_stop_condition_backup.txt"
+
 
       ! Allocating resources
 
@@ -70,6 +82,10 @@ contains
 
       this%nwi = 0
 
+      this%ireg = 0
+
+      if (reload==1) call this%load_backup()
+
    end subroutine
 
 
@@ -81,12 +97,11 @@ contains
 
       ! Inner variables
       integer       :: i
-      integer, save :: ireg = 0
 
       ! Getting the index of the current register
-      ireg = idx(ireg+1,this%GNoAcc)
+      this%ireg = idx(this%ireg+1,this%GNoAcc)
 
-      this%fbest(ireg) = maxval(ehist%fit)
+      this%fbest(this%ireg) = maxval(ehist%fit)
 
 
       this%stopflag = .true.
@@ -102,11 +117,13 @@ contains
 
             this%nwi = i-1
 
-            return
+            exit
 
          end if
 
       end do
+
+      call this%save_backup()
 
    end subroutine
 
@@ -151,5 +168,42 @@ contains
       str = trim(caux)
 
    end function
+
+   !> \brief Saves a backup of the class state
+   subroutine save_backup(this)
+      implicit none
+      class(class_no_improvement_stop_condition) :: this !< A reference to this object
+
+      if (mpio%master) then
+
+         open(20, file=this%backup_file)
+
+         write(20,*) this%ireg
+         write(20,*) this%fbest
+         write(20,*) this%stopflag
+         write(20,*) this%nwi
+
+         close(20)
+
+      end if
+
+   end subroutine
+
+
+   !> \brief Loads a backup of the class state
+   subroutine load_backup(this)
+      implicit none
+      class(class_no_improvement_stop_condition) :: this !< A reference to this object
+
+      open(20, file=this%backup_file)
+
+      read(20,*) this%ireg
+      read(20,*) this%fbest
+      read(20,*) this%stopflag
+      read(20,*) this%nwi
+
+      close(20)
+
+   end subroutine
 
 end module

@@ -4,6 +4,7 @@
 module mod_class_external_fitness_calculator
 
    use mod_mpi
+   use mod_class_ifile
    use mod_class_ehist
    use mod_class_system_variables
    use mod_class_abstract_fitness_calculator
@@ -27,6 +28,7 @@ module mod_class_external_fitness_calculator
       integer                            :: success_counter !< Total number of success
       integer                            :: failure_counter !< Total number of failures
 
+      character(len=:), allocatable :: backup_file  !< Backup file
       integer                       :: np           !< Population size
       character(len=:), allocatable :: sname        !< Simulation name
       character(len=:), allocatable :: absfolderout !< Absolute path to output folder
@@ -43,6 +45,8 @@ module mod_class_external_fitness_calculator
       procedure, public,  pass :: send              !< Sends information from this threat
       procedure, public,  pass :: recv              !< Receives information from other threads
       procedure, public,  pass :: update            !< Updates class after a parallel computation cycle
+      procedure, private, pass :: save_backup       !< Saves a backup of the class state
+      procedure, private, pass :: load_backup       !< Loads a backup of the class state
 
 
    end type
@@ -58,11 +62,17 @@ contains
       class(class_system_variables), intent(in)  :: sys_var !< System's variables
       class(class_ehist),            intent(in)  :: ehist   !< Evolution history
 
+      ! Inner variables
+      type(class_ifile) :: ifile
+      integer           :: reload
+
       this%absfolderout = sys_var%absfolderout
       this%fdir         = sys_var%fdir
       this%ffit         = sys_var%ffit
       this%sname        = ehist%sname
 
+      ! Backup file
+      this%backup_file = trim(this%absfolderout) // "/class_external_fitness_calculator_backup.txt"
 
       ! Population size
       this%np = ehist%np
@@ -71,11 +81,26 @@ contains
       allocate(this%success_counter_thread(ehist%np))
       allocate(this%failure_counter_thread(ehist%np))
 
-      this%success_counter_thread = 0
-      this%failure_counter_thread = 0
+      ! Reading reload option
+      call ifile%init(filename=sys_var%absparfile, field_separator='&')
 
-      this%success_counter = 0
-      this%failure_counter = 0
+      call ifile%load()
+
+      call ifile%get_value(reload,"reload")
+
+      if (reload==0) then
+
+         this%success_counter_thread = 0
+         this%failure_counter_thread = 0
+
+         this%success_counter = 0
+         this%failure_counter = 0
+
+      else
+
+         call this%load_backup()
+
+      end if
 
    end subroutine
 
@@ -293,6 +318,46 @@ contains
 
       this%success_counter = sum(this%success_counter_thread)
       this%failure_counter = sum(this%failure_counter_thread)
+
+      call this%save_backup()
+
+   end subroutine
+
+
+   !> \brief Saves a backup of the class state
+   subroutine save_backup(this)
+      implicit none
+      class(class_external_fitness_calculator) :: this !< A reference to this object
+
+      if (mpio%master) then
+
+         open(20, file=this%backup_file)
+
+         write(20,*) this%success_counter_thread
+         write(20,*) this%failure_counter_thread
+         write(20,*) this%success_counter
+         write(20,*) this%failure_counter
+
+         close(20)
+
+      end if
+
+   end subroutine
+
+
+   !> \brief Loads a backup of the class state
+   subroutine load_backup(this)
+      implicit none
+      class(class_external_fitness_calculator) :: this !< A reference to this object
+
+      open(20, file=this%backup_file)
+
+      read(20,*) this%success_counter_thread
+      read(20,*) this%failure_counter_thread
+      read(20,*) this%success_counter
+      read(20,*) this%failure_counter
+
+      close(20)
 
    end subroutine
 

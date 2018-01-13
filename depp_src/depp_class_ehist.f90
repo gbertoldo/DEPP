@@ -5,6 +5,7 @@
 
 module mod_class_ehist
 
+   use mod_mpi
    use mod_string
    use mod_class_system_variables
    use mod_class_ifile
@@ -199,22 +200,26 @@ contains
       class(class_ehist)                        :: this    !< A reference to this object
       class(class_system_variables), intent(in) :: sys_var !< System's variables
 
-      open(23, file = trim(sys_var%absfolderout) // trim(this%sname) // "-ehist-backup.txt")
+      if (mpio%master) then
 
-      write(23,*) this%sname
-      write(23,*) this%g
-      write(23,*) this%nu
-      write(23,*) this%np
-      write(23,*) this%ng
-      write(23,*) this%ibest
-      write(23,*) this%fit
-      write(23,*) this%pop
-      write(23,*) this%hist
-      write(23,*) this%xmin
-      write(23,*) this%xmax
-      write(23,*) this%xname
+         open(23, file = trim(sys_var%absfolderout) // trim(this%sname) // "-ehist-backup.txt")
 
-      close(23)
+         write(23,*) this%sname
+         write(23,*) this%g
+         write(23,*) this%nu
+         write(23,*) this%np
+         write(23,*) this%ng
+         write(23,*) this%ibest
+         write(23,*) this%fit
+         write(23,*) this%pop
+         write(23,*) this%hist
+         write(23,*) this%xmin
+         write(23,*) this%xmax
+         write(23,*) this%xname
+
+         close(23)
+
+      end if
 
    end subroutine
 

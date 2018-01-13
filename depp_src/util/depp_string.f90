@@ -35,7 +35,7 @@ contains
 
       else
 
-         write(tmp,*)
+         write(tmp,*) val
 
       end if
 
@@ -59,7 +59,7 @@ contains
 
       else
 
-         write(tmp,*)
+         write(tmp,*) val
 
       end if
 
@@ -83,7 +83,7 @@ contains
 
       else
 
-         write(tmp,*)
+         write(tmp,*) val
 
       end if
 

@@ -144,21 +144,17 @@ contains
             call ehist%select_individuals()
 
 
-            ! Only for master
-            if (mpio%master) then
+            ! Printing evolution history information
+            call sys_var%logger%print(ehist%info())
 
-               call sys_var%logger%print(ehist%info())
+            ! Calculating the ellapsed CPU time
+            call timer%measure()
 
-               ! Calculating the ellapsed CPU time
-               call timer%measure()
+            ! Saving backup of cpu time
+            call timer%save_backup()
 
-               ! Saving backup of cpu time
-               call timer%save_backup()
-
-               ! Saving backup data
-               call ehist%save_backup(sys_var)
-
-            end if
+            ! Saving backup data
+            call ehist%save_backup(sys_var)
 
             call mod_mpi_barrier()
 

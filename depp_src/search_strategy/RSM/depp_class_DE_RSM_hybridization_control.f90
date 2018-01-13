@@ -4,6 +4,7 @@
 module mod_class_DE_RSM_hybridization_control
 
    use mod_mpi
+   use mod_class_ifile
    use mod_class_system_variables
    use mod_random_generator
 
@@ -23,8 +24,8 @@ module mod_class_DE_RSM_hybridization_control
       real(8) ::  fhmin !< Minimum factor of hybridization
       real(8) ::  fhmax !< Maximum factor of hybridization
       integer ::    fhm !< Model for the dynamical calculation of the factor of hybridization
-
-      real(8), allocatable, dimension(:) :: r_rsm !< Register if RSM was applied with success (1) or not (0)
+      character(len=:), allocatable      :: backup_file !< Backup file
+      real(8), allocatable, dimension(:) :: r_rsm       !< Register if RSM was applied with success (1) or not (0)
 
       ! Pointer to system variables
       class(class_system_variables), pointer :: sys_var !< System's variables
@@ -37,6 +38,8 @@ module mod_class_DE_RSM_hybridization_control
       procedure, pass, private :: rsm_p_success     !< Returns the probability of success of RSM
       procedure, pass, private :: idx               !< Returns the index of the current register
       procedure, pass, public  :: update            !< Calculates the hybridization factor according to a prescribed model
+      procedure, pass, private :: save_backup       !< Saves backup of the class state
+      procedure, pass, private :: load_backup       !< Loads backup of the class state
 
    end type
 
@@ -64,6 +67,11 @@ contains
       real(8),                               intent(in) :: fhmax   !< Maximum hybridization factor
       integer,                               intent(in) :: fhm     !< Model for the dynamical calculation of the factor of hybridization
 
+      ! Inner variables
+      type(class_ifile) :: ifile
+      integer           :: reload
+
+
       this%sys_var => sys_var
 
       this%np = np
@@ -83,6 +91,21 @@ contains
       this%r_rsm = -1.d0
 
       this%ireg = 0
+
+      this%backup_file = trim(sys_var%absfolderout) // "/class_DE_RSM_hybridization_control_backup.txt"
+
+      ! Reading reload option
+      call ifile%init(filename=sys_var%absparfile, field_separator='&')
+
+      call ifile%load()
+
+      call ifile%get_value(reload,"reload")
+
+      if (reload==1) then
+
+         call this%load_backup()
+
+      end if
 
    end subroutine
 
@@ -222,6 +245,44 @@ contains
          case default
 
       end select
+
+      call this%save_backup()
+
+   end subroutine
+
+
+   !> \brief Saves backup of class state
+   subroutine save_backup(this)
+      implicit none
+      class(class_DE_RSM_hybridization_control) :: this !< A reference to this object
+
+      if (mpio%master) then
+
+         open(20, file=this%backup_file)
+
+         write(20,*) this%ireg
+         write(20,*) this%fh
+         write(20,*) this%r_rsm
+
+         close(20)
+
+      end if
+
+   end subroutine
+
+
+   !> \brief Loads backup of class state
+   subroutine load_backup(this)
+      implicit none
+      class(class_DE_RSM_hybridization_control) :: this !< A reference to this object
+
+      open(20, file=this%backup_file)
+
+      read(20,*) this%ireg
+      read(20,*) this%fh
+      read(20,*) this%r_rsm
+
+      close(20)
 
    end subroutine
 

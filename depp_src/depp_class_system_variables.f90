@@ -125,9 +125,10 @@ contains
 
 
       ! Initializing logger
-      call this%logger%init(trim(this%abslogfile))
+      call this%logger%init(reload, trim(this%abslogfile))
 
-
+      call this%logger%print("")
+      call this%logger%print("")
       call this%logger%print("  =======  DIFFERENTIAL EVOLUTION PARALLEL PROGRAM  =======  ")
       call this%logger%print("")
       call this%logger%print(this%calendar%get_date() // " : System date")

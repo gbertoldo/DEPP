@@ -3,6 +3,7 @@
 
 module mod_class_btimer
 
+   use mod_mpi
    use mod_class_system_variables
    use mod_class_ifile
    use mod_class_timer
@@ -73,11 +74,15 @@ contains
    subroutine save_backup(this)
       class(class_btimer) :: this !< A reference to this object
 
-      open(1000,file=this%backup_file)
+      if (mpio%master) then
 
-      write(1000,*) this%elapsed_time()
+         open(1000,file=this%backup_file)
 
-      close(1000)
+         write(1000,*) this%elapsed_time()
+
+         close(1000)
+
+      end if
 
    end subroutine
 

@@ -35,9 +35,10 @@ contains
 
 
    !> \brief Open files
-   subroutine init(this, logfile)
+   subroutine init(this, reload, logfile)
       implicit none
       class(class_log_output_control) :: this    !< A reference to this object
+      integer,             intent(in) :: reload  !< Reload? (0=no, 1=yes)
       character(len=*),    intent(in) :: logfile !< File name
 
 
@@ -53,7 +54,19 @@ contains
          this%fileid(2) = 100
 
          ! Only master
-         if (mpio%master) open(this%fileid(2),file=logfile)
+         if (mpio%master) then
+
+            if (reload==0) then
+
+               open(this%fileid(2),file=logfile)
+
+            else
+
+               open(this%fileid(2),file=logfile, access='append')
+
+            end if
+
+         end if
 
       end if
 
