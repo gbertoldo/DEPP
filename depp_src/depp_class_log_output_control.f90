@@ -24,9 +24,9 @@ module mod_class_log_output_control
 
    contains
 
-      procedure, public, pass :: init
-      procedure, public, pass :: print
-      procedure, public, pass :: finish
+      procedure, public, pass :: init   !< Constructor
+      procedure, public, pass :: print  !< Print
+      procedure, public, pass :: finish !< Destructor
 
    end type
 
@@ -37,8 +37,8 @@ contains
    !> \brief Open files
    subroutine init(this, logfile)
       implicit none
-      class(class_log_output_control) :: this
-      character(len=*),    intent(in) :: logfile
+      class(class_log_output_control) :: this    !< A reference to this object
+      character(len=*),    intent(in) :: logfile !< File name
 
 
       ! Initialize only once
@@ -64,8 +64,8 @@ contains
    !> \brief Print messages
    subroutine print(this, msg)
       implicit none
-      class(class_log_output_control) :: this
-      character(len=*),    intent(in) :: msg
+      class(class_log_output_control) :: this !< A reference to this object
+      character(len=*),    intent(in) :: msg  !< Message to be printed
 
       ! Inner variables
       integer :: i
@@ -88,7 +88,7 @@ contains
    !> \brief Close files
    subroutine finish(this)
       implicit none
-      class(class_log_output_control) :: this
+      class(class_log_output_control) :: this !< A reference to this object
 
       ! Inner variables
       integer :: i

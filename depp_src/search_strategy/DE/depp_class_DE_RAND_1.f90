@@ -17,7 +17,7 @@ module mod_class_DE_RAND_1
    ! Makes everything private, except otherwise stated
    private
 
-   ! Public class defining DE/rand/1 search strategy
+   !> \brief Class defining DE/rand/1 search strategy
    type, public, extends(class_abstract_search_strategy) :: class_DE_RAND_1
 
       private
@@ -27,9 +27,9 @@ module mod_class_DE_RAND_1
 
    contains
 
-      procedure, public, pass :: init
-      procedure, public, pass :: get_trial
-      procedure, public, pass :: feed_back
+      procedure, public, pass :: init      !< Constructor
+      procedure, public, pass :: get_trial !< Gets a trial individual
+      procedure, public, pass :: feed_back !< Process the feedback from fitness calculator
 
    end type
 
@@ -38,9 +38,9 @@ contains
    !> \brief Constructor
    subroutine init(this, sys_var, conf_file_name)
       implicit none
-      class(class_DE_RAND_1)                    :: this
-      class(class_system_variables), intent(in) :: sys_var
-      character(len=*),              intent(in) :: conf_file_name
+      class(class_DE_RAND_1)                    :: this           !< A reference to this object
+      class(class_system_variables), intent(in) :: sys_var        !< System's variables
+      character(len=*),              intent(in) :: conf_file_name !< Configuration file
 
       ! Inner variables
       type(class_ifile)   :: ifile
@@ -67,11 +67,11 @@ contains
    !> \brief Generates a trial individual
    subroutine get_trial(this, ind, ehist, x, es)
       implicit none
-      class(class_DE_RAND_1)                :: this
-      integer,                  intent(in)  :: ind   ! Number of the individual of the population
-      class(class_ehist),       intent(in)  :: ehist ! Evolution history
-      real(8), dimension(:),    intent(out) :: x     ! Trial individual
-      integer, optional,        intent(out) :: es    ! Exit status
+      class(class_DE_RAND_1)                :: this  !< A reference to this object
+      integer,                  intent(in)  :: ind   !< Number of the individual of the population
+      class(class_ehist),       intent(in)  :: ehist !< Evolution history
+      real(8), dimension(:),    intent(out) :: x     !< Trial individual
+      integer, optional,        intent(out) :: es    !< Exit status
 
 
       ! Inner variables
@@ -93,14 +93,14 @@ contains
 
    end subroutine
 
-
+   !> \brief Process the feedback from fitness calculator
    subroutine feed_back(this, ind, ehist, fit, ecode)
       implicit none
-      class(class_DE_RAND_1)                :: this
-      integer,                  intent(in)  :: ind     ! Number of the individual of the population
-      class(class_ehist),       intent(in)  :: ehist   ! Evolution history
-      real(8),                  intent(in)  :: fit     ! Fitness of the trial individual
-      integer,                  intent(in)  :: ecode   ! Error code
+      class(class_DE_RAND_1)                :: this    !< A reference to this object
+      integer,                  intent(in)  :: ind     !< Number of the individual of the population
+      class(class_ehist),       intent(in)  :: ehist   !< Evolution history
+      real(8),                  intent(in)  :: fit     !< Fitness of the trial individual
+      integer,                  intent(in)  :: ecode   !< Error code
 
    end subroutine
 

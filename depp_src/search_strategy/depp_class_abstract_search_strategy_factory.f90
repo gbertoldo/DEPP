@@ -8,18 +8,18 @@ module mod_class_abstract_search_strategy_factory
 
    implicit none
 
-   !> Interface for a factory class for creating search strategy objects
+   !> \brief Interface for a factory class for creating search strategy objects
    type, abstract, public :: class_abstract_search_strategy_factory
 
    contains
 
-      procedure(create_interface), deferred, public, pass :: create
+      procedure(create_interface), deferred, public, pass :: create !< Creates a search strategy object
 
    end type
 
    abstract interface
 
-      !> Creates an instance of the search strategy object
+      !> \brief Creates an instance of the search strategy object
       subroutine create_interface(this, sys_var, conf_file_name, searcher)
 
          import class_abstract_search_strategy_factory
@@ -27,10 +27,10 @@ module mod_class_abstract_search_strategy_factory
          import class_abstract_search_strategy
 
          implicit none
-         class(class_abstract_search_strategy_factory)               :: this
-         class(class_system_variables),                  intent(in)  :: sys_var
-         character(len=*),                               intent(in)  :: conf_file_name
-         class(class_abstract_search_strategy), pointer, intent(out) :: searcher
+         class(class_abstract_search_strategy_factory)               :: this           !< A reference to this object
+         class(class_system_variables),                  intent(in)  :: sys_var        !< System's variables
+         character(len=*),                               intent(in)  :: conf_file_name !< Configuration file
+         class(class_abstract_search_strategy), pointer, intent(out) :: searcher       !< Search strategy object
 
 
       end subroutine

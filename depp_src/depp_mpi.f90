@@ -138,8 +138,8 @@ contains
    !> Facade for sending an integer
    subroutine mod_mpi_send_integer(to_thread, dta)
       implicit none
-      integer, intent(in) :: to_thread
-      integer, intent(in) :: dta
+      integer, intent(in) :: to_thread !< Number of the receiver thread
+      integer, intent(in) :: dta       !< Data
 
       call mpi_send(dta, 1, mpi_integer, to_thread, mpio%tag, mpio%comm, mpio%code)
 
@@ -149,8 +149,8 @@ contains
    !> Facade for sending a vector of integers
    subroutine mod_mpi_send_integer_vector(to_thread, dta)
       implicit none
-      integer, intent(in) :: to_thread
-      integer, intent(in) :: dta(:)
+      integer, intent(in) :: to_thread !< Number of the receiver thread
+      integer, intent(in) :: dta(:)    !< Data
 
       call mpi_send(dta, size(dta), mpi_integer, to_thread, mpio%tag, mpio%comm, mpio%code)
 
@@ -160,8 +160,8 @@ contains
    !> Facade for sending a double
    subroutine mod_mpi_send_double(to_thread, dta)
       implicit none
-      integer, intent(in) :: to_thread
-      real(8), intent(in) :: dta
+      integer, intent(in) :: to_thread !< Number of the receiver thread
+      real(8), intent(in) :: dta       !< Data
 
       call mpi_send(dta, 1, mpi_double_precision, to_thread, mpio%tag, mpio%comm, mpio%code)
 
@@ -171,8 +171,8 @@ contains
    !> Facade for sending a vector of doubles
    subroutine mod_mpi_send_double_vector(to_thread, dta)
       implicit none
-      integer, intent(in) :: to_thread
-      real(8), intent(in) :: dta(:)
+      integer, intent(in) :: to_thread !< Number of the receiver thread
+      real(8), intent(in) :: dta(:)    !< Data
 
       call mpi_send(dta, size(dta), mpi_double_precision, to_thread, mpio%tag, mpio%comm, mpio%code)
 
@@ -182,8 +182,8 @@ contains
    !> Facade for receiving an integer
    subroutine mod_mpi_recv_integer(from_thread, dta)
       implicit none
-      integer, intent(in) :: from_thread
-      integer, intent(in) :: dta
+      integer, intent(in) :: from_thread !< Number of the sender thread
+      integer, intent(in) :: dta         !< Data
 
       call mpi_recv(dta, 1, mpi_integer, from_thread, mpio%tag, mpio%comm, mpio%status, mpio%code)
 
@@ -193,8 +193,8 @@ contains
    !> Facade for receiving a vector of integers
    subroutine mod_mpi_recv_integer_vector(from_thread, dta)
       implicit none
-      integer, intent(in) :: from_thread
-      integer, intent(in) :: dta(:)
+      integer, intent(in) :: from_thread !< Number of the sender thread
+      integer, intent(in) :: dta(:)      !< Data
 
       call mpi_recv(dta, size(dta), mpi_integer, from_thread, mpio%tag, mpio%comm, mpio%status, mpio%code)
 
@@ -204,8 +204,8 @@ contains
    !> Facade for receiving a double
    subroutine mod_mpi_recv_double(from_thread, dta)
       implicit none
-      integer, intent(in) :: from_thread
-      real(8), intent(in) :: dta
+      integer, intent(in) :: from_thread !< Number of the sender thread
+      real(8), intent(in) :: dta         !< Data
 
       call mpi_recv(dta, 1, mpi_double_precision, from_thread, mpio%tag, mpio%comm, mpio%status, mpio%code)
 
@@ -215,8 +215,8 @@ contains
    !> Facade for receiving a vector of doubles
    subroutine mod_mpi_recv_double_vector(from_thread, dta)
       implicit none
-      integer, intent(in) :: from_thread
-      real(8), intent(in) :: dta(:)
+      integer, intent(in) :: from_thread !< Number of the sender thread
+      real(8), intent(in) :: dta(:)      !< Data
 
       call mpi_recv(dta, size(dta), mpi_double_precision, from_thread, mpio%tag, mpio%comm, mpio%status, mpio%code)
 

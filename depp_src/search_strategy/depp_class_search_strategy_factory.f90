@@ -15,24 +15,24 @@ module mod_class_search_strategy_factory
 
    implicit none
 
-   !> Factory class for creating search strategy objects
+   !> \brief Factory class for creating search strategy objects
    type, public, extends(class_abstract_search_strategy_factory) :: class_search_strategy_factory
 
    contains
 
-      procedure, public, pass :: create
+      procedure, public, pass :: create !< Creates an instance of the search strategy object
 
    end type
 
 contains
 
-   !> Creates an instance of the search strategy object
+   !> \brief Creates an instance of the search strategy object
    subroutine create(this, sys_var, conf_file_name, searcher)
       implicit none
-      class(class_search_strategy_factory)                        :: this
-      class(class_system_variables),                  intent(in)  :: sys_var
-      character(len=*),                               intent(in)  :: conf_file_name
-      class(class_abstract_search_strategy), pointer, intent(out) :: searcher
+      class(class_search_strategy_factory)                        :: this           !< A reference to this object
+      class(class_system_variables),                  intent(in)  :: sys_var        !< System's variables
+      character(len=*),                               intent(in)  :: conf_file_name !< Configuration file
+      class(class_abstract_search_strategy), pointer, intent(out) :: searcher       !< Search strategy object
 
       ! Inner variables
       type(class_ifile)   :: ifile

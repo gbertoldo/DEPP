@@ -17,15 +17,15 @@ module mod_class_btimer
 
       private
 
-      real(8)                       :: backup_tcpu = 0.d0
-      character(len=:), allocatable :: backup_file
+      real(8)                       :: backup_tcpu = 0.d0 !< Elapsed time
+      character(len=:), allocatable :: backup_file        !< Backup file
 
 
    contains
 
-      procedure, public, pass :: init
-      procedure, public, pass :: save_backup
-      procedure, public, pass :: load_backup
+      procedure, public, pass :: init        !< Constructor
+      procedure, public, pass :: save_backup !< Saves backup
+      procedure, public, pass :: load_backup !< Loads backup
 
    end type
 
@@ -34,8 +34,8 @@ contains
 
    !> \brief Constructor
    subroutine init(this, sys_var)
-      class(class_btimer)                       :: this
-      class(class_system_variables), intent(in) :: sys_var
+      class(class_btimer)                       :: this    !< A reference to this object
+      class(class_system_variables), intent(in) :: sys_var !< System's variables
 
       ! Inner variables
       type(class_ifile) :: ifile     ! Input file reader
@@ -71,7 +71,7 @@ contains
 
    !> \brief Save backup
    subroutine save_backup(this)
-      class(class_btimer) :: this
+      class(class_btimer) :: this !< A reference to this object
 
       open(1000,file=this%backup_file)
 
@@ -84,7 +84,7 @@ contains
 
    !> \brief Load backup
    subroutine load_backup(this)
-      class(class_btimer) :: this
+      class(class_btimer) :: this !< A reference to this object
 
       open(1000,file=this%backup_file)
 

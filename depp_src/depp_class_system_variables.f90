@@ -1,5 +1,5 @@
 
-! \brief Contains information about system variables
+!> \brief Contains information about system variables
 
 module mod_class_system_variables
 
@@ -14,22 +14,23 @@ module mod_class_system_variables
   ! Makes everything private, except otherwise stated
    private
 
-   ! Type system variables contains information about paths and filenames
+   !> \brief Class system variables contains information about paths and filenames
+   !! as well as a logger to print output data.
    type, public :: class_system_variables
 
-      character(str_size) :: sname                        !< simulation id
-      character(str_size) :: folderin  = "./depp_input/"  !< folder the for input files
-      character(str_size) :: folderout = "./depp_output/" !< folder the for output files
-      character(str_size) :: ifilename = "input_file.txt" !< stores the name of the parameters input file
-      character(str_size) :: absfolderin                  !< absolute path to folderin
-      character(str_size) :: absfolderout                 !< absolute path to folderout
-      character(str_size) :: parfile                      !< name of the parameters input file
-      character(str_size) :: absparfile                   !< absolute path and name of the parameters input file
-      character(str_size) :: logfile                      !< name of the log file
-      character(str_size) :: abslogfile                   !< absolute path to log file
-      character(str_size) :: fdir                         !< name of working directory for fitness calculation
-      character(str_size) :: ffit                         !< name of executable for fitness calculation
-      character(str_size) :: CWD                          !< current working directory
+      character(str_size) :: sname                        !< Simulation id
+      character(str_size) :: folderin  = "./depp_input/"  !< Folder the for input files
+      character(str_size) :: folderout = "./depp_output/" !< Folder the for output files
+      character(str_size) :: ifilename = "input_file.txt" !< Stores the name of the parameters input file
+      character(str_size) :: absfolderin                  !< Absolute path to folderin
+      character(str_size) :: absfolderout                 !< Absolute path to folderout
+      character(str_size) :: parfile                      !< Name of the parameters input file
+      character(str_size) :: absparfile                   !< Absolute path and name of the parameters input file
+      character(str_size) :: logfile                      !< Name of the log file
+      character(str_size) :: abslogfile                   !< Absolute path to log file
+      character(str_size) :: fdir                         !< Name of working directory for fitness calculation
+      character(str_size) :: ffit                         !< Name of executable for fitness calculation
+      character(str_size) :: CWD                          !< Current working directory
 
       ! Defines an instance of class_log_output_control
       type(class_log_output_control) :: logger            !< Logger for output data
@@ -38,7 +39,7 @@ module mod_class_system_variables
 
    contains
 
-      procedure, public, pass :: init
+      procedure, public, pass :: init                     !< Constructor
 
    end type
 
@@ -47,7 +48,7 @@ contains
    !> \brief Reads simulation variables from input file
    subroutine init(this)
       implicit none
-      class(class_system_variables) :: this
+      class(class_system_variables) :: this !< A reference to this object
 
       ! Inner variables
       type(class_ifile)       :: ifile

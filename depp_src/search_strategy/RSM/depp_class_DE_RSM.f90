@@ -20,35 +20,35 @@ module mod_class_DE_RSM
    ! Makes everything private, except otherwise stated
    private
 
-   ! Public class defining DE-RSM search strategy
+   !> \brief DE-RSM search strategy
    type, public, extends(class_abstract_search_strategy) :: class_DE_RSM
 
       private
 
       ! These data are calculated separately by each thread and must be exchanged
       ! before the next generation.
-      integer, allocatable                           :: rsm_tag(:)   ! Stores the return state of application of DE-RSM
-      real(8), allocatable                           :: curnt_fit(:) ! Fitness of the current individuals
-      real(8), allocatable                           :: trial_fit(:) ! Fitness of the trial individuals
+      integer, allocatable                           :: rsm_tag(:)   !< Stores the return state of application of DE-RSM
+      real(8), allocatable                           :: curnt_fit(:) !< Fitness of the current individuals
+      real(8), allocatable                           :: trial_fit(:) !< Fitness of the trial individuals
 
       ! Hybridization control
-      type(class_DE_RSM_hybridization_control)       :: hybrid_control
+      type(class_DE_RSM_hybridization_control)       :: hybrid_control !< Controls DE-RSM hybridization
 
       ! Search strategies
-      class(class_abstract_search_strategy), pointer :: de_searcher  => null()
-      class(class_abstract_search_strategy), pointer :: rsm_searcher => null()
+      class(class_abstract_search_strategy), pointer :: de_searcher  => null() !< DE search strategy
+      class(class_abstract_search_strategy), pointer :: rsm_searcher => null() !< RSM search strategy
 
 
    contains
 
-      procedure, public, pass :: init
-      procedure, public, pass :: get_trial
-      procedure, public, pass :: feed_back
+      procedure, public, pass :: init      !< Constructor
+      procedure, public, pass :: get_trial !< Gets a trial individual
+      procedure, public, pass :: feed_back !< Process the feedback from fitness calculator
 
-      procedure, public, pass :: data_size
-      procedure, public, pass :: send
-      procedure, public, pass :: recv
-      procedure, public, pass :: update
+      procedure, public, pass :: data_size !< Gives the size of the shared data vector
+      procedure, public, pass :: send      !< Send data to other threads
+      procedure, public, pass :: recv      !< Receive data from other threads
+      procedure, public, pass :: update    !< Perform update calculations after parallel computation cycle
 
    end type
 
@@ -57,10 +57,10 @@ contains
    !> \brief Constructor
    subroutine init(this, sys_var, conf_file_name, search_strategy_factory)
       implicit none
-      class(class_DE_RSM)                                       :: this
-      class(class_system_variables),                 intent(in) :: sys_var
-      character(len=*),                              intent(in) :: conf_file_name
-      class(class_abstract_search_strategy_factory), intent(in) :: search_strategy_factory
+      class(class_DE_RSM)                                       :: this                    !< A reference to this object
+      class(class_system_variables),                 intent(in) :: sys_var                 !< System's variables
+      character(len=*),                              intent(in) :: conf_file_name          !< Configuration file
+      class(class_abstract_search_strategy_factory), intent(in) :: search_strategy_factory !< Search strategy factory
 
       ! Inner variables
       integer             :: estatus            ! Exit status
@@ -144,23 +144,23 @@ contains
 
 
 
-   !> User defined. Returns the size of the number of elements of the data vector that
+   !> \brief Returns the size of the number of elements of the data vector that
    !! must be shared among threads.
    integer function data_size(this)
       implicit none
-      class(class_DE_RSM) :: this
+      class(class_DE_RSM) :: this !< A reference to this object
 
       data_size = size(this%rsm_tag)
 
    end function
 
 
-   !> User defined. Tells MPI how to send each element of data from current thread to 'to_thread'.
+   !> \brief Tells MPI how to send each element of data from current thread to 'to_thread'.
    subroutine send(this, i, to_thread)
       implicit none
-      class(class_DE_RSM) :: this
-      integer,                    intent(in) :: i
-      integer,                    intent(in) :: to_thread
+      class(class_DE_RSM) :: this      !< A reference to this object
+      integer, intent(in) :: i         !< Index of the shared data vector
+      integer, intent(in) :: to_thread !< Receiver thread
 
       call mod_mpi_send(to_thread, this%rsm_tag(i)  )
       call mod_mpi_send(to_thread, this%trial_fit(i))
@@ -169,12 +169,12 @@ contains
    end subroutine
 
 
-   !> User defined. Tells MPI how to receive each element of data from 'from_thread' to current thread.
+   !> \brief Tells MPI how to receive each element of data from 'from_thread' to current thread.
    subroutine recv(this, i, from_thread)
       implicit none
-      class(class_DE_RSM) :: this
-      integer,                    intent(in) :: i
-      integer,                    intent(in) :: from_thread
+      class(class_DE_RSM) :: this        !< A reference to this object
+      integer, intent(in) :: i           !< Index of the shared data vector
+      integer, intent(in) :: from_thread !< Sender thread
 
       call mod_mpi_recv(from_thread, this%rsm_tag(i)  )
       call mod_mpi_recv(from_thread, this%trial_fit(i))
@@ -183,10 +183,10 @@ contains
    end subroutine
 
 
-   !> Performs update tasks before the next generation.
+   !> \brief Performs update tasks before the next generation.
    subroutine update(this)
       implicit none
-      class(class_DE_RSM) :: this
+      class(class_DE_RSM) :: this !< A reference to this object
 
       ! Inner variables
       integer :: i
@@ -206,11 +206,11 @@ contains
    !> \brief Generates a trial individual
    subroutine get_trial(this, ind, ehist, x, es)
       implicit none
-      class(class_DE_RSM)                   :: this
-      integer,                  intent(in)  :: ind   ! Number of the individual of the population
-      class(class_ehist),       intent(in)  :: ehist ! Evolution history
-      real(8), dimension(:),    intent(out) :: x     ! Trial individual
-      integer, optional,        intent(out) :: es    ! Exit status
+      class(class_DE_RSM)                   :: this  !< A reference to this object
+      integer,                  intent(in)  :: ind   !< Number of the individual of the population
+      class(class_ehist),       intent(in)  :: ehist !< Evolution history
+      real(8), dimension(:),    intent(out) :: x     !< Trial individual
+      integer, optional,        intent(out) :: es    !< Exit status
 
 
       integer :: estatus
@@ -279,14 +279,14 @@ contains
 
    end subroutine
 
-
+   !> \brief Process the feedback from fitness calculator
    subroutine feed_back(this, ind, ehist, fit, ecode)
       implicit none
-      class(class_DE_RSM)                   :: this
-      integer,                  intent(in)  :: ind     ! Number of the individual of the population
-      class(class_ehist),       intent(in)  :: ehist   ! Evolution history
-      real(8),                  intent(in)  :: fit     ! Fitness of the trial individual
-      integer,                  intent(in)  :: ecode   ! Error code
+      class(class_DE_RSM)                   :: this    !< A reference to this object
+      integer,                  intent(in)  :: ind     !< Number of the individual of the population
+      class(class_ehist),       intent(in)  :: ehist   !< Evolution history
+      real(8),                  intent(in)  :: fit     !< Fitness of the trial individual
+      integer,                  intent(in)  :: ecode   !< Error code
 
       this%curnt_fit(ind) = ehist%fit(ind)
       this%trial_fit(ind) = fit

@@ -14,12 +14,12 @@ module mod_stop_condition_factory
 
 contains
 
-   !> Creates an instance of the stop condition object
+   !> \brief Creates an instance of the stop condition object
    subroutine create_stop_condition_object(sys_var, model, stopper)
       implicit none
-      class(class_system_variables),                      intent(in) :: sys_var
-      character(len=*),                                   intent(in) :: model
-      class(class_abstract_stop_condition),     pointer, intent(out) :: stopper
+      class(class_system_variables),                      intent(in) :: sys_var !< System's variables
+      character(len=*),                                   intent(in) :: model   !< Model
+      class(class_abstract_stop_condition),     pointer, intent(out) :: stopper !< Stop condition object
 
 
       if ( .not. associated(stopper) ) then

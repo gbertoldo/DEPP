@@ -23,7 +23,7 @@ module mod_class_ifile
    integer, parameter, private :: chlen = 500
 
 
-   !! Defines a basic structure of input data
+   !> Defines a basic structure of input data
    !! It is expected that input files contains
    !! data in the following pattern:
    !!
@@ -32,48 +32,47 @@ module mod_class_ifile
    !! where FS is the field separator char
    type, private :: basic_struct
 
-      type(character(chlen)) :: value
-      type(character(chlen)) :: varname
-      type(character(chlen)) :: description
+      type(character(chlen)) :: value        !< Value
+      type(character(chlen)) :: varname      !< Variable name or ID
+      type(character(chlen)) :: description  !< Description
 
    end type
 
 
-   !! Defines the ifile class
+   !> Defines the ifile class
    type, public :: class_ifile
 
-      character(len=10), private                             :: field_separator
-      type(character(chlen)), private                        :: filename
-      type(basic_struct), dimension(:), allocatable, private :: data
-      integer,            dimension(:), allocatable, private :: pickedup
+      character(len=10), private                             :: field_separator !< Field separator
+      type(character(chlen)), private                        :: filename        !< File name
+      type(basic_struct), dimension(:), allocatable, private :: data            !< List of data
+      integer,            dimension(:), allocatable, private :: pickedup        !< List of picked up data
 
    contains
 
-      procedure, public,  pass :: init
-      procedure, public,  pass :: clear
-      procedure, public,  pass :: load
-      generic,   public        :: get_value => get_int_value    &
+      procedure, public,  pass :: init                             !< Constructor
+      procedure, public,  pass :: clear                            !< Clears allocated memory
+      procedure, public,  pass :: load                             !< Loads input file data to ifile object
+      generic,   public        :: get_value => get_int_value    &  !< Gets the value of 'varname' (overload function)
          ,                                     get_real8_value  &
          ,                                     get_string_value
-      procedure, private, pass :: get_int_value
-      procedure, private, pass :: get_real8_value
-      procedure, private, pass :: get_string_value
-      procedure, public,  pass :: print_read_data
-      procedure, public,  pass :: print_pickedup_data
+      procedure, private, pass :: get_int_value                    !< Get integer value
+      procedure, private, pass :: get_real8_value                  !< Get double value
+      procedure, private, pass :: get_string_value                 !< Get string value
+      procedure, public,  pass :: print_read_data                  !< Print read data
+      procedure, public,  pass :: print_pickedup_data              !< Print picked up data
 
    end type
 
 
 contains
 
-   !==========================================================================
 
-   !! Initializes ifile object
+   !> \brief Initializes ifile object
    subroutine init(this, filename, field_separator)
       implicit none
-      class(class_ifile)                 :: this
-      type(character(len=*)), intent(in) :: filename
-      type(character(len=*)), intent(in) :: field_separator
+      class(class_ifile)                 :: this            !< A reference to this object
+      type(character(len=*)), intent(in) :: filename        !< File name
+      type(character(len=*)), intent(in) :: field_separator !< Field separator
 
       call this%clear()
 
@@ -83,24 +82,22 @@ contains
 
    end subroutine
 
-   !==========================================================================
 
-   !! Clears allocated memory
+   !> \brief Clears allocated memory
    subroutine clear(this)
       implicit none
-      class(class_ifile) :: this
+      class(class_ifile) :: this !< A reference to this object
 
       if (allocated(this%data))     deallocate(this%data)
       if (allocated(this%pickedup)) deallocate(this%pickedup)
 
    end subroutine
 
-   !==========================================================================
 
-   !! Loads input file data to ifile object
+   !> \brief Loads input file data to ifile object
    subroutine load(this)
       implicit none
-      class(class_ifile) :: this
+      class(class_ifile) :: this !< A reference to this object
 
       ! Inner variables
 
@@ -167,12 +164,11 @@ contains
 
    end subroutine
 
-   !==========================================================================
 
-   !! Checks for variables repeated in the input file
+   !> Checks for variables repeated in the input file
    subroutine check_var_repetition(this)
       implicit none
-      class(class_ifile) :: this
+      class(class_ifile) :: this !< A reference to this object
 
       ! Inner variables
 
@@ -195,15 +191,14 @@ contains
 
    end subroutine
 
-   !==========================================================================
 
-   !! Add data to the end of the list
+   !> \brief Add data to the end of the list
    subroutine add_data(this, value, varname, description)
       implicit none
-      class(class_ifile)           :: this
-      character(len=*), intent(in) :: value
-      character(len=*), intent(in) :: varname
-      character(len=*), intent(in) :: description
+      class(class_ifile)           :: this        !< A reference to this object
+      character(len=*), intent(in) :: value       !< Value of varname
+      character(len=*), intent(in) :: varname     !< Variable name
+      character(len=*), intent(in) :: description !< Variable description
 
       integer :: Nb
       type(basic_struct), dimension(:), allocatable :: tmp
@@ -225,15 +220,14 @@ contains
 
    end subroutine
 
-   !==========================================================================
 
    !> \brief Finds the next token in str separated by FS
    function next_token(str,FS,last_token) result(token)
       implicit none
-      character(len=*),        intent(inout) :: str         !! Input string
-      character(len=*),        intent(in)    :: FS          !! Set of field separators
-      character(len=len(str))                :: token       !! Next token found
-      logical,                 intent(out)   :: last_token  !! Returns true if this is the last_token token
+      character(len=*),        intent(inout) :: str         !< Input string
+      character(len=*),        intent(in)    :: FS          !< Set of field separators
+      character(len=len(str))                :: token       !< Next token found
+      logical,                 intent(out)   :: last_token  !< Returns true if this is the last_token token
 
 
       ! Inner variables
@@ -282,14 +276,13 @@ contains
 
    end function
 
-   !==========================================================================
 
-   !! Prints all data read from file
+   !> \brief Prints all data read from file
    subroutine print_read_data(this,unt,frm)
       implicit none
-      class(class_ifile)                     :: this
-      integer, intent(in)                    :: unt !! Unit to print
-      character(len=*), optional, intent(in) :: frm !! Output format
+      class(class_ifile)                     :: this !< A reference to this object
+      integer, intent(in)                    :: unt  !< Unit to print
+      character(len=*), optional, intent(in) :: frm  !< Output format
 
       ! Inner variables
       integer :: i
@@ -315,14 +308,12 @@ contains
    end subroutine
 
 
-   !==========================================================================
-
-   !! Returns the value of the int corresponding to varname
+   !> \brief Returns the value of the int corresponding to varname
    subroutine get_int_value(this,value,varname)
       implicit none
-      class(class_ifile)            :: this
-      integer,          intent(out) :: value
-      character(len=*), intent(in)  :: varname
+      class(class_ifile)            :: this    !< A reference to this object
+      integer,          intent(out) :: value   !< Value of varname
+      character(len=*), intent(in)  :: varname !< Variable name
 
       ! Inner variables
       integer :: i
@@ -349,14 +340,13 @@ contains
 
    end subroutine
 
-   !==========================================================================
 
-   !! Returns the value of the real(8) corresponding to varname
+   !> \brief Returns the value of the real(8) corresponding to varname
    subroutine get_real8_value(this,value,varname)
       implicit none
-      class(class_ifile)            :: this
-      real(8),          intent(out) :: value
-      character(len=*), intent(in)  :: varname
+      class(class_ifile)            :: this    !< A reference to this object
+      real(8),          intent(out) :: value   !< Value of varname
+      character(len=*), intent(in)  :: varname !< Variable name
 
       ! Inner variables
       integer :: i
@@ -384,14 +374,13 @@ contains
    end subroutine
 
 
-   !==========================================================================
 
-   !! Returns the value of the string corresponding to varname
+   !> \brief Returns the value of the string corresponding to varname
    subroutine get_string_value(this,value,varname)
       implicit none
-      class(class_ifile)            :: this
-      character(len=*), intent(out) :: value
-      character(len=*), intent(in)  :: varname
+      class(class_ifile)            :: this    !< A reference to this object
+      character(len=*), intent(out) :: value   !< Value of varname
+      character(len=*), intent(in)  :: varname !< Variable name
 
       ! Inner variables
       integer :: i
@@ -419,13 +408,12 @@ contains
    end subroutine
 
 
-   !==========================================================================
 
-   !! Add picked up item to the list
+   !> \brief Add picked up item to the list
    subroutine add_pickedup(this, idx)
       implicit none
-      class(class_ifile)  :: this
-      integer, intent(in) :: idx !! Index of the picked data
+      class(class_ifile)  :: this !< A reference to this object
+      integer, intent(in) :: idx  !< Index of the picked data
 
 
       integer :: Nb
@@ -447,15 +435,12 @@ contains
    end subroutine
 
 
-
-   !==========================================================================
-
-   !! Prints all data picked up from file
+   !> \brief Prints all data picked up from file
    subroutine print_pickedup_data(this,unt,frm)
       implicit none
-      class(class_ifile)                     :: this
-      integer,                    intent(in) :: unt !! Unit to print
-      character(len=*), optional, intent(in) :: frm !! Output format
+      class(class_ifile)                     :: this !< A reference to this object
+      integer,                    intent(in) :: unt  !< Unit to print
+      character(len=*), optional, intent(in) :: frm  !< Output format
 
       ! Inner variables
       integer :: i, j
@@ -482,6 +467,5 @@ contains
 
    end subroutine
 
-   !==========================================================================
 
 end module

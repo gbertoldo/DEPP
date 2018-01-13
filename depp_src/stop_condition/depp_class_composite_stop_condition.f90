@@ -17,7 +17,7 @@ module mod_class_composite_stop_condition
    private
 
 
-   ! A pointer to a stop condition object
+   !> \brief A pointer to a stop condition object
    type :: ptr_stop_cond
 
       class(class_abstract_stop_condition), pointer :: ptr => null()
@@ -25,21 +25,21 @@ module mod_class_composite_stop_condition
    end type
 
 
-   ! Public class for creating a composite of stop condition objects
+   !> \brief Class for creating a composite of stop condition objects
    type, public, extends(class_abstract_stop_condition) :: class_composite_stop_condition
 
       private
       integer :: nsc      !< Number of stop conditions
       logical :: stopflag !< Stop flag
 
-      type(ptr_stop_cond), allocatable, dimension(:) :: stop_cond_container
+      type(ptr_stop_cond), allocatable, dimension(:) :: stop_cond_container !< A container of stop conditions objects
 
    contains
 
-      procedure, public, pass :: init
-      procedure, public, pass :: compute_stop_condition
-      procedure, public, pass :: is_stop_condition_satisfied
-      procedure, public, pass :: convergence_info
+      procedure, public, pass :: init                        !< Constructor
+      procedure, public, pass :: compute_stop_condition      !< Computes stop condition
+      procedure, public, pass :: is_stop_condition_satisfied !< Checks if stop condition is satisfied
+      procedure, public, pass :: convergence_info            !< Returns a string containing convergence information
 
    end type
 
@@ -49,8 +49,8 @@ contains
    !> \brief Constructor
    subroutine init(this, sys_var)
       implicit none
-      class(class_composite_stop_condition)      :: this
-      class(class_system_variables),  intent(in) :: sys_var
+      class(class_composite_stop_condition)      :: this    !< A reference to this object
+      class(class_system_variables),  intent(in) :: sys_var !< System's variables
 
       ! Inner variables
       type(class_ifile)  :: ifile
@@ -101,8 +101,8 @@ contains
    !> \brief Computes the stop condition
    subroutine compute_stop_condition(this, ehist)
       implicit none
-      class(class_composite_stop_condition)      :: this
-      class(class_ehist),             intent(in) :: ehist
+      class(class_composite_stop_condition)      :: this  !< A reference to this object
+      class(class_ehist),             intent(in) :: ehist !< Evolution history
 
       ! Inner variables
       integer :: i
@@ -119,7 +119,7 @@ contains
    !> \brief Checks if the stop condition is satisfied
    logical function is_stop_condition_satisfied(this)
       implicit none
-      class(class_composite_stop_condition) :: this
+      class(class_composite_stop_condition) :: this !< A reference to this object
 
       ! Inner variables
       integer :: i
@@ -139,11 +139,11 @@ contains
    end function
 
 
-   !> Returns the convergence information
+   !> \brief Returns the convergence information
    function convergence_info(this) result(str)
       implicit none
-      class(class_composite_stop_condition) :: this
-      character(len=:), allocatable         :: str
+      class(class_composite_stop_condition) :: this !< A reference to this object
+      character(len=:), allocatable         :: str  !< String containing convergence information
 
       ! Inner variables
       integer :: i

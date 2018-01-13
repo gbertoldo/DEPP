@@ -16,32 +16,31 @@ module mod_class_DE_RSM_hybridization_control
    type, public :: class_DE_RSM_hybridization_control
 
       private
-      integer ::     np ! Population size
-      integer ::     nf ! Number of fitting points for response surface adjustment
-      integer ::   ireg ! Index of the current register
-      real(8) ::     fh ! Initial factor of hybridization
-      real(8) ::  fhmin ! Minimum factor of hybridization
-      real(8) ::  fhmax ! Maximum factor of hybridization
-      integer ::    fhm ! Model for the dynamical calculation of the factor of hybridization
+      integer ::     np !< Population size
+      integer ::     nf !< Number of fitting points for response surface adjustment
+      integer ::   ireg !< Index of the current register
+      real(8) ::     fh !< Initial factor of hybridization
+      real(8) ::  fhmin !< Minimum factor of hybridization
+      real(8) ::  fhmax !< Maximum factor of hybridization
+      integer ::    fhm !< Model for the dynamical calculation of the factor of hybridization
 
-      ! Register if RSM was applied with success (1) or not (0)
-      real(8), allocatable, dimension(:) :: r_rsm
+      real(8), allocatable, dimension(:) :: r_rsm !< Register if RSM was applied with success (1) or not (0)
 
       ! Pointer to system variables
-      class(class_system_variables), pointer :: sys_var
+      class(class_system_variables), pointer :: sys_var !< System's variables
 
    contains
 
-      procedure, pass, public  :: init
-      procedure, pass, public  :: add
-      procedure, pass, public  :: is_rsm_applicable
-      procedure, pass, private :: rsm_p_success
-      procedure, pass, private :: idx
-      procedure, pass, public  :: update
+      procedure, pass, public  :: init              !< Constructor
+      procedure, pass, public  :: add               !< Add a result
+      procedure, pass, public  :: is_rsm_applicable !< Checks if the RSM may be applied
+      procedure, pass, private :: rsm_p_success     !< Returns the probability of success of RSM
+      procedure, pass, private :: idx               !< Returns the index of the current register
+      procedure, pass, public  :: update            !< Calculates the hybridization factor according to a prescribed model
 
    end type
 
-   ! Defining a return code for application of DE-RSM
+   !> \brief Defines a return code for application of DE-RSM
    type, private :: DE_RSM_RETURN_CODE
 
       integer ::  DE_APPLIED
@@ -49,15 +48,15 @@ module mod_class_DE_RSM_hybridization_control
 
    end type
 
-   type(DE_RSM_RETURN_CODE), parameter, public :: DE_RSM_RETURN = DE_RSM_RETURN_CODE(0,1)
+   type(DE_RSM_RETURN_CODE), parameter, public :: DE_RSM_RETURN = DE_RSM_RETURN_CODE(0,1) !< Return code for application of DE-RSM
 
 contains
 
    !> \brief Constructor
    subroutine init(this, sys_var, np, nf, fh, fhmin, fhmax, fhm)
       implicit none
-      class(class_DE_RSM_hybridization_control)         :: this
-      class(class_system_variables), target, intent(in) :: sys_var !< System variables
+      class(class_DE_RSM_hybridization_control)         :: this    !< A reference to this object
+      class(class_system_variables), target, intent(in) :: sys_var !< System's variables
       integer,                               intent(in) :: np      !< Population size
       integer,                               intent(in) :: nf      !< Number of fitting points for response surface adjustment
       real(8),                               intent(in) :: fh      !< Initial hybridization factor
@@ -91,7 +90,7 @@ contains
    !> \brief Add a result
    subroutine add(this, rsm_tag, xfit, fit)
       implicit none
-      class(class_DE_RSM_hybridization_control) :: this
+      class(class_DE_RSM_hybridization_control) :: this    !< A reference to this object
       integer,                       intent(in) :: rsm_tag !< Stores the return state of application of DE-RSM
       real(8),                       intent(in) :: xfit    !< fitness of the trial individual
       real(8),                       intent(in) :: fit     !< fitness of a given individual of the population
@@ -135,8 +134,8 @@ contains
    !> \brief Checks if the RSM may be applied
    logical function is_rsm_applicable(this, g)
       implicit none
-      class(class_DE_RSM_hybridization_control) :: this
-      integer,                     intent(in)   :: g     !< Current generation
+      class(class_DE_RSM_hybridization_control) :: this !< A reference to this object
+      integer,                     intent(in)   :: g    !< Current generation
 
       ! Inner variables
       real(8) :: rnd ! Random number
@@ -153,7 +152,7 @@ contains
    !> \brief Returns the probability of success of RSM
    real(8) function rsm_p_success(this)
       implicit none
-      class(class_DE_RSM_hybridization_control) :: this
+      class(class_DE_RSM_hybridization_control) :: this !< A reference to this object
 
       ! Inner variables
       integer :: i
@@ -175,8 +174,8 @@ contains
    !> \brief Returns the index of the current register
    integer function idx(this, i)
       implicit none
-      class(class_DE_RSM_hybridization_control) :: this
-      integer,                       intent(in) :: i
+      class(class_DE_RSM_hybridization_control) :: this !< A reference to this object
+      integer,                       intent(in) :: i    !< Index of current register
 
       idx = mod(i,this%np)
 
@@ -189,7 +188,7 @@ contains
    !> \brief Calculates the hybridization factor according to a prescribed model.
    subroutine update(this)
       implicit none
-      class(class_DE_RSM_hybridization_control) :: this
+      class(class_DE_RSM_hybridization_control) :: this !< A reference to this object
 
       ! Inner variables
       real(8) :: ps

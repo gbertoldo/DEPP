@@ -11,10 +11,10 @@ contains
    !> \brief Calculates a random individual
    subroutine get_random_individual(nu, xmin, xmax, x)
       implicit none
-      integer, intent(in)  :: nu          !< number of unknowns
-      real(8), intent(in)  :: xmin(nu)    !< lower boundary constraints
-      real(8), intent(in)  :: xmax(nu)    !< higher boundary constraints
-      real(8), intent(out) :: x(nu)       !< random individual
+      integer, intent(in)  :: nu          !< Number of unknowns
+      real(8), intent(in)  :: xmin(nu)    !< Lower boundary constraints
+      real(8), intent(in)  :: xmax(nu)    !< Upper boundary constraints
+      real(8), intent(out) :: x(nu)       !< Random individual
 
       integer :: j   ! dummy index
       real(8) :: rnd ! random number
@@ -33,9 +33,9 @@ contains
    !> \brief Selects three distinct individuals of the population.
    subroutine select_individuals(np, ind, r)
       implicit none
-      integer, intent(in)  :: np    !< population size
-      integer, intent(in)  :: ind   !< number of the individual
-      integer, intent(out) :: r(3)  !< indexes of selected individuals
+      integer, intent(in)  :: np    !< Population size
+      integer, intent(in)  :: ind   !< Number of the individual
+      integer, intent(out) :: r(3)  !< Indexes of selected individuals
 
       real(8) :: rnd
 
@@ -71,12 +71,12 @@ contains
    !> \brief Performs the crossing over
    subroutine crossing_over(ind, nu, np, crs, pop, x)
       implicit none
-      integer, intent(in)    :: ind          !< number of the individual
-      integer, intent(in)    :: nu           !< number of unknowns
-      integer, intent(in)    :: np           !< population size
-      real(8), intent(in)    :: crs          !< crossover constant
-      real(8), intent(in)    :: pop(np,nu)   !< population
-      real(8), intent(inout) :: x(nu)        !< trial individual
+      integer, intent(in)    :: ind          !< Number of the individual
+      integer, intent(in)    :: nu           !< Number of unknowns
+      integer, intent(in)    :: np           !< Population size
+      real(8), intent(in)    :: crs          !< Crossover constant
+      real(8), intent(in)    :: pop(np,nu)   !< Population
+      real(8), intent(inout) :: x(nu)        !< Trial individual
 
       ! Inner variables
       integer :: j
@@ -110,10 +110,10 @@ contains
    !> \brief Checks if X is out of range
    logical function is_X_out_of_range(nu, xmin, xmax, x)
       implicit none
-      integer, intent(in)    :: nu           !< number of unknowns
-      real(8), intent(in)    :: xmin(nu)     !< lower boundary constraints
-      real(8), intent(in)    :: xmax(nu)     !< higher boundary constraints
-      real(8), intent(in)    :: x(nu)        !< trial individual
+      integer, intent(in)    :: nu           !< Number of unknowns
+      real(8), intent(in)    :: xmin(nu)     !< Lower boundary constraints
+      real(8), intent(in)    :: xmax(nu)     !< Upper boundary constraints
+      real(8), intent(in)    :: x(nu)        !< Trial individual
 
       integer :: j
 

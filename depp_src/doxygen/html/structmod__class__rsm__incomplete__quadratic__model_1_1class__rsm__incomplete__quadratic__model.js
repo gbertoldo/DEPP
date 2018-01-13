@@ -1,0 +1,11 @@
+var structmod__class__rsm__incomplete__quadratic__model_1_1class__rsm__incomplete__quadratic__model =
+[
+    [ "dim", "structmod__class__rsm__incomplete__quadratic__model_1_1class__rsm__incomplete__quadratic__model.html#aca8c54883213085a8208577adefe1d07", null ],
+    [ "fit", "structmod__class__rsm__incomplete__quadratic__model_1_1class__rsm__incomplete__quadratic__model.html#ad4397d12344b61167065f8b29df5620f", null ],
+    [ "get_optimizer", "structmod__class__rsm__incomplete__quadratic__model_1_1class__rsm__incomplete__quadratic__model.html#a705b59b136840b5ce1697ca8cd7a218b", null ],
+    [ "p", "structmod__class__rsm__incomplete__quadratic__model_1_1class__rsm__incomplete__quadratic__model.html#a577eae5345470311bf57b3af6e7c7c62", null ],
+    [ "cp", "structmod__class__rsm__incomplete__quadratic__model_1_1class__rsm__incomplete__quadratic__model.html#af42c0b8a847b173d68886b5a07c5e0be", null ],
+    [ "m", "structmod__class__rsm__incomplete__quadratic__model_1_1class__rsm__incomplete__quadratic__model.html#a5f0fdf6e5efcadfe551098f5596abdf3", null ],
+    [ "n", "structmod__class__rsm__incomplete__quadratic__model_1_1class__rsm__incomplete__quadratic__model.html#acccb6a277896cbc2e82310a4f78a1a87", null ],
+    [ "nb", "structmod__class__rsm__incomplete__quadratic__model_1_1class__rsm__incomplete__quadratic__model.html#a65adb8fcb1f1889cb407a86d63c1ff52", null ]
+];

@@ -21,7 +21,7 @@
 !!          Federal University of Technology - Paraná - UTFPR
 !!
 !!
-!! \date Nov, 2017.
+!! \date Jan, 2018.
 !!
 !! \version 2.0
 !!

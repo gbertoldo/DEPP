@@ -12,7 +12,7 @@ module mod_class_timer
    private
 
 
-   ! Class declaration
+   !> \brief Class timer
    type, public :: class_timer
 
       private
@@ -22,23 +22,20 @@ module mod_class_timer
 
    contains
 
-      procedure, public, pass :: start
-      procedure, public, pass :: measure
-      procedure, public, pass :: elapsed_time
-      procedure, public, pass :: formatted_elapsed_time
+      procedure, public, pass :: start                   !< Starts timer
+      procedure, public, pass :: measure                 !< Measures the elapsed time
+      procedure, public, pass :: elapsed_time            !< Returns the elapsed time in seconds
+      procedure, public, pass :: formatted_elapsed_time  !< Returns the elapsed time formatted as 00:00:00
 
    end type
-
-
-   ! Definitions
 
 contains
 
 
    !> \brief Starts timer
    subroutine start(this, accumulated)
-      class(class_timer)            :: this
-      real(8), optional, intent(in) :: accumulated ! Accumulated time from another reading
+      class(class_timer)            :: this        !< A reference to this object
+      real(8), optional, intent(in) :: accumulated !< Accumulated time from another reading
 
       if ( present(accumulated) ) then
 
@@ -57,7 +54,7 @@ contains
 
    !> \brief Measure time
    subroutine measure(this)
-      class(class_timer) :: this
+      class(class_timer) :: this !< A reference to this object
 
       this%t1 = MPI_Wtime()
 
@@ -66,7 +63,7 @@ contains
 
    !> \brief Returns the elapsed time in seconds
    real(8) function elapsed_time(this)
-      class(class_timer) :: this
+      class(class_timer) :: this !< A reference to this object
 
       elapsed_time = this%t1 - this%t0
 
@@ -75,7 +72,7 @@ contains
 
    !> \brief Returns the elapsed time formatted as 00:00:00
    character(len=10) function formatted_elapsed_time(this)
-      class(class_timer) :: this
+      class(class_timer) :: this !< A reference to this object
 
       ! Inner variables
       character(10) :: ftime !< time formatted

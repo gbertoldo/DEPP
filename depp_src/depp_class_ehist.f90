@@ -14,7 +14,7 @@ module mod_class_ehist
   ! Makes everything private, except otherwise stated
    private
 
-   ! Evolution history class
+   !> \brief Evolution history class
    type, public :: class_ehist
 
       character(str_size) :: sname                     !< Simulation name
@@ -38,22 +38,22 @@ module mod_class_ehist
 
       ! Domain
       real(8),       dimension(:), allocatable :: xmin  !< lower boundary constraints
-      real(8),       dimension(:), allocatable :: xmax  !< higher boundary constraints
+      real(8),       dimension(:), allocatable :: xmax  !< upper boundary constraints
       character(10), dimension(:), allocatable :: xname !< names of the unknowns
 
    contains
 
-      procedure, public,  pass :: init
-      procedure, public,  pass :: new_generation
-      procedure, public,  pass :: add_trial_population
-      procedure, public,  pass :: select_individuals
-      procedure, public,  pass :: save_backup
-      procedure, private, pass :: load_backup
-      procedure, public,  pass :: trial_population_info
-      procedure, public,  pass :: current_population_info
-      procedure, public,  pass :: current_population_statistics_info
-      procedure, public,  pass :: final_solution_info
-      procedure, public,  pass :: info
+      procedure, public,  pass :: init                                 !< Constructor
+      procedure, public,  pass :: new_generation                       !< Starts a new generation
+      procedure, public,  pass :: add_trial_population                 !< Add a trial population to evolution history
+      procedure, public,  pass :: select_individuals                   !< Selects the individuals of the trial population
+      procedure, public,  pass :: save_backup                          !< Saves a backup
+      procedure, private, pass :: load_backup                          !< Loads a backup
+      procedure, public,  pass :: trial_population_info                !< Returns a string with trial population information
+      procedure, public,  pass :: current_population_info              !< Returns a string with current population information
+      procedure, public,  pass :: current_population_statistics_info   !< Returns a string with evolution statistics information
+      procedure, public,  pass :: final_solution_info                  !< Returns a string with the final solution information
+      procedure, public,  pass :: info                                 !< Returns a string with current generation information
 
    end type
 
@@ -63,8 +63,8 @@ contains
    !> \brief Constructor
    subroutine init(this, sys_var)
       implicit none
-      class(class_ehist)                        :: this
-      class(class_system_variables), intent(in) :: sys_var
+      class(class_ehist)                        :: this    !< A reference to this object
+      class(class_system_variables), intent(in) :: sys_var !< System's variables
 
 
       ! Inner variables
@@ -131,7 +131,7 @@ contains
    !> \brief Adds a new generation to evolution history
    subroutine new_generation(this)
       implicit none
-      class(class_ehist) :: this
+      class(class_ehist) :: this !< A reference to this object
 
       this%g = this%g + 1
 
@@ -142,9 +142,9 @@ contains
    !> \brief Add a trial population to evolution history
    subroutine add_trial_population(this, pop, fit)
       implicit none
-      class(class_ehist)                  :: this
-      real(8), dimension(:,:), intent(in) :: pop ! Trial individuals population
-      real(8), dimension(:),   intent(in) :: fit ! Fitness of the population
+      class(class_ehist)                  :: this !< A reference to this object
+      real(8), dimension(:,:), intent(in) :: pop  !< Trial individuals population
+      real(8), dimension(:),   intent(in) :: fit  !< Fitness of the population
 
       ! Inner variables
       integer :: i
@@ -165,7 +165,7 @@ contains
    !> \brief Selects the best individuals
    subroutine select_individuals(this)
       implicit none
-      class(class_ehist) :: this
+      class(class_ehist) :: this !< A reference to this object
 
       ! Inner variables
       integer :: i
@@ -196,8 +196,8 @@ contains
    ! \brief Saves a backup
    subroutine save_backup(this, sys_var)
       implicit none
-      class(class_ehist) :: this
-      class(class_system_variables), intent(in) :: sys_var
+      class(class_ehist)                        :: this    !< A reference to this object
+      class(class_system_variables), intent(in) :: sys_var !< System's variables
 
       open(23, file = trim(sys_var%absfolderout) // trim(this%sname) // "-ehist-backup.txt")
 
@@ -223,8 +223,8 @@ contains
    ! \brief Loads the backup data
    subroutine load_backup(this, sys_var)
       implicit none
-      class(class_ehist) :: this
-      class(class_system_variables), intent(in) :: sys_var
+      class(class_ehist)                        :: this    !< A reference to this object
+      class(class_system_variables), intent(in) :: sys_var !< System's variables
 
       ! Inner variables
 
@@ -252,8 +252,8 @@ contains
    !> \brief Returns a string with trial population information
    function trial_population_info(this) result(str)
       implicit none
-      class(class_ehist)            :: this
-      character(len=:), allocatable :: str
+      class(class_ehist)            :: this !< A reference to this object
+      character(len=:), allocatable :: str  !< Information string
 
       ! Inner variables
       integer                       :: i
@@ -286,8 +286,8 @@ contains
    !> \brief Returns a string with current population information
    function current_population_info(this) result(str)
       implicit none
-      class(class_ehist)            :: this
-      character(len=:), allocatable :: str
+      class(class_ehist)            :: this !< A reference to this object
+      character(len=:), allocatable :: str  !< Information string
 
       ! Inner variables
       integer                       :: i
@@ -320,8 +320,8 @@ contains
    !> \brief Returns a string with current population statistics information
    function current_population_statistics_info(this) result(str)
       implicit none
-      class(class_ehist)            :: this
-      character(len=:), allocatable :: str
+      class(class_ehist)            :: this !< A reference to this object
+      character(len=:), allocatable :: str  !< Information string
 
       ! Inner variables
       character                     :: endl=char(10) ! End line char
@@ -348,8 +348,8 @@ contains
    !> \brief Returns final solution information
    function final_solution_info(this) result(str)
       implicit none
-      class(class_ehist)            :: this
-      character(len=:), allocatable :: str
+      class(class_ehist)            :: this !< A reference to this object
+      character(len=:), allocatable :: str  !< Information string
 
       ! Inner variables
       integer                       :: j
@@ -394,8 +394,8 @@ contains
    !> \brief Returns a string with current generation information
    function info(this) result(str)
       implicit none
-      class(class_ehist)            :: this
-      character(len=:), allocatable :: str
+      class(class_ehist)            :: this !< A reference to this object
+      character(len=:), allocatable :: str  !< Information string
 
 
       str = this%trial_population_info()                 &

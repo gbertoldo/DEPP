@@ -8,17 +8,17 @@ module mod_class_calendar
    private
 
 
-   !> \brief Defines a calendar class
+   !> \brief A calendar class
    type, public :: class_calendar
 
       private
-      character(10) :: date
-      character(10) :: time
+      character(10) :: date !< Current date
+      character(10) :: time !< Current time
 
    contains
 
-      procedure, public, pass :: get_date
-      procedure, public, pass :: get_time
+      procedure, public, pass :: get_date !< Returns current date
+      procedure, public, pass :: get_time !< Returns current time
 
    end type
 
@@ -27,12 +27,11 @@ module mod_class_calendar
 contains
 
 
-
    !> \brief Returns current date
    function get_date(this) result(date)
       implicit none
-      class(class_calendar)     :: this
-      character(:), allocatable :: date
+      class(class_calendar)     :: this !< A reference to this object
+      character(:), allocatable :: date !< Current date
 
       call get_date_time(this%date, this%time)
 
@@ -45,8 +44,8 @@ contains
    !> \brief Returns current time
    function get_time(this) result(time)
       implicit none
-      class(class_calendar)     :: this
-      character(:), allocatable :: time
+      class(class_calendar)     :: this !< A reference to this object
+      character(:), allocatable :: time !< Current time
 
       call get_date_time(this%date, this%time)
 
@@ -62,13 +61,13 @@ contains
       character(10), intent(out) :: date  !< system date
       character(10), intent(out) :: time  !< system time
 
-      character(2)  :: aux1
-      character(2)  :: aux2
-      character(4)  :: aux3
+      character(2)  :: aux1      ! Auxiliary variable
+      character(2)  :: aux2      ! Auxiliary variable
+      character(4)  :: aux3      ! Auxiliary variable
       character(20) :: vardate   ! system date
       character(20) :: vartime   ! system time
-      character(20) :: varzone
-      character(50) :: aux
+      character(20) :: varzone   ! system zone
+      character(50) :: aux       ! Auxiliary variable
       integer       :: var(8)    ! date and time
 
       call date_and_time(vardate, vartime, varzone, var)

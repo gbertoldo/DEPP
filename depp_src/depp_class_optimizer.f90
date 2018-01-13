@@ -21,16 +21,16 @@ module mod_class_optimizer
 
       private
 
-      type(class_system_variables)                    :: sys_var            ! System variables
-      type(class_ehist)                               :: ehist              ! Evolution history
-      type(class_btimer)                              :: timer              ! Timer
-      type(class_composite_stop_condition)            :: stopper            ! Stop condition object
-      type(class_parallel_processed_trial_population) :: searcher           ! Searcher object
+      type(class_system_variables)                    :: sys_var  !< System variables
+      type(class_ehist)                               :: ehist    !< Evolution history
+      type(class_btimer)                              :: timer    !< Timer
+      type(class_composite_stop_condition)            :: stopper  !< Stop condition object
+      type(class_parallel_processed_trial_population) :: searcher !< Searcher object
 
    contains
 
-      procedure, public, pass :: init
-      procedure, public, pass :: run
+      procedure, public, pass :: init !< Constructor
+      procedure, public, pass :: run  !< Performs optimization
 
    end type
 
@@ -41,7 +41,7 @@ contains
    !> \brief Constructor
    subroutine init(this)
       implicit none
-      class(class_optimizer) :: this
+      class(class_optimizer) :: this !< A reference to this object
 
 
       ! Creating labels
@@ -58,7 +58,7 @@ contains
 
 
          ! Initializing random number generator module
-         !call initialize_random_generator(mpio%iproc)
+         !call initialize_random_generator()
 
 
          ! Initializing system variables
@@ -91,7 +91,7 @@ contains
    !> \brief Optimization algorithm
    subroutine run(this)
       implicit none
-      class(class_optimizer) :: this
+      class(class_optimizer) :: this !< A reference to this object
 
 
       ! Creating labels

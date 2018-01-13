@@ -21,7 +21,7 @@ module mod_class_RSM_search_strategy
    ! Makes everything private, except otherwise stated
    private
 
-
+   !> \brief Search strategy base on the Response Surface Methodology
    type, public, extends(class_abstract_search_strategy) :: class_RSM_search_strategy
 
       private
@@ -34,13 +34,13 @@ module mod_class_RSM_search_strategy
 
    contains
 
-      procedure, pass, public  :: init
-      procedure, pass, public  :: get_trial
-      procedure, pass, public  :: feed_back
-      procedure, pass, private :: select_target_individual
-      procedure, pass, private :: select_fitting_individuals
-      procedure, pass, private :: get_weights
-      procedure, pass, public  :: get_nf
+      procedure, pass, public  :: init                       !< Constructor
+      procedure, pass, public  :: get_trial                  !< Returns the trial individual (best estimate given by the Response Surface Methodology)
+      procedure, pass, public  :: feed_back                  !< Process the fitness of the trial individual
+      procedure, pass, private :: select_target_individual   !< Selects a target individual from the history list
+      procedure, pass, private :: select_fitting_individuals !< Selects the fitting individuals for a given target individual
+      procedure, pass, private :: get_weights                !< Calculates the weights of the fitting individuals
+      procedure, pass, public  :: get_nf                     !< Returns the number of points expected for fitting the response surface
 
    end type
 
@@ -49,7 +49,7 @@ contains
    !> \brief Constructor
    subroutine init(this, sys_var, conf_file_name)
       implicit none
-      class(class_RSM_search_strategy)             :: this
+      class(class_RSM_search_strategy)             :: this           !< A reference to this object
       class(class_system_variables),   intent(in)  :: sys_var        !< System's variables
       character(len=*),                intent(in)  :: conf_file_name !< Name of the configuration file
 
@@ -104,14 +104,14 @@ contains
    end subroutine
 
 
-   !> \brief Returns the best estimate given by the Response Surface Methodology
+   !> \brief Returns the trial individual (best estimate given by the Response Surface Methodology)
    subroutine get_trial(this, ind, ehist, x, es)
       implicit none
-      class(class_RSM_search_strategy)      :: this
-      integer,                  intent(in)  :: ind   ! Current individual
-      class(class_ehist),       intent(in)  :: ehist ! Evolution history
-      real(8), dimension(:),    intent(out) :: x     ! Best estimated individual
-      integer, optional,        intent(out) :: es    ! Exit status: 0 = success, 1 = failure
+      class(class_RSM_search_strategy)      :: this  !< A reference to this object
+      integer,                  intent(in)  :: ind   !< Current individual
+      class(class_ehist),       intent(in)  :: ehist !< Evolution history
+      real(8), dimension(:),    intent(out) :: x     !< Best estimated individual
+      integer, optional,        intent(out) :: es    !< Exit status: 0 = success, 1 = failure
 
 
       ! Inner variables
@@ -183,7 +183,7 @@ contains
    !> \brief Process the fitness of the trial individual.
    subroutine feed_back(this, ind, ehist, fit, ecode)
       implicit none
-      class(class_RSM_search_strategy)      :: this
+      class(class_RSM_search_strategy)      :: this    !< A reference to this object
       integer,                  intent(in)  :: ind     !< Number of the individual of the population
       class(class_ehist),       intent(in)  :: ehist   !< Evolution history
       real(8),                  intent(in)  :: fit     !< Fitness of the trial individual
@@ -195,7 +195,7 @@ contains
    !> \brief Selects a target individual from the history list
    subroutine select_target_individual(this, ind, nu, np, ng, g, hist, xs)
       implicit none
-      class(class_RSM_search_strategy)            :: this
+      class(class_RSM_search_strategy)            :: this !< A reference to this object
       integer,                        intent(in)  :: ind  !< Current individual
       integer,                        intent(in)  :: nu   !< Dimension of the problem
       integer,                        intent(in)  :: np   !< Size of the population
@@ -267,7 +267,7 @@ contains
    !> \brief Selects the fitting individuals for a given target individual
    subroutine select_fitting_individuals(this, nu, np, ng, g, netol, hist, xs, xmin, xmax, dm, fm, es)
       implicit none
-      class(class_RSM_search_strategy)             :: this
+      class(class_RSM_search_strategy)             :: this !< A reference to this object
       integer,                         intent(in)  :: nu    !< Dimension of the problem
       integer,                         intent(in)  :: np    !< Size of the population
       integer,                         intent(in)  :: ng    !< Number of generations
@@ -399,14 +399,14 @@ contains
 
 
 
-   !> \brief Calculates the weights wm
+   !> \brief Calculates the weights of the fitting individuals
    subroutine get_weights(this, kw, m, fm, wm)
       implicit none
-      class(class_RSM_search_strategy)     :: this
-      integer,                 intent(in)  :: kw !< Kind of weight (1=uniform, 2=exp. decrease from max. f)
-      integer,                 intent(in)  :: m  !< Number of 'measures'
-      real(8), dimension(m),   intent(in)  :: fm !< 'Measures of f'
-      real(8), dimension(m),   intent(out) :: wm !< Weight of 'Measures of f'
+      class(class_RSM_search_strategy)     :: this !< A reference to this object
+      integer,                 intent(in)  :: kw   !< Kind of weight (1=uniform, 2=exp. decrease from max. f)
+      integer,                 intent(in)  :: m    !< Number of 'measures'
+      real(8), dimension(m),   intent(in)  :: fm   !< 'Measures of f'
+      real(8), dimension(m),   intent(out) :: wm   !< Weight of 'Measures of f'
 
       ! Parameters
       real(8), parameter :: tol = sqrt(epsilon(1.d0))
@@ -456,7 +456,7 @@ contains
    !> \brief Returns the number of points expected for fitting the response surface
    integer function get_nf(this)
       implicit none
-      class(class_RSM_search_strategy) :: this
+      class(class_RSM_search_strategy) :: this !< A reference to this object
 
       get_nf = this%nf
 

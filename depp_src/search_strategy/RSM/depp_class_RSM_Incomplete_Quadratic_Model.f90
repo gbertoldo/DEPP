@@ -21,12 +21,11 @@ module mod_class_RSM_Incomplete_Quadratic_Model
 
    contains
 
-      procedure, public,  pass :: dim                  !< Minimum number of points necessary to fit the response surface
-      procedure, public,  pass :: fit                  !< Fits the polynomial to the data
-      procedure, public,  pass :: P                    !< Returns the value of the fitted response surface for a given x
-      procedure, public,  pass :: get_optimizer        !< Returns the response surface optimizer
-
-      procedure, private, pass :: phi                  !< Base function
+      procedure, public,  pass :: dim           !< Minimum number of points necessary to fit the response surface
+      procedure, public,  pass :: fit           !< Fits the polynomial to the data
+      procedure, public,  pass :: P             !< Returns the value of the fitted response surface for a given x
+      procedure, public,  pass :: get_optimizer !< Returns the response surface optimizer
+      procedure, private, pass :: phi           !< Base function
 
    end type
 
@@ -36,8 +35,8 @@ contains
    !> \brief Minimum number of points necessary to fit the response surface
    integer function dim(this, n)
       implicit none
-      class(class_RSM_Incomplete_Quadratic_Model) :: this
-      integer, optional, intent(in)               :: n
+      class(class_RSM_Incomplete_Quadratic_Model) :: this !< A reference to this object
+      integer, optional, intent(in)               :: n    !< Number of unknowns
 
       if ( present(n) ) then
 
@@ -61,7 +60,7 @@ contains
    !!
    subroutine fit(this, dm, fm, wm, es)
       implicit none
-      class(class_RSM_Incomplete_Quadratic_Model) :: this
+      class(class_RSM_Incomplete_Quadratic_Model) :: this !< A reference to this object
       real(8), dimension(:,:),        intent(in)  :: dm   !< Design matrix (each row is an x point)
       real(8), dimension(:),          intent(in)  :: fm   !< 'Measures of f'
       real(8), dimension(:),          intent(in)  :: wm   !< Weight of 'Measures of f'
@@ -134,7 +133,7 @@ contains
    !> \brief Returns the value of the fitted response surface for a given x
    real(8) function P(this, x)
       implicit none
-      class(class_RSM_Incomplete_Quadratic_Model)  :: this
+      class(class_RSM_Incomplete_Quadratic_Model)  :: this !< A reference to this object
       real(8), dimension(:),            intent(in) :: x    !< Independent variables
 
       ! Inner variables
@@ -155,7 +154,7 @@ contains
    !> \brief Returns the response surface optimizer
    subroutine get_optimizer(this, dm, x, ko, es)
       implicit none
-      class(class_RSM_Incomplete_Quadratic_Model) :: this
+      class(class_RSM_Incomplete_Quadratic_Model) :: this !< A reference to this object
       real(8), dimension(:,:),        intent(in)  ::   dm !< Design matrix (each row is an x point)
       real(8), dimension(:),          intent(out) ::    x !< Coordinates of the optimizer
       integer,                        intent(out) ::   ko !< ko: -1 = minimizer, 0 = saddle point, 1 = maximizer
@@ -213,7 +212,7 @@ contains
    !> \brief Base function
    real(8) function phi(this, p, x)
       implicit none
-      class(class_RSM_Incomplete_Quadratic_Model)  :: this
+      class(class_RSM_Incomplete_Quadratic_Model)  :: this  !< A reference to this object
       integer,                          intent(in) :: p     !< Number of the base function
       real(8), dimension(:),            intent(in) :: x     !< Variables
 

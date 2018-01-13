@@ -1,0 +1,25 @@
+var structmod__class__ehist_1_1class__ehist =
+[
+    [ "add_trial_population", "structmod__class__ehist_1_1class__ehist.html#ad15d1f62a7e169f201093340bb9b8cbd", null ],
+    [ "current_population_info", "structmod__class__ehist_1_1class__ehist.html#a6e088a00eadd5ddfc90134137760416f", null ],
+    [ "current_population_statistics_info", "structmod__class__ehist_1_1class__ehist.html#aeef55a92348987e84b313929816ff78d", null ],
+    [ "final_solution_info", "structmod__class__ehist_1_1class__ehist.html#a06e36025b03f934e12f408962d4adb68", null ],
+    [ "info", "structmod__class__ehist_1_1class__ehist.html#a8ca160cf7c378593a9051ad5bb3945f3", null ],
+    [ "init", "structmod__class__ehist_1_1class__ehist.html#a697fe21028daa299fbf672f6d53ecfb8", null ],
+    [ "new_generation", "structmod__class__ehist_1_1class__ehist.html#a013621822f02e25e79f651dcf88838bf", null ],
+    [ "save_backup", "structmod__class__ehist_1_1class__ehist.html#a41b30a328a1adccad4b400a325239d8b", null ],
+    [ "select_individuals", "structmod__class__ehist_1_1class__ehist.html#af123ee847b096dbc92857d3b01b2aa1b", null ],
+    [ "trial_population_info", "structmod__class__ehist_1_1class__ehist.html#a405a37781dab6ef5c7e4b7584f7ac2ed", null ],
+    [ "fit", "structmod__class__ehist_1_1class__ehist.html#a53b542a9bf56c190f6985adbb2618ba3", null ],
+    [ "g", "structmod__class__ehist_1_1class__ehist.html#a9985903219bbbde1419727298a9a30d5", null ],
+    [ "hist", "structmod__class__ehist_1_1class__ehist.html#a5af514299aef80bc274c5eb95bb0f85f", null ],
+    [ "ibest", "structmod__class__ehist_1_1class__ehist.html#a99acb968244dc045be83006563e8d1e7", null ],
+    [ "ng", "structmod__class__ehist_1_1class__ehist.html#a90f8b82e4ffb35609a122b4b76502112", null ],
+    [ "np", "structmod__class__ehist_1_1class__ehist.html#a0e4adcea711866c94aba52fffaad0b59", null ],
+    [ "nu", "structmod__class__ehist_1_1class__ehist.html#ae37bbb6e6d08d5be610435d0cc49e39c", null ],
+    [ "pop", "structmod__class__ehist_1_1class__ehist.html#aca60a89b206aabb9d3d5804ff81ea7c2", null ],
+    [ "sname", "structmod__class__ehist_1_1class__ehist.html#a67d9665c356115061c026ab1c4cebc45", null ],
+    [ "xmax", "structmod__class__ehist_1_1class__ehist.html#a086e80439fe0c68020bfa38c538928d9", null ],
+    [ "xmin", "structmod__class__ehist_1_1class__ehist.html#a8d90a2d16159e295e074909d62858c82", null ],
+    [ "xname", "structmod__class__ehist_1_1class__ehist.html#ac17b3d039a7d001edd0ccbb75ef4d587", null ]
+];

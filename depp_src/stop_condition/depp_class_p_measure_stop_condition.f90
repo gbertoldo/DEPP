@@ -15,7 +15,7 @@ module mod_class_p_measure_stop_condition
    ! Makes everything private, except otherwise stated
    private
 
-   ! Public class for creating stop condition objects based on the distance of the individuals
+   !> \brief Class for creating stop condition objects based on the distance of the individuals
    type, public, extends(class_abstract_stop_condition) :: class_p_measure_stop_condition
 
       private
@@ -26,10 +26,10 @@ module mod_class_p_measure_stop_condition
 
    contains
 
-      procedure, public, pass :: init
-      procedure, public, pass :: compute_stop_condition
-      procedure, public, pass :: is_stop_condition_satisfied
-      procedure, public, pass :: convergence_info
+      procedure, public, pass :: init                        !< Constructor
+      procedure, public, pass :: compute_stop_condition      !< Computes stop condition
+      procedure, public, pass :: is_stop_condition_satisfied !< Checks if stop condition is satisfied
+      procedure, public, pass :: convergence_info            !< Returns a string containing convergence information
 
    end type
 
@@ -39,8 +39,8 @@ contains
    !> \brief Constructor
    subroutine init(this, sys_var)
       implicit none
-      class(class_p_measure_stop_condition)      :: this
-      class(class_system_variables),  intent(in) :: sys_var
+      class(class_p_measure_stop_condition)      :: this    !< A reference to this object
+      class(class_system_variables),  intent(in) :: sys_var !< System's variables
 
       ! Inner variables
       type(class_ifile) :: ifile
@@ -62,8 +62,8 @@ contains
    !> \brief Computes the stop condition
    subroutine compute_stop_condition(this, ehist)
       implicit none
-      class(class_p_measure_stop_condition) :: this
-      class(class_ehist),        intent(in) :: ehist
+      class(class_p_measure_stop_condition) :: this  !< A reference to this object
+      class(class_ehist),        intent(in) :: ehist !< Evolution history
 
       if ( 0 < ehist%g ) then
 
@@ -79,18 +79,18 @@ contains
    !> \brief Checks if the stop condition was reached.
    logical function is_stop_condition_satisfied(this)
       implicit none
-      class(class_p_measure_stop_condition) :: this
+      class(class_p_measure_stop_condition) :: this !< A reference to this object
 
       is_stop_condition_satisfied = this%stopflag
 
    end function
 
 
-   !> Returns the convergence information
+   !> \brief Returns the convergence information
    function convergence_info(this) result(str)
       implicit none
-      class(class_p_measure_stop_condition) :: this
-      character(len=:), allocatable         :: str
+      class(class_p_measure_stop_condition) :: this !< A reference to this object
+      character(len=:), allocatable         :: str  !< String containing convergence information
 
       ! Inner variables
       character(len=str_size) caux
@@ -112,7 +112,7 @@ contains
       integer, intent(in)  :: nu         !< Dimension of the problem
       integer, intent(in)  :: np         !< Size of the population
       real(8), intent(in)  :: xmin(nu)   !< lower boundary constraints
-      real(8), intent(in)  :: xmax(nu)   !< higher boundary constraints
+      real(8), intent(in)  :: xmax(nu)   !< upper boundary constraints
       real(8), intent(in)  :: pop(np,nu) !< Population
       real(8), intent(out) :: pm         !< P-measure
 

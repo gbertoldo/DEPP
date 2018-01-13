@@ -19,7 +19,7 @@ module mod_class_RSM_factory
 
    contains
 
-      procedure, pass, public :: create
+      procedure, pass, public :: create !< Creates the RSM object
 
    end type
 
@@ -29,10 +29,10 @@ contains
    !> \brief Creates the RSM object
    subroutine create(this, sys_var, option, obj)
       implicit none
-      class(class_RSM_factory)                        :: this
-      class(class_system_variables),      intent(in)  :: sys_var
-      character(len=*),                   intent(in)  :: option
-      class(class_abstract_RSM), pointer, intent(out) :: obj
+      class(class_RSM_factory)                        :: this    !< A reference to this object
+      class(class_system_variables),      intent(in)  :: sys_var !< System's variables
+      character(len=*),                   intent(in)  :: option  !< RSM model
+      class(class_abstract_RSM), pointer, intent(out) :: obj     !< RSM object
 
       if ( trim(adjustl(option)) == "Quadratic" ) then
 

@@ -24,13 +24,14 @@ module mod_class_abstract_parallel_processed_data
 
    contains
 
-      procedure(data_size_interface), deferred, private, pass :: data_size
-      procedure(compute_interface),   deferred, private, pass :: compute
-      procedure(send_interface),      deferred, private, pass :: send
-      procedure(recv_interface),      deferred, private, pass :: recv
-      procedure(update_interface),    deferred, private, pass :: update
-      procedure,                                public,  pass :: compute_concurrent
-      procedure,                                private, pass :: exchange
+      procedure(data_size_interface), deferred, private, pass :: data_size          !< Gives the size of the array of data
+      procedure(compute_interface),   deferred, private, pass :: compute            !< Defines the procedure for calculating each data element
+      procedure(send_interface),      deferred, private, pass :: send               !< Tells MPI how to send each element of data from current thread to 'to_thread'
+      procedure(recv_interface),      deferred, private, pass :: recv               !< Tells MPI how to receive each element of data from 'from_thread' to current thread
+      procedure(update_interface),    deferred, private, pass :: update             !< Perform calculations after parallel computation and data synchronization
+      !! and data synchronization
+      procedure,                                public,  pass :: compute_concurrent !< Executes in parallel the procedure defined in compute(i) for each element of data
+      procedure,                                private, pass :: exchange           !< Exchange data among threads
 
    end type
 
@@ -39,53 +40,53 @@ module mod_class_abstract_parallel_processed_data
    abstract interface
 
 
-      !> User defined: Gives the size of the array of data.
+      !> \brief User defined: Gives the size of the array of data.
       integer function data_size_interface(this)
          import class_abstract_parallel_processed_data
          implicit none
-         class(class_abstract_parallel_processed_data) :: this
+         class(class_abstract_parallel_processed_data) :: this !< A reference to this object
 
       end function
 
 
-      !> User defined. Defines the procedure for calculating each data element.
+      !> \brief User defined. Defines the procedure for calculating each data element.
       subroutine compute_interface(this,i)
          import class_abstract_parallel_processed_data
          implicit none
-         class(class_abstract_parallel_processed_data) :: this
+         class(class_abstract_parallel_processed_data) :: this !< A reference to this object
          integer, intent(in) :: i
 
       end subroutine
 
 
-      !> User defined. Tells MPI how to send each element of data from current thread to 'to_thread'.
+      !> \brief User defined. Tells MPI how to send each element of data from current thread to 'to_thread'.
       subroutine send_interface(this, i, to_thread)
          import class_abstract_parallel_processed_data
          implicit none
-         class(class_abstract_parallel_processed_data) :: this
-         integer,                  intent(in) :: i
-         integer,                  intent(in) :: to_thread
+         class(class_abstract_parallel_processed_data) :: this      !< A reference to this object
+         integer,                           intent(in) :: i         !< Index of the shared data
+         integer,                           intent(in) :: to_thread !< Receiver thread
 
       end subroutine
 
 
-      !> User defined. Tells MPI how to receive each element of data from 'from_thread' to current thread.
+      !> \brief User defined. Tells MPI how to receive each element of data from 'from_thread' to current thread.
       subroutine recv_interface(this, i, from_thread)
          import class_abstract_parallel_processed_data
          implicit none
-         class(class_abstract_parallel_processed_data) :: this
-         integer,                  intent(in) :: i
-         integer,                  intent(in) :: from_thread
+         class(class_abstract_parallel_processed_data) :: this        !< A reference to this object
+         integer,                           intent(in) :: i           !< Index of the shared data
+         integer,                           intent(in) :: from_thread !< Sender thread
 
       end subroutine
 
 
-      !> User defined. This function may be used to perform extra calculations after parallel computation
-      !! and data synchronization.
+      !> \brief User defined. This function may be used to perform extra calculations after
+      !! parallel computation and data synchronization.
       subroutine update_interface(this)
          import class_abstract_parallel_processed_data
          implicit none
-         class(class_abstract_parallel_processed_data) :: this
+         class(class_abstract_parallel_processed_data) :: this !< A reference to this object
 
       end subroutine
 
@@ -98,7 +99,7 @@ contains
    !> Executes in parallel the procedure defined in compute(i) for each element of data.
    subroutine compute_concurrent(this)
       implicit none
-      class(class_abstract_parallel_processed_data) :: this
+      class(class_abstract_parallel_processed_data) :: this !< A reference to this object
 
       integer :: i
 
@@ -117,7 +118,7 @@ contains
    !> Exchange data among threads.
    subroutine exchange(this)
       implicit none
-      class(class_abstract_parallel_processed_data) :: this
+      class(class_abstract_parallel_processed_data) :: this !< A reference to this object
 
       integer :: i
       integer :: from_thread

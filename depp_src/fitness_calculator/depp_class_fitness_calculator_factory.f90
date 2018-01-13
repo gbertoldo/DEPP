@@ -1,6 +1,5 @@
 
 !> \brief Defines a factory class for creating fitness calculator objects.
-!! Based on the Factory Design Pattern.
 
 module mod_class_fitness_calculator_factory
 
@@ -17,12 +16,12 @@ module mod_class_fitness_calculator_factory
    private
 
 
-   !> Factory class for creating fitness calculator objects
+   !> \brief Factory class for creating fitness calculator objects
    type, public :: class_fitness_calculator_factory
 
    contains
 
-      procedure, public, pass :: create
+      procedure, public, pass :: create !< Creates a fitness calculator object
 
    end type
 
@@ -33,11 +32,11 @@ contains
    !> \brief Creates a fitness calculator object
    subroutine create(this, sys_var, ehist, model, fitness_calculator)
       implicit none
-      class(class_fitness_calculator_factory)                        :: this
-      class(class_system_variables),                     intent(in)  :: sys_var
-      class(class_ehist),                                intent(in)  :: ehist
-      character(len=*),                                  intent(in)  :: model
-      class(class_abstract_fitness_calculator), pointer, intent(out) :: fitness_calculator
+      class(class_fitness_calculator_factory)                        :: this               !< A reference to this object
+      class(class_system_variables),                     intent(in)  :: sys_var            !< System's variables
+      class(class_ehist),                                intent(in)  :: ehist              !< Evolution history
+      character(len=*),                                  intent(in)  :: model              !< Model
+      class(class_abstract_fitness_calculator), pointer, intent(out) :: fitness_calculator !< Fitness calculator
 
 
       ! Allocating object

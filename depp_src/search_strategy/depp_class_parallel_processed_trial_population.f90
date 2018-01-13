@@ -26,10 +26,10 @@ module mod_class_parallel_processed_trial_population
    !> \brief Provides a class for parallel processing a trial population.
    type, extends(class_abstract_parallel_processed_data), public :: class_parallel_processed_trial_population
 
-      class(class_system_variables),            pointer :: sys_var        => null()
-      class(class_ehist),                       pointer :: ehist          => null()
-      class(class_abstract_search_strategy),    pointer :: searcher       => null()
-      class(class_abstract_fitness_calculator), pointer :: fit_calculator => null()
+      class(class_system_variables),            pointer :: sys_var        => null() !< System's variables
+      class(class_ehist),                       pointer :: ehist          => null() !< Evolution history
+      class(class_abstract_search_strategy),    pointer :: searcher       => null() !< Search strategy
+      class(class_abstract_fitness_calculator), pointer :: fit_calculator => null() !< Fitness calculator
 
       ! These vector of data are calculated separately by each thread and shared after
       ! all parallel computation is finished.
@@ -39,16 +39,16 @@ module mod_class_parallel_processed_trial_population
    contains
 
 
-      procedure, public, pass :: init
-      procedure, public, pass :: get_trial_population
+      procedure, public, pass :: init                  !< Constructor
+      procedure, public, pass :: get_trial_population  !< Computes the trial population and the corresponding fitness function
 
 
       ! Procedures deferred from parent class and implemented here
-      procedure, private, pass :: data_size
-      procedure, private, pass :: compute
-      procedure, private, pass :: send
-      procedure, private, pass :: recv
-      procedure, private, pass :: update
+      procedure, private, pass :: data_size !< Gives the size of the shared data vector
+      procedure, private, pass :: compute   !< Defines the procedure for calculating each element of the shared data vector
+      procedure, private, pass :: send      !< Tells MPI how to send each element of data from current thread to 'to_thread'
+      procedure, private, pass :: recv      !< Tells MPI how to receive each element of data from 'from_thread' to current thread
+      procedure, private, pass :: update    !< Perform calculations after parallel computation and data synchronization
 
    end type
 
@@ -58,9 +58,9 @@ contains
    !> \brief Constructor
    subroutine init(this, sys_var, ehist)
       implicit none
-      class(class_parallel_processed_trial_population)  :: this
-      class(class_system_variables), target, intent(in) :: sys_var
-      class(class_ehist),            target, intent(in) :: ehist
+      class(class_parallel_processed_trial_population)  :: this    !< A reference to this object
+      class(class_system_variables), target, intent(in) :: sys_var !< System's variables
+      class(class_ehist),            target, intent(in) :: ehist   !< Evolution history
 
       ! Inner variables
       type(class_ifile)                      :: ifile
@@ -133,7 +133,7 @@ contains
    !> \brief Computes the trial population and the corresponding fitness function
    subroutine get_trial_population(this)
       implicit none
-      class(class_parallel_processed_trial_population)  :: this
+      class(class_parallel_processed_trial_population)  :: this !< A reference to this object
 
 
       ! Compute the trial individuals and their fitness in parallel
@@ -158,21 +158,21 @@ contains
    end subroutine
 
 
-   !> User defined: Gives the size of the array of data to be parallel computed.
+   !> \brief Gives the size of the array of shared data to be parallel computed.
    integer function data_size(this)
       implicit none
-      class(class_parallel_processed_trial_population) :: this
+      class(class_parallel_processed_trial_population) :: this !< A reference to this object
 
       data_size = this%ehist%np
 
    end function
 
 
-   !> User defined. Defines the procedure for calculating each data element.
+   !> \brief Defines the procedure for calculating each data element.
    subroutine compute(this,i)
       implicit none
-      class(class_parallel_processed_trial_population) :: this
-      integer, intent(in)                              :: i
+      class(class_parallel_processed_trial_population) :: this !< A reference to this object
+      integer, intent(in)                              :: i    !< Index of the shared data vector
 
       ! Inner variables
       integer :: ecode
@@ -257,12 +257,12 @@ contains
    end subroutine
 
 
-   !> User defined. Tells MPI how to send each element of data from current thread to 'to_thread'.
+   !> \brief Tells MPI how to send each element of data from current thread to 'to_thread'.
    subroutine send(this, i, to_thread)
       implicit none
-      class(class_parallel_processed_trial_population) :: this
-      integer,                              intent(in) :: i
-      integer,                              intent(in) :: to_thread
+      class(class_parallel_processed_trial_population) :: this      !< A reference to this object
+      integer,                              intent(in) :: i         !< Index of the shared data vector
+      integer,                              intent(in) :: to_thread !< Receiver thread
 
       call mod_mpi_send(to_thread, this%trial_pop(i,:))
 
@@ -275,12 +275,12 @@ contains
    end subroutine
 
 
-   !> User defined. Tells MPI how to receive each element of data from 'from_thread' to current thread.
+   !> \brief Tells MPI how to receive each element of data from 'from_thread' to current thread.
    subroutine recv(this, i, from_thread)
       implicit none
-      class(class_parallel_processed_trial_population) :: this
-      integer,                              intent(in) :: i
-      integer,                              intent(in) :: from_thread
+      class(class_parallel_processed_trial_population) :: this        !< A reference to this object
+      integer,                              intent(in) :: i           !< Index of the shared data vector
+      integer,                              intent(in) :: from_thread !< Sender thread
 
       call mod_mpi_recv(from_thread, this%trial_pop(i,:))
 
@@ -296,7 +296,7 @@ contains
    !> \brief Perform update actions after all parallel computation have been finished.
    subroutine update(this)
       implicit none
-      class(class_parallel_processed_trial_population) :: this
+      class(class_parallel_processed_trial_population) :: this !< A reference to this object
 
       call this%searcher%update()
 

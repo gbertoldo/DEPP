@@ -20,29 +20,29 @@ module mod_class_external_fitness_calculator
       private
 
       ! Store the number of success and failures of each thread
-      integer, allocatable, dimension(:) :: success_counter_thread
-      integer, allocatable, dimension(:) :: failure_counter_thread
+      integer, allocatable, dimension(:) :: success_counter_thread !< Thread number of success
+      integer, allocatable, dimension(:) :: failure_counter_thread !< Thread number of failures
 
       ! Store the number of success and failures of all threads
-      integer                            :: success_counter
-      integer                            :: failure_counter
+      integer                            :: success_counter !< Total number of success
+      integer                            :: failure_counter !< Total number of failures
 
-      integer                       :: np
-      character(len=:), allocatable :: sname
-      character(len=:), allocatable :: absfolderout
-      character(len=:), allocatable :: fdir
-      character(len=:), allocatable :: ffit
+      integer                       :: np           !< Population size
+      character(len=:), allocatable :: sname        !< Simulation name
+      character(len=:), allocatable :: absfolderout !< Absolute path to output folder
+      character(len=:), allocatable :: fdir         !< Name of working directory for fitness calculation
+      character(len=:), allocatable :: ffit         !< Name of executable for fitness calculation
 
    contains
 
-      procedure, public,  pass :: init
-      procedure, public,  pass :: get_fitness
-      procedure, public,  pass :: statistics_info
-      procedure, private, pass :: save_failure
-      procedure, public,  pass :: data_size
-      procedure, public,  pass :: send
-      procedure, public,  pass :: recv
-      procedure, public,  pass :: update
+      procedure, public,  pass :: init              !< Constructor
+      procedure, public,  pass :: get_fitness       !< Calculates the fitness of a trial individual
+      procedure, public,  pass :: statistics_info   !< Returns a string with fitness calculator statistics information
+      procedure, private, pass :: save_failure      !< Register failures in calculations of fitness
+      procedure, public,  pass :: data_size         !< Size of the vector to be shared among threads
+      procedure, public,  pass :: send              !< Sends information from this threat
+      procedure, public,  pass :: recv              !< Receives information from other threads
+      procedure, public,  pass :: update            !< Updates class after a parallel computation cycle
 
 
    end type
@@ -54,9 +54,9 @@ contains
    !> \brief Constructor
    subroutine init(this, sys_var, ehist)
       implicit none
-      class(class_external_fitness_calculator)   :: this
-      class(class_system_variables), intent(in)  :: sys_var
-      class(class_ehist),            intent(in)  :: ehist
+      class(class_external_fitness_calculator)   :: this    !< A reference to this object
+      class(class_system_variables), intent(in)  :: sys_var !< System's variables
+      class(class_ehist),            intent(in)  :: ehist   !< Evolution history
 
       this%absfolderout = sys_var%absfolderout
       this%fdir         = sys_var%fdir
@@ -83,12 +83,12 @@ contains
    !> \brief Calculates the fitness function
    subroutine get_fitness(this, ehist, i, x, fit, ecode)
       implicit none
-      class(class_external_fitness_calculator) :: this
-      class(class_ehist),          intent(in)  :: ehist
-      integer,                     intent(in)  :: i
-      real(8), dimension(:),       intent(in)  :: x
-      real(8),                     intent(out) :: fit
-      integer,                     intent(out) :: ecode
+      class(class_external_fitness_calculator) :: this  !< A reference to this object
+      class(class_ehist),          intent(in)  :: ehist !< Evolution history
+      integer,                     intent(in)  :: i     !< Index of the trial individual
+      real(8), dimension(:),       intent(in)  :: x     !< Trial individual
+      real(8),                     intent(out) :: fit   !< Fitness of the trial individual
+      integer,                     intent(out) :: ecode !< Exit code
 
       ! Inner variables
       integer        :: j
@@ -175,11 +175,11 @@ contains
    end subroutine
 
 
-   !> \brief Returns a string with information about fitness calculator
+   !> \brief Returns a string with statistics about fitness calculator
    function statistics_info(this) result(info)
       implicit none
-      class(class_external_fitness_calculator) :: this
-      character(len=:), allocatable            :: info
+      class(class_external_fitness_calculator) :: this !< A reference to this object
+      character(len=:), allocatable            :: info !< A string with statistics about fitness calculator
 
       ! Inner variables
       character        :: ENDL = char(10) ! New line char
@@ -201,12 +201,12 @@ contains
    !> \brief Saves the failure to a file
    subroutine save_failure(this, ehist, i, x, fit, ecode)
       implicit none
-      class(class_external_fitness_calculator) :: this
-      class(class_ehist),           intent(in) :: ehist
-      integer,                      intent(in) :: i
-      real(8), dimension(:),        intent(in) :: x
-      real(8),                      intent(in) :: fit
-      integer,                      intent(in) :: ecode
+      class(class_external_fitness_calculator) :: this  !< A reference to this object
+      class(class_ehist),           intent(in) :: ehist !< Evolution history
+      integer,                      intent(in) :: i     !< Index of the trial individual
+      real(8), dimension(:),        intent(in) :: x     !< Trial individual
+      real(8),                      intent(in) :: fit   !< Fitness of the trial individual
+      integer,                      intent(in) :: ecode !< Exit code
 
       ! Inner variables
 
@@ -250,21 +250,22 @@ contains
    end subroutine
 
 
-
+   !> \brief Size of the vector to be shared among threads
    integer function data_size(this)
       implicit none
-      class(class_external_fitness_calculator) :: this
+      class(class_external_fitness_calculator) :: this !< A reference to this object
 
       data_size = this%np
 
    end function
 
 
+   !> \brief Sends information from this threat
    subroutine send(this, i, to_thread)
       implicit none
-      class(class_external_fitness_calculator) :: this
-      integer,                      intent(in) :: i
-      integer,                      intent(in) :: to_thread
+      class(class_external_fitness_calculator) :: this      !< A reference to this object
+         integer,                   intent(in) :: i         !< Index of the shared vector
+         integer,                   intent(in) :: to_thread !< Receiver thread
 
       call mod_mpi_send(to_thread, this%success_counter_thread(i) )
       call mod_mpi_send(to_thread, this%failure_counter_thread(i) )
@@ -272,11 +273,12 @@ contains
    end subroutine
 
 
+   !> \brief Receives information from other threads
    subroutine recv(this, i, from_thread)
       implicit none
-      class(class_external_fitness_calculator) :: this
-      integer,                      intent(in) :: i
-      integer,                      intent(in) :: from_thread
+      class(class_external_fitness_calculator) :: this        !< A reference to this object
+      integer,                      intent(in) :: i           !< Index of the shared vector
+      integer,                      intent(in) :: from_thread !< Sender thread
 
       call mod_mpi_recv(from_thread, this%success_counter_thread(i) )
       call mod_mpi_recv(from_thread, this%failure_counter_thread(i) )
@@ -284,9 +286,10 @@ contains
    end subroutine
 
 
+   !> \brief Updates class after a parallel computation cycle
    subroutine update(this)
       implicit none
-      class(class_external_fitness_calculator) :: this
+      class(class_external_fitness_calculator) :: this !< A reference to this object
 
       this%success_counter = sum(this%success_counter_thread)
       this%failure_counter = sum(this%failure_counter_thread)
