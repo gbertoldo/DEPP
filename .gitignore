@@ -1,0 +1,14 @@
+/depp.x
+/interface/functions.x
+depp_src/doxygen/
+
+depp_src/depp2\.layout
+depp_output/*
+
+depp_src/ToDo\.txt
+
+*.o
+
+depp_src/obj/Debug/
+
+depp_src/depp2\.depend

@@ -15,6 +15,8 @@ module mod_class_parallel_processed_trial_population
    use mod_class_ifile
    use mod_search_tools
    use mod_string
+   use mod_class_abstract_population_initializer
+   use mod_class_population_initializer_factory
 
    implicit none
 
@@ -35,6 +37,10 @@ module mod_class_parallel_processed_trial_population
       ! all parallel computation is finished.
       real(8), allocatable, dimension(:)    :: trial_fit !< Fitness of the trial population
       real(8), allocatable, dimension(:,:)  :: trial_pop !< Trial population
+
+      ! Population initializer
+      type(class_population_initializer_factory)            :: pop_initializer_factory   !< Population initializer factory
+      class(class_abstract_population_initializer), pointer :: pop_initializer => null() !< Population initializer object
 
    contains
 
@@ -126,6 +132,8 @@ contains
 
       end if
 
+      ! Creating population initializer
+      call this%pop_initializer_factory%create(sys_var, this%sys_var%absparfile, this%pop_initializer)
 
    end subroutine
 
@@ -186,70 +194,122 @@ contains
                  trial_fit      =>    this%trial_fit,      &
                  trial_pop      =>    this%trial_pop       )
 
+         ! First generation deserves special attention
+         if ( ehist%g == 1 ) then
 
-         ! Calculating the fitness function
-         fitloop: do
+            ! Calculating the fitness function
+            fitloop1: do
 
+               ! Population initialization
+               call this%pop_initializer%get_trial(i, ehist, trial_pop(i,:))
 
-            ! Calculating a trial individual
-            call searcher%get_trial(i, ehist, trial_pop(i,:))
+               ! Checking the constraints
+               if ( is_X_out_of_range(ehist%nu, ehist%xmin, ehist%xmax, trial_pop(i,:)) ) then
 
-
-            ! Checking the constraints
-            if ( is_X_out_of_range(ehist%nu, ehist%xmin, ehist%xmax, trial_pop(i,:)) ) then
-
-               call sys_var%logger%print("Searcher must provide trial individuals that satisfy constraints. Stopping.")
-
-               call mod_mpi_finalize()
-
-            end if
-
-
-            ! Asking the fitness calculator the fitness of the trial individual
-            call fit_calculator%get_fitness(ehist, i, trial_pop(i,:), trial_fit(i), ecode)
-
-
-            ! Sending feedback to searcher
-            call searcher%feed_back(i, ehist, trial_fit(i), ecode)
-
-
-            ! Analyzing the exit code of the fitness calculator
-            select case (ecode)
-
-
-               ! In case of success, just exit the loop
-               case (fitness_calculator_exit_code%SUCCESS)
-
-                  exit fitloop
-
-
-               ! Fitness calculation fail and no other individual will be generated
-               case (fitness_calculator_exit_code%FAIL_AND_GIVE_UP)
-
-                  trial_pop(i,:) = ehist%pop(i,:)
-
-                  trial_fit(i)   = ehist%fit(i)
-
-                  exit fitloop
-
-
-               ! Fitness calculation fail and another individual will be generated
-               case (fitness_calculator_exit_code%FAIL_AND_TRY_AGAIN)
-
-
-               ! Unknown cases
-               case default
-
-                  call sys_var%logger%print("ERROR: fitness calculator returned an unknown status. Stopping...")
+                  call sys_var%logger%print("Pop. initializer must provide trial individuals that satisfy constraints. Stopping.")
 
                   call mod_mpi_finalize()
 
+               end if
 
-            end select
+
+               ! Asking the fitness calculator the fitness of the trial individual
+               call fit_calculator%get_fitness(ehist, i, trial_pop(i,:), trial_fit(i), ecode)
 
 
-         end do fitloop
+               ! Analyzing the exit code of the fitness calculator
+               select case (ecode)
 
+
+                  ! In case of success, just exit the loop
+                  case (fitness_calculator_exit_code%SUCCESS)
+
+                     exit fitloop1
+
+                  ! Fitness calculation fail and no other individual will be generated
+                  case (fitness_calculator_exit_code%FAIL_AND_GIVE_UP)
+
+
+                  ! Fitness calculation fail and another individual will be generated
+                  case (fitness_calculator_exit_code%FAIL_AND_TRY_AGAIN)
+
+
+                  ! Unknown cases
+                  case default
+
+                     call sys_var%logger%print("ERROR: fitness calculator returned an unknown status. Stopping...")
+
+                     call mod_mpi_finalize()
+
+               end select
+
+            end do fitloop1
+
+         else ! For 1 < generation
+
+            ! Calculating the fitness function
+            fitloop2: do
+
+
+               ! Calculating a trial individual
+               call searcher%get_trial(i, ehist, trial_pop(i,:))
+
+
+               ! Checking the constraints
+               if ( is_X_out_of_range(ehist%nu, ehist%xmin, ehist%xmax, trial_pop(i,:)) ) then
+
+                  call sys_var%logger%print("Searcher must provide trial individuals that satisfy constraints. Stopping.")
+
+                  call mod_mpi_finalize()
+
+               end if
+
+
+               ! Asking the fitness calculator the fitness of the trial individual
+               call fit_calculator%get_fitness(ehist, i, trial_pop(i,:), trial_fit(i), ecode)
+
+
+               ! Sending feedback to searcher
+               call searcher%feed_back(i, ehist, trial_fit(i), ecode)
+
+
+               ! Analyzing the exit code of the fitness calculator
+               select case (ecode)
+
+
+                  ! In case of success, just exit the loop
+                  case (fitness_calculator_exit_code%SUCCESS)
+
+                     exit fitloop2
+
+
+                  ! Fitness calculation fail and no other individual will be generated
+                  case (fitness_calculator_exit_code%FAIL_AND_GIVE_UP)
+
+                     trial_pop(i,:) = ehist%pop(i,:)
+
+                     trial_fit(i)   = ehist%fit(i)
+
+                     exit fitloop2
+
+
+                  ! Fitness calculation fail and another individual will be generated
+                  case (fitness_calculator_exit_code%FAIL_AND_TRY_AGAIN)
+
+
+                  ! Unknown cases
+                  case default
+
+                     call sys_var%logger%print("ERROR: fitness calculator returned an unknown status. Stopping...")
+
+                     call mod_mpi_finalize()
+
+
+               end select
+
+            end do fitloop2
+
+         end if
 
       end associate
 
@@ -268,7 +328,7 @@ contains
 
       call mod_mpi_send(to_thread, this%trial_fit(i))
 
-      call this%searcher%send(i, to_thread)
+      if ( 1 < this%ehist%g ) call this%searcher%send(i, to_thread)
 
       call this%fit_calculator%send(i, to_thread)
 
@@ -286,7 +346,7 @@ contains
 
       call mod_mpi_recv(from_thread, this%trial_fit(i))
 
-      call this%searcher%recv(i, from_thread)
+      if ( 1 < this%ehist%g ) call this%searcher%recv(i, from_thread)
 
       call this%fit_calculator%recv(i, from_thread)
 
@@ -298,7 +358,7 @@ contains
       implicit none
       class(class_parallel_processed_trial_population) :: this !< A reference to this object
 
-      call this%searcher%update()
+      if ( 1 < this%ehist%g ) call this%searcher%update()
 
       call this%fit_calculator%update()
 

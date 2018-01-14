@@ -15,9 +15,6 @@ module mod_class_DE_RSM
    use mod_string
    use mod_class_DE_RSM_hybridization_control
 
-   !!!
-   use mod_class_abstract_population_initializer
-   use mod_class_population_initializer_factory
 
    implicit none
 
@@ -41,11 +38,6 @@ module mod_class_DE_RSM
       ! Search strategies
       class(class_abstract_search_strategy), pointer :: de_searcher  => null() !< DE search strategy
       class(class_abstract_search_strategy), pointer :: rsm_searcher => null() !< RSM search strategy
-
-      !!!
-      type(class_population_initializer_factory)            :: pop_initializer_factory   !< Population initializer factory
-      class(class_abstract_population_initializer), pointer :: pop_initializer => null() !< Population initializer object
-
 
    contains
 
@@ -85,6 +77,7 @@ contains
       integer             :: nf                 ! Number of fitting points for response surface adjustment
 
 
+      ! Getting parameters
       call ifile1%init(filename=sys_var%absparfile, field_separator='&')
       call ifile2%init(filename=conf_file_name,     field_separator='&')
 
@@ -147,9 +140,6 @@ contains
 
       ! Initializing the hybridization control object
       call this%hybrid_control%init(sys_var, np, nf, fh, fhmin, fhmax, fhm)
-
-      !!! Creating population initializer
-      call this%pop_initializer_factory%create(sys_var, conf_file_name, this%pop_initializer)
 
    end subroutine
 
@@ -229,51 +219,36 @@ contains
 
       if (present(es)) es = 0
 
-      if (ehist%g==1) then
+      ! Checking if RSM can be applied
 
-         ! Creating the trial individual x
-         estatus = DE_RSM_RETURN%DE_APPLIED
+      if ( this%hybrid_control%is_rsm_applicable(ehist%g) ) then
 
-         !!! Population initialization
-         call this%pop_initializer%get_trial(ind, ehist, x)
+         ! rsm_tag stores the return state of application of DE-RSM
+         estatus = DE_RSM_RETURN%RSM_APPLIED
 
-      else
+         ! Generating a RSM individual
 
-         ! Checking if RSM can be applied
+         call this%rsm_searcher%get_trial(ind, ehist, x, rsmstatus)
 
-         if ( this%hybrid_control%is_rsm_applicable(ehist%g) ) then
-
-            ! rsm_tag stores the return state of application of DE-RSM
-            estatus = DE_RSM_RETURN%RSM_APPLIED
-
-            ! Generating a RSM individual
-
-            call this%rsm_searcher%get_trial(ind, ehist, x, rsmstatus)
-
-            ! If RSM fails, generates a pure DE individual
-            if ( rsmstatus == 1 ) then
-
-               ! rsm_tag stores the return state of application of DE-RSM
-               estatus = DE_RSM_RETURN%DE_APPLIED
-
-               ! Creating the trial individual x
-               call this%de_searcher%get_trial(ind, ehist, x)
-
-            end if
-
-         else
+         ! If RSM fails, generates a pure DE individual
+         if ( rsmstatus == 1 ) then
 
             ! rsm_tag stores the return state of application of DE-RSM
             estatus = DE_RSM_RETURN%DE_APPLIED
 
+            ! Creating the trial individual x
             call this%de_searcher%get_trial(ind, ehist, x)
-
-            estatus = DE_RSM_RETURN%DE_APPLIED
 
          end if
 
-      end if
+      else
 
+         ! rsm_tag stores the return state of application of DE-RSM
+         estatus = DE_RSM_RETURN%DE_APPLIED
+
+         call this%de_searcher%get_trial(ind, ehist, x)
+
+      end if
 
       ! Verifying the constraints. If the individual x is out of range,
       ! another one is created using pure DE
