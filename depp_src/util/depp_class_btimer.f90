@@ -44,7 +44,7 @@ contains
 
 
       ! Creating backup file name
-      this%backup_file = trim(sys_var%absfolderout) // "/cpu_time_backup.txt"
+      this%backup_file = trim(sys_var%absfolderbkp) // "/cpu_time_backup.txt"
 
 
       ! Checking reload option

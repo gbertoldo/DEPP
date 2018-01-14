@@ -92,7 +92,7 @@ contains
 
       this%ireg = 0
 
-      this%backup_file = trim(sys_var%absfolderout) // "/class_DE_RSM_hybridization_control_backup.txt"
+      this%backup_file = trim(sys_var%absfolderbkp) // "/class_DE_RSM_hybridization_control_backup.txt"
 
       ! Reading reload option
       call ifile%init(filename=sys_var%absparfile, field_separator='&')

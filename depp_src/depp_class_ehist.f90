@@ -202,7 +202,7 @@ contains
 
       if (mpio%master) then
 
-         open(23, file = trim(sys_var%absfolderout) // trim(this%sname) // "-ehist-backup.txt")
+         open(23, file = trim(sys_var%absfolderbkp) // trim(this%sname) // "-ehist-backup.txt")
 
          write(23,*) this%sname
          write(23,*) this%g

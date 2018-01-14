@@ -24,6 +24,7 @@ module mod_class_system_variables
       character(str_size) :: ifilename = "input_file.txt" !< Stores the name of the parameters input file
       character(str_size) :: absfolderin                  !< Absolute path to folderin
       character(str_size) :: absfolderout                 !< Absolute path to folderout
+      character(str_size) :: absfolderbkp                 !< Absolute path to backup folder
       character(str_size) :: parfile                      !< Name of the parameters input file
       character(str_size) :: absparfile                   !< Absolute path and name of the parameters input file
       character(str_size) :: logfile                      !< Name of the log file
@@ -89,6 +90,8 @@ contains
       ! folderout for current simulation
       this%folderout = trim(this%folderout) // trim(this%sname) // "/"
 
+      ! Absolute path to backup folder for current simulation
+      this%absfolderbkp = trim(this%folderout) //  "backup/"
 
       ! Absolute path to input folder
       this%absfolderout = trim(this%CWD) // "/" // trim(this%folderout)
@@ -105,11 +108,13 @@ contains
             if (reload == 0) then
                call execute_command_line("rm -r " // trim(this%absfolderout))
                call execute_command_line("mkdir " // trim(this%absfolderout))
+               call execute_command_line("mkdir " // trim(this%absfolderbkp))
             end if
 
          else
 
             call execute_command_line("mkdir " // trim(this%absfolderout))
+            call execute_command_line("mkdir " // trim(this%absfolderbkp))
 
          end if
 

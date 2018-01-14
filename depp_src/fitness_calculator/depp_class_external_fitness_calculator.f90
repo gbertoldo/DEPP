@@ -72,7 +72,7 @@ contains
       this%sname        = ehist%sname
 
       ! Backup file
-      this%backup_file = trim(this%absfolderout) // "/class_external_fitness_calculator_backup.txt"
+      this%backup_file = trim(sys_var%absfolderbkp) // "/class_external_fitness_calculator_backup.txt"
 
       ! Population size
       this%np = ehist%np

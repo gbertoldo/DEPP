@@ -62,7 +62,7 @@ contains
       call ifile%get_value(reload,"reload")
 
       ! Backup file
-      this%backup_file = trim(sys_var%absfolderout) // "class_no_improvement_stop_condition_backup.txt"
+      this%backup_file = trim(sys_var%absfolderbkp) // "class_no_improvement_stop_condition_backup.txt"
 
 
       ! Allocating resources
