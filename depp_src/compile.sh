@@ -16,6 +16,9 @@ depp_class_ehist.f90
 ./fitness_calculator/depp_class_external_fitness_calculator.f90
 ./fitness_calculator/depp_class_fitness_calculator_factory.f90
 ./search_strategy/depp_search_tools.f90 
+./search_strategy/population_initializers/depp_class_abstract_population_initializer.f90
+./search_strategy/population_initializers/depp_class_population_initializer_uniform_random.f90
+./search_strategy/population_initializers/depp_class_population_initializer_factory.f90
 ./search_strategy/depp_class_abstract_parallel_processed_data.f90
 ./search_strategy/depp_class_abstract_search_strategy.f90 
 ./search_strategy/depp_class_abstract_search_strategy_factory.f90

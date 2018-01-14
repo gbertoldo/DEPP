@@ -6,13 +6,14 @@ All data must follow the input pattern: "value & variable & description", where 
 
 -------------------------------------------------------------------------------------------------------------------------------------------
 
-             function14RSM &                sname  &  Simulation name
-                         0 &               reload  &  Upload backup data and continue computation (0=no; 1=yes)
-         '$PWD/interface/' &                 fdir  &  Name of working directory for fitness calculation
-             'functions.x' &                 ffit  &  Name of executable for fitness calculation
-                         2 &                   nu  &  Number of unknowns
-                        20 &                   np  &  Size of population (recommended 10*nu)
-   'de_rsm_parameters.txt' & search_strategy_conf  &  Search strategy configuration file
+             function14RSM &                 sname  &  Simulation name
+                         0 &                reload  &  Upload backup data and continue computation (0=no; 1=yes)
+         '$PWD/interface/' &                  fdir  &  Name of working directory for fitness calculation
+             'functions.x' &                  ffit  &  Name of executable for fitness calculation
+                         2 &                    nu  &  Number of unknowns
+                        20 &                    np  &  Size of population (recommended 10*nu)
+   'de_rsm_parameters.txt' &  search_strategy_conf  &  Search strategy configuration file
+          'uniform_random' & pop_initializer_model  &  Population initializer model
 
 ===========================================================================================================================================
 

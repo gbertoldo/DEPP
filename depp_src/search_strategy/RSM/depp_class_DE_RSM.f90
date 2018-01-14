@@ -15,6 +15,10 @@ module mod_class_DE_RSM
    use mod_string
    use mod_class_DE_RSM_hybridization_control
 
+   !!!
+   use mod_class_abstract_population_initializer
+   use mod_class_population_initializer_factory
+
    implicit none
 
    ! Makes everything private, except otherwise stated
@@ -37,6 +41,10 @@ module mod_class_DE_RSM
       ! Search strategies
       class(class_abstract_search_strategy), pointer :: de_searcher  => null() !< DE search strategy
       class(class_abstract_search_strategy), pointer :: rsm_searcher => null() !< RSM search strategy
+
+      !!!
+      type(class_population_initializer_factory)            :: pop_initializer_factory   !< Population initializer factory
+      class(class_abstract_population_initializer), pointer :: pop_initializer => null() !< Population initializer object
 
 
    contains
@@ -140,6 +148,9 @@ contains
       ! Initializing the hybridization control object
       call this%hybrid_control%init(sys_var, np, nf, fh, fhmin, fhmax, fhm)
 
+      !!! Creating population initializer
+      call this%pop_initializer_factory%create(sys_var, conf_file_name, this%pop_initializer)
+
    end subroutine
 
 
@@ -223,7 +234,8 @@ contains
          ! Creating the trial individual x
          estatus = DE_RSM_RETURN%DE_APPLIED
 
-         call get_random_individual(ehist%nu, ehist%xmin, ehist%xmax, x)
+         !!! Population initialization
+         call this%pop_initializer%get_trial(ind, ehist, x)
 
       else
 
