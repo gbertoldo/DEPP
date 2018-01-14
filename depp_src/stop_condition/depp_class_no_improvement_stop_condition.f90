@@ -34,6 +34,7 @@ module mod_class_no_improvement_stop_condition
       procedure, public,  pass :: compute_stop_condition      !< Computes stop condition
       procedure, public,  pass :: is_stop_condition_satisfied !< Checks if stop condition is satisfied
       procedure, public,  pass :: convergence_info            !< Returns a string containing convergence information
+      procedure, private, pass :: add                         !< Adds data to the convergence history
       procedure, private, pass :: save_backup                 !< Saves a backup of the class state
       procedure, private, pass :: load_backup                 !< Loads a backup of the class state
 
@@ -50,7 +51,6 @@ contains
       class(class_system_variables),  intent(in) :: sys_var !< System's variables
 
       ! Inner variables
-      integer :: i
       integer :: reload
       type(class_ifile) :: ifile
 
@@ -71,12 +71,7 @@ contains
 
       allocate(this%fbest(this%GNoAcc))
 
-
-      do i = 1, this%GNoAcc
-
-         this%fbest(i) = -huge(1.d0)/dble(i)
-
-      end do
+      this%fbest = 0.d0
 
       this%stopflag = .false.
 
@@ -96,34 +91,91 @@ contains
       class(class_ehist),             intent(in) :: ehist !< Evolution history
 
       ! Inner variables
-      integer       :: i
+      integer :: i
+      integer :: k
 
-      ! Getting the index of the current register
-      this%ireg = idx(this%ireg+1,this%GNoAcc)
+      ! Creating labels
+      associate ( ireg     => this%ireg,     &
+                  GNoAcc   => this%GNoAcc,   &
+                  stopflag => this%stopflag, &
+                  nwi      => this%nwi,      &
+                  fbest    => this%fbest     )
 
-      this%fbest(this%ireg) = maxval(ehist%fit)
+
+         ! Adding the max fitness of the current generation to the convergence history
+         call this%add(maxval(ehist%fit))
+
+         ! Checking convergence
+
+         stopflag = .false.
+
+         nwi = 0
+
+         k = min(ireg, GNoAcc)
+
+         do i = k, 1, -1
+
+            ! Checks if there are differences among the best fitness in the last GNoAcc generations
+            if ( fbest(k)-fbest(i) > 10.d0 * epsilon(1.d0) ) exit
+
+            nwi = nwi + 1
+
+         end do
+
+         if ( nwi == GNoAcc ) stopflag = .true.
+
+      end associate
 
 
-      this%stopflag = .true.
+      call this%save_backup()
 
-      this%nwi = this%GNoAcc
+   end subroutine
 
-      do i = 1, this%GNoAcc
 
-         ! Checks if there are differences among the best fitness in the last GNoAcc generations
-         if ( abs(this%fbest(i)-this%fbest(this%GNoAcc)) > 10.d0 * epsilon(1.d0) ) then
+   !> \brief Adds data to the convergence history
+   subroutine add(this, fmax)
+      implicit none
+      class(class_no_improvement_stop_condition) :: this  !< A reference to this object
+      real(8),                        intent(in) :: fmax  !< Maximum value of f of current generation
 
-            this%stopflag = .false.
+      ! Creating labels
+      associate ( ireg   => this%ireg,   &
+                  GNoAcc => this%GNoAcc, &
+                  fbest  => this%fbest   )
 
-            this%nwi = i-1
+         ireg = ireg + 1
 
-            exit
+         if ( ireg <= GNoAcc ) then
+
+            fbest(ireg) = fmax
+
+         else
+
+            call shift_left(fbest)
+
+            fbest(GNoAcc) = fmax
 
          end if
 
-      end do
+      end associate
 
-      call this%save_backup()
+   contains
+
+      !> \brief Shift data to left
+      subroutine shift_left(x)
+         implicit none
+         real(8), dimension(:), intent(inout) :: x
+
+         ! Inner variables
+         integer :: i
+
+         do i = 1, size(x)-1
+
+            x(i) = x(i+1)
+
+         end do
+
+      end subroutine
 
    end subroutine
 
@@ -135,19 +187,6 @@ contains
       class(class_no_improvement_stop_condition) :: this !< A reference to this object
 
       is_stop_condition_satisfied = this%stopflag
-
-   end function
-
-
-   !> \brief Returns the index of the current register
-   integer function idx(i, nps)
-      implicit none
-      integer, intent(in) :: i
-      integer, intent(in) :: nps
-
-      idx = mod(i,nps)
-
-      if (idx==0) idx = nps
 
    end function
 
