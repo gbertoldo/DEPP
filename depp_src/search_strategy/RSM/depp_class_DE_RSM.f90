@@ -63,7 +63,6 @@ contains
       class(class_abstract_search_strategy_factory), intent(in) :: search_strategy_factory !< Search strategy factory
 
       ! Inner variables
-      integer             :: estatus            ! Exit status
       type(class_ifile)   :: ifile1             ! Input file
       type(class_ifile)   :: ifile2             ! Input file
       character(str_size) :: de_conf_file_name  ! DE configuration file

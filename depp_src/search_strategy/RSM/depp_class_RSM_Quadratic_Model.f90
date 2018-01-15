@@ -21,7 +21,7 @@ module mod_class_RSM_Quadratic_Model
 
    contains
 
-      procedure, public,  pass :: dim           !< Minimum number of points necessary to fit the response surface
+      procedure, public,  pass :: nfit          !< Minimum number of points necessary to fit the response surface
       procedure, public,  pass :: fit           !< Fits the polynomial to the data
       procedure, public,  pass :: P             !< Returns the value of the fitted response surface for a given x
       procedure, public,  pass :: get_optimizer !< Returns the response surface optimizer
@@ -33,18 +33,18 @@ contains
 
 
    !> \brief Minimum number of points necessary to fit the response surface
-   integer function dim(this, n)
+   integer function nfit(this, n)
       implicit none
       class(class_RSM_Quadratic_Model) :: this !< A reference to this object
       integer, optional, intent(in)    :: n    !< Number of unknowns
 
       if ( present(n) ) then
 
-         dim = (n+1)*(n+2)/2
+         nfit = (n+1)*(n+2)/2
 
       else
 
-         dim = this%nb
+         nfit = this%nb
 
       end if
 
@@ -242,6 +242,8 @@ contains
 
       associate ( n  => this%n, &
                   nb => this%nb )
+
+         phi = 0.d0
 
          if ( p == 1 ) then
 

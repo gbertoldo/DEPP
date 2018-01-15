@@ -9,7 +9,7 @@ module mod_class_abstract_RSM
 
    contains
 
-      procedure(dim_interface),           deferred, public, pass :: dim             !< Minimum number of points necessary to fit the response surface
+      procedure(nfit_interface),          deferred, public, pass :: nfit            !< Minimum number of points necessary to fit the response surface
       procedure(fit_interface),           deferred, public, pass :: fit             !< Fits the response surface to the data
       procedure(P_interface),             deferred, public, pass :: P               !< Returns the value of the fitted response surface
       procedure(get_optimizer_interface), deferred, public, pass :: get_optimizer   !< Returns the response surface optimizer
@@ -19,7 +19,7 @@ module mod_class_abstract_RSM
    abstract interface
 
       !> \brief Minimum number of points necessary to fit the response surface
-      integer function dim_interface(this, n)
+      integer function nfit_interface(this, n)
          import class_abstract_RSM
          implicit none
          class(class_abstract_RSM)     :: this !< A reference to this object

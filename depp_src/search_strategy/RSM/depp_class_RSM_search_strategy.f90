@@ -88,7 +88,7 @@ contains
 
 
       ! Number of points for fitting the objective function to the polynomial
-      this%nf = ceiling( fnb * dble(this%RSM%dim(nu)) ) + 1
+      this%nf = ceiling( fnb * dble(this%RSM%nfit(nu)) ) + 1
 
 
       ! Checking if the number of generations is enough to apply RSM

@@ -80,6 +80,10 @@ contains
       integer :: r(3) ! indexes of selected individuals
 
 
+      ! Setting exit status
+      if (present(es)) es = 0
+
+
       ! Detecting nu and np
       nu = size(x)
       np = size(ehist%pop,dim=1)

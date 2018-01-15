@@ -43,8 +43,8 @@ depp_class_optimizer.f90
 depp_main.f90
 "
 
-#mpif90 -Wall -O3 -o depp.x $flist
-mpif90 -o depp.x $flist
+#mpif90 -std=f2008 -Wall -O3 -o depp.x $flist
+mpif90 -std=f2008 -O3 -o depp.x $flist
 
 mv ./depp.x ../
 rm *.mod

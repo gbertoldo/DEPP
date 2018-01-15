@@ -62,7 +62,7 @@ contains
 
             else
 
-               open(this%fileid(2),file=logfile, access='append')
+               open(this%fileid(2),file=logfile, position='append')
 
             end if
 

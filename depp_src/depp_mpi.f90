@@ -25,6 +25,7 @@ module mod_mpi
       integer :: status(mpi_status_size)  !< mpi: vector with information and source tag
       integer :: iproc                    !< mpi: identification number of the process
       integer :: code                     !< mpi: status code
+      integer :: ierror                   !< mpi: ierror
       integer :: nproc                    !< mpi: number of processes
       integer :: tag                      !< mpi: message label
       integer :: comm                     !< mpi: MPI communicator
@@ -80,7 +81,7 @@ contains
 
          write(*,*) " =====  Error in the MPI initialization. Stopping...  ====="
 
-         call mpi_abort(mpio%comm, mpio%code, mpio%code)
+         call mpi_abort(mpio%comm, mpio%code, mpio%ierror)
 
       endif
 
@@ -121,7 +122,7 @@ contains
    subroutine mod_mpi_abort()
       implicit none
 
-      call mpi_abort(mpio%comm, mpio%code, mpio%code)
+      call mpi_abort(mpio%comm, mpio%code, mpio%ierror)
 
    end subroutine
 
