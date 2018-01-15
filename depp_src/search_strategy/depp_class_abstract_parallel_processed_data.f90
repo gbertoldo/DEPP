@@ -160,10 +160,10 @@ contains
       integer, intent(in) :: i
 
       ! This rule leaves all the work to slaves.
-      thread_map = mod(i, mpio%nproc-1) + 1
+      !thread_map = mod(i, mpio%nproc-1) + 1
 
       ! This rule shares the work among all threads, including master thread.
-      !thread_map = mod(i, mpio%nproc)
+      thread_map = mod(i, mpio%nproc)
 
    end function
 

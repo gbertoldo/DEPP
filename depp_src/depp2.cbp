@@ -64,6 +64,7 @@
 		<Unit filename="search_strategy/DE/depp_class_DE_RAND_1.f90">
 			<Option weight="5" />
 		</Unit>
+		<Unit filename="search_strategy/RSM/depp_RSM_tools.f90" />
 		<Unit filename="search_strategy/RSM/depp_class_DE_RSM.f90">
 			<Option weight="6" />
 		</Unit>

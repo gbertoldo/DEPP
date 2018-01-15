@@ -58,7 +58,7 @@ contains
 
 
          ! Initializing random number generator module
-         !call initialize_random_generator()
+         call initialize_random_generator()
 
 
          ! Initializing system variables
