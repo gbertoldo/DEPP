@@ -23,11 +23,11 @@ All data must follow the input pattern: "value & variable & description", where 
 
 Stop condition is a composite of the following models. Choose a composition of models and set the corresponding parameters. 
 
-"max_generations, no_improvement, p_measure" & composite_stop_condition & List of stop condition models
-                       200 &                   ng  &  Maximum number of generations (Model: max_generations)
-                        40 &               GNoAcc  &  Max. num. of gen. before stopping if no improvement was found (Model: no_improvement)
-                         2 &                  kpm  &  Kind of population convergence measure (See options bellow) (Model: p_measure)
-                  0.0005d0 &                 ptol  &  Tolerance for the population convergence measure (Model: p_measure)
+"max_generations, no_improvement, p_measure" & composite_stop_condition &  List of stop condition models
+                                         200 &                      ng  &  Maximum number of generations (Model: max_generations)
+                                          40 &                  GNoAcc  &  Max. num. of gen. before stopping if no improvement was found (Model: no_improvement)
+                                           2 &                     kpm  &  Kind of population convergence measure (See options bellow) (Model: p_measure)
+                                    0.0005d0 &                    ptol  &  Tolerance for the population convergence measure (Model: p_measure)
 
 Kind of population convergence measure (kpm):
 
@@ -40,18 +40,18 @@ Kind of population convergence measure (kpm):
 
 -------------------------------------------------------------------------------------------------------------------------------------------
 
-                        X1 & xname(1)& Name of the unknown
-                   -500.d0 &  xmin(1)& Lower value for 1st unknown
-                    500.d0 &  xmax(1)& Biggest value for 1st unknown
-                        X2 & xname(2)& Name of the unknown
-                   -500.d0 &  xmin(2)& Lower value for 2nd unknown
-                    500.d0 &  xmax(2)& Biggest value for 2nd unknown
-                        X3 & xname(3)& Name of the unknown
-                   -500.d0 &  xmin(3)& Lower value for 3rd unknown
-                    500.d0 &  xmax(3)& Biggest value for 3rd unknown
-                        X4 & xname(4)& Name of the unknown
-                   -500.d0 &  xmin(4)& Lower value for 4th unknown
-                    500.d0 &  xmax(4)& Biggest value for 4th unknown
+                                          X1 &                xname(1)  &  Name of the unknown
+                                     -500.d0 &                 xmin(1)  &  Lower value for 1st unknown
+                                      500.d0 &                 xmax(1)  &  Biggest value for 1st unknown
+                                          X2 &                xname(2)  &  Name of the unknown
+                                     -500.d0 &                 xmin(2)  &  Lower value for 2nd unknown
+                                      500.d0 &                 xmax(2)  &  Biggest value for 2nd unknown
+                                          X3 &                xname(3)  &  Name of the unknown
+                                     -500.d0 &                 xmin(3)  &  Lower value for 3rd unknown
+                                      500.d0 &                 xmax(3)  &  Biggest value for 3rd unknown
+                                          X4 &                xname(4)  &  Name of the unknown
+                                     -500.d0 &                 xmin(4)  &  Lower value for 4th unknown
+                                      500.d0 &                 xmax(4)  &  Biggest value for 4th unknown
     
 ===========================================================================================================================================
 

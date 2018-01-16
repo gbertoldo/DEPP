@@ -14,19 +14,19 @@
 !!          Guilherme Bertoldo
 !!
 !!                 E-mail: glbertoldo@gmail.com
-!!             Curriculum: http://buscatextual.cnpq.br/buscatextual/visualizacv.do?id=H769069
+!!             Curriculum: http://lattes.cnpq.br/0176403556779673
 !!
 !!
 !! \par Institution
 !!          Federal University of Technology - Paraná - UTFPR
 !!
 !!
-!! \date April, 2016.
+!! \date Jan, 2018.
 !!
 !! \version 2.0
 !!
-!! \par SVN CHECKOUT
-!!          http://depp.googlecode.com/svn/trunk/
+!! \par GitHub repository
+!!          https://github.com/gbertoldo/DEPP
 !!
 program functions
 
@@ -459,6 +459,8 @@ contains
    
    end function function13
 
+   !============================================================================
+
 
    !> \brief Schwefel 2.26 (Zhang and Sanderson, 2009)
    real(8) function function14(nu, x)
@@ -482,6 +484,8 @@ contains
    
    end function function14
    
+
+   !============================================================================
    
 
    !> \brief Griewank (Zhang and Sanderson, 2009)
