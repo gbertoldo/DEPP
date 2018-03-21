@@ -40,7 +40,6 @@ module mod_class_ehist
       ! Domain
       real(8),       dimension(:), allocatable :: xmin  !< lower boundary constraints
       real(8),       dimension(:), allocatable :: xmax  !< upper boundary constraints
-      character(10), dimension(:), allocatable :: xname !< names of the unknowns
 
    contains
 
@@ -69,10 +68,9 @@ contains
 
 
       ! Inner variables
-      type(class_ifile) :: ifile
-      character(20)     :: caux
-      integer           :: i
-      integer           :: reload
+      type(class_ifile)       :: ifile
+      integer                 :: reload
+      character(len=str_size) :: str
 
 
       ! Reading the parameters input file
@@ -89,23 +87,15 @@ contains
 
       allocate(this%xmin(this%nu))
       allocate(this%xmax(this%nu))
-      allocate(this%xname(this%nu))
       allocate(this%fit(this%np))
       allocate(this%pop(this%np,this%nu))
       allocate(this%hist(this%ng,this%np,0:this%nu))
 
-      do i = 1, this%nu
+      call ifile%get_value( str, "lower_bound")
+      call get_constraint_vector(str, this%xmin)
 
-         write(caux,"(A,I1.1,A)") "xname(",i,")"
-         call ifile%get_value( this%xname(i), trim(caux))
-
-         write(caux,"(A,I1.1,A)") "xmin(",i,")"
-         call ifile%get_value(  this%xmin(i), trim(caux))
-
-         write(caux,"(A,I1.1,A)") "xmax(",i,")"
-         call ifile%get_value(  this%xmax(i), trim(caux))
-
-      end do
+      call ifile%get_value( str, "upper_bound")
+      call get_constraint_vector(str, this%xmax)
 
 
       ! If reload=0, data is initialized, otherwise the population and its fitness are read from the backup file
@@ -123,6 +113,51 @@ contains
          call this%load_backup(sys_var)
 
       end if
+
+   contains
+
+      !> \brief Reads the constraint vectors
+      subroutine get_constraint_vector(str, bound_vector)
+         implicit none
+         character(len=*),       intent(in) :: str          !< String containing the data
+         real(8), dimension(:), intent(out) :: bound_vector !< The vector with the constraints
+
+         ! Auxiliary variables
+         integer :: i
+         integer :: IO1
+         integer :: IO2
+
+         ! Trying to read bound vector
+         read(str,*,IOStat=IO1) bound_vector
+
+         ! If an error occured, try to discover the number of elements of this vector
+         if (IO1/=0) then
+
+            do i = this%nu-1, 1, -1
+
+               read(str,*,IOStat=IO2) bound_vector(1:i)
+
+               if ( IO2==0 ) exit
+
+            end do
+
+            ! If there is only one element, then all elements are equal to this one.
+            if ( i == 1 .and. IO2 == 0) then
+
+               bound_vector = bound_vector(1)
+
+            ! Otherwise, there is some error...
+            else
+
+               call sys_var%logger%print("class_ehist: Unable to read constraint vectors. Stopping...")
+
+               call mod_mpi_finalize()
+
+            end if
+
+         end if
+
+      end subroutine
 
 
    end subroutine
@@ -215,7 +250,6 @@ contains
          write(23,*) this%hist
          write(23,*) this%xmin
          write(23,*) this%xmax
-         write(23,*) this%xname
 
          close(23)
 
@@ -246,7 +280,6 @@ contains
       read(23,*) this%hist
       read(23,*) this%xmin
       read(23,*) this%xmax
-      read(23,*) this%xname
 
       close(23)
 

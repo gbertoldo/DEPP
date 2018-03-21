@@ -33,86 +33,70 @@ program functions
    use depp_interface
 
    implicit none
-   integer :: i      !< dummy index
-   integer :: nf     !< function number
-   integer :: ind    !< number of the individual
-   integer :: nu     !< number of unknowns
-   integer :: estatus!< Exit status (0 = success, 1 = failure, 2 = generate another individual)
-   real(8) :: fit    !< fitness
-   character(200) :: sname !< simulation name
-   integer,       dimension(:), allocatable :: xopt   !< Optimization checker
-   character(10), dimension(:), allocatable :: xname  !< Name of parameters
-   real(8),       dimension(:), allocatable :: x      !< parameters
+   integer                            :: nf      !< function number
+   integer                            :: estatus !< Exit status (0 = success, 1 = failure, 2 = generate another individual)
+   real(8)                            :: fit     !< fitness
+   real(8), dimension(:), allocatable :: x       !< parameters
    
    ! Variables used for creating seeds of the random number generator
    integer :: clock     !< clock time for seeds generation
    integer :: seed(97)  !< seeds for random numbers
 
-   
-   
+      
    ! Initializing the seed for the random numbers
-   
    call system_clock(count = clock)
    seed = clock
    call random_seed(put = seed)
-   
-   
-   
 
+
+   ! Exit status
+   estatus = 0
+       
+   
+   ! Reads the parameters from DEPP
+   call depp_get_parameters(x)
+
+
+   ! Choosing the fitness function
    open(10, file = "./input_function.txt")
    read(10,*) nf
-   read(10,*) nu
-   
-   allocate( xopt(nu), xname(nu), x(nu) )
-
-   do i = 1, nu
-
-       read(10,*) xname(i)  ! Parameter name
-       read(10,*) xopt(i)   ! Will this parameter be optimized? ( 0 = no, 1 = yes )
-       read(10,*) x(i)      ! Parameter value
-
-   end do
-
    close(10)
-  
-   ! Reads the parameters from DEPP
-   call depp_get_parameters(nu, xopt, xname, x, ind, sname)
 
-   estatus = 0
- 
+
+   ! Calculating the fitness 
    select case (nf)
       case(1)
-         fit = function1(nu, x) ! Sphere function (Coley, page 38, 1999)
+         fit = function1(size(x), x) ! Sphere function (Coley, page 38, 1999)
       case(2)
-         fit = function2(nu, x) ! Step function (Zhang and Sanderson, 2009)
+         fit = function2(size(x), x) ! Step function (Zhang and Sanderson, 2009)
       case(3)
-         fit = function3(nu, x) ! Test function 4 (Coley, page 38, 1999)
+         fit = function3(size(x), x) ! Test function 4 (Coley, page 38, 1999)
       case(4)
-         fit = function4(nu, x) ! Test function 5 (Coley, page 38, 1999)
+         fit = function4(size(x), x) ! Test function 5 (Coley, page 38, 1999)
       case(5)
-         fit = function5(nu, x, estatus) 
+         fit = function5(size(x), x, estatus) 
          ! Test function 5 (this function is used to test the exit status functionality
          ! of the DEPP program)
       case(6)
-         fit = function6(nu, x, estatus)  ! Bump problem (Feoktistov, page 139, 2006)
+         fit = function6(size(x), x, estatus)  ! Bump problem (Feoktistov, page 139, 2006)
       case(7)
-         fit = function7(nu, x)  ! Rastrigin's function (Feoktistov, page 163, 2006)
+         fit = function7(size(x), x)  ! Rastrigin's function (Feoktistov, page 163, 2006)
       case(8)
-         fit = function8(nu, x)  ! Rotated Ellipsoid function (Feoktistov, page 164, 2006)
+         fit = function8(size(x), x)  ! Rotated Ellipsoid function (Feoktistov, page 164, 2006)
       case(9)
-         fit = function9(nu, x)  ! Rosenbrock's function, (Feoktistov, page 160, 2006) 
+         fit = function9(size(x), x)  ! Rosenbrock's function, (Feoktistov, page 160, 2006) 
       case(10)
-         fit = function10(nu, x) ! Shifted Ackley's function (Vicenzi and Savoia, 2015)
+         fit = function10(size(x), x) ! Shifted Ackley's function (Vicenzi and Savoia, 2015)
       case(11)
-         fit = function11(nu, x) ! Schwefel 2.22 (Zhang and Sanderson, 2009)
+         fit = function11(size(x), x) ! Schwefel 2.22 (Zhang and Sanderson, 2009)
       case(12)
-         fit = function12(nu, x) ! Schwefel 2.21 (Zhang and Sanderson, 2009)
+         fit = function12(size(x), x) ! Schwefel 2.21 (Zhang and Sanderson, 2009)
       case(13)
-         fit = function13(nu, x) ! Noisy quartic (Zhang and Sanderson, 2009)
+         fit = function13(size(x), x) ! Noisy quartic (Zhang and Sanderson, 2009)
       case(14)
-         fit = function14(nu, x) ! Schwefel 2.26 (Zhang and Sanderson, 2009)
+         fit = function14(size(x), x) ! Schwefel 2.26 (Zhang and Sanderson, 2009)
       case(15)
-         fit = function15(nu, x) ! Griewank (Zhang and Sanderson, 2009)
+         fit = function15(size(x), x) ! Griewank (Zhang and Sanderson, 2009)
       case default
          write(*,*) " ERROR: invalid function number. "
          stop
@@ -120,7 +104,7 @@ program functions
 
 
    ! Saves the fitness function to a file
-   call depp_save_fitness(fit, estatus, "Fitness")
+   call depp_save_fitness(fit, estatus)
 
    
 contains

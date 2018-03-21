@@ -1,0 +1,5 @@
+           'output.txt' = arqfit: name of the file for fitness
+                      2 = nu:    number of unknowns
+  1.000000000000000e-00
+  2.000000000000000e-00
+

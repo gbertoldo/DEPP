@@ -138,21 +138,10 @@ contains
          write(27,"(a  , a)") "'" // trim(arqfit) // "'", " = arqfit: name of the file for fitness"
       end if
 
-      if (len(trim(this%sname)) <= 23) then
-         write(27,"(a23, a)") trim(this%sname), " = sname: simulation name"
-      else
-         write(27,"(a  , a)") trim(this%sname), " = sname: simulation name"
-      end if
-
-      write(27,"(i23, a)")        i, " = ind:   individual number"
       write(27,"(i23, a)") ehist%nu, " = nu:    number of unknowns"
 
-      write(27,*)
-      write(27,*) "=========== VARIABLES OF OPTIMIZATION ====================="
-      write(27,*) "                     X                       Variable name"
-
       do j = 1, ehist%nu
-         write(27,"(1pe23.15, a36)") x(j), trim(ehist%xname(j))
+         write(27,"(1pe23.15, a36)") x(j)
       end do
 
       write(27,*)
@@ -161,8 +150,7 @@ contains
 
       ! Calling the external program for fitness calculation
       call execute_command_line("(cd " // trim(this%fdir) // " && exec ./" &
-                                // trim(this%ffit) // ") < " // trim(arqpar) // " > /dev/null")
-
+                                // trim(this%ffit) // " " // trim(arqpar) // ") " // " > /dev/null")
 
       ! Reading the solution
       open(26, file = trim(arqfit))

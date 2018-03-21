@@ -6,14 +6,14 @@ All data must follow the input pattern: "value & variable & description", where 
 
 -------------------------------------------------------------------------------------------------------------------------------------------
 
-             function14RSM &                 sname  &  Simulation name
-                         0 &                reload  &  Upload backup data and continue computation (0=no; 1=yes)
-         '$PWD/interface/' &                  fdir  &  Name of working directory for fitness calculation
-             'functions.x' &                  ffit  &  Name of executable for fitness calculation
-                         2 &                    nu  &  Number of unknowns
-                        20 &                    np  &  Size of population (recommended 10*nu)
-   'de_rsm_parameters.txt' &  search_strategy_conf  &  Search strategy configuration file
-          'uniform_random' & pop_initializer_model  &  Population initializer model
+                                  function01 &                  sname  &  Simulation name
+                                           0 &                 reload  &  Upload backup data and continue computation (0=no; 1=yes)
+                '$PWD/interface/Fortran2008' &                   fdir  &  Name of working directory for fitness calculation
+                                 'fitness.x' &                   ffit  &  Name of executable for fitness calculation
+                                           2 &                     nu  &  Number of unknowns
+                                          20 &                     np  &  Size of population (recommended 10*nu)
+                     'de_rsm_parameters.txt' &   search_strategy_conf  &  Search strategy configuration file
+                            'uniform_random' &  pop_initializer_model  &  Population initializer model
 
 ===========================================================================================================================================
 
@@ -36,22 +36,15 @@ Kind of population convergence measure (kpm):
 
 ===========================================================================================================================================
 
-                                               VARIABLES AND CONSTRAINTS
+                                                    CONSTRAINTS
 
 -------------------------------------------------------------------------------------------------------------------------------------------
 
-                                          X1 &                xname(1)  &  Name of the unknown
-                                     -500.d0 &                 xmin(1)  &  Lower value for 1st unknown
-                                      500.d0 &                 xmax(1)  &  Biggest value for 1st unknown
-                                          X2 &                xname(2)  &  Name of the unknown
-                                     -500.d0 &                 xmin(2)  &  Lower value for 2nd unknown
-                                      500.d0 &                 xmax(2)  &  Biggest value for 2nd unknown
-                                          X3 &                xname(3)  &  Name of the unknown
-                                     -500.d0 &                 xmin(3)  &  Lower value for 3rd unknown
-                                      500.d0 &                 xmax(3)  &  Biggest value for 3rd unknown
-                                          X4 &                xname(4)  &  Name of the unknown
-                                     -500.d0 &                 xmin(4)  &  Lower value for 4th unknown
-                                      500.d0 &                 xmax(4)  &  Biggest value for 4th unknown
-    
+Tip: if all components have the same value, just type one value, i.e., it is not necessary to repeat all components. Otherwise, type
+each component separated by comma.
+
+                                   "-500.d0" &             lower_bound  &  Lower bound vector.
+                                    "500.d0" &             upper_bound  &  Upper bound vector.
+
 ===========================================================================================================================================
 
