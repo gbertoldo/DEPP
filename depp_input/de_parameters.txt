@@ -6,7 +6,7 @@ All data must follow the input pattern: "value & variable & description", where 
 
 -----------------------------------------------------------------------------------------------------------------------
 
-                    'DE/RAND/1' &        CID    &  Class ID of this configuration file
+                      DE/RAND/1 &        CID    &  Class ID of this configuration file
                          0.85d0 &        dif    &  Differentiation constant (recommended 0.85)
                           0.5d0 &        crs    &  Crossover probability (recommended 0.5)
 

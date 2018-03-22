@@ -384,6 +384,7 @@ contains
 
       ! Inner variables
       integer :: i
+      character(len=chlen) :: caux
 
       value = ""
 
@@ -391,7 +392,9 @@ contains
 
          if (trim(adjustl(varname))==trim(adjustl(this%data(i)%varname))) then
 
-            read(this%data(i)%value,*) value
+            read(this%data(i)%value,"(A)") caux
+
+            value = trim(adjustl(caux))
 
             call add_pickedup(this, i)
 

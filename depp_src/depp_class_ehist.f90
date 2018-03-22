@@ -126,6 +126,19 @@ contains
          integer :: i
          integer :: IO1
          integer :: IO2
+         real(8) :: raux
+
+         ! Trying to read an augmented bound vector (just to check the vector size)
+         read(str,*,IOStat=IO1) bound_vector, raux
+
+         ! If no error occured, the input data is wrong
+         if (IO1==0) then
+
+            call sys_var%logger%print("class_ehist: Unable to read constraint vectors. Stopping...")
+
+            call mod_mpi_finalize()
+
+         end if
 
          ! Trying to read bound vector
          read(str,*,IOStat=IO1) bound_vector
