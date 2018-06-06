@@ -26,6 +26,7 @@ module mod_class_RSM_search_strategy
 
       private
 
+      integer                            :: np            !< Population size
       integer                            :: nf            !< Number of fitting points
       integer                            :: kw            !< Kind of weight
       real(8)                            :: crsh          !< Crossing over parameter
@@ -37,6 +38,10 @@ module mod_class_RSM_search_strategy
       procedure, pass, public  :: init                       !< Constructor
       procedure, pass, public  :: get_trial                  !< Returns the trial individual (best estimate given by the Response Surface Methodology)
       procedure, pass, public  :: feed_back                  !< Process the fitness of the trial individual
+      procedure, pass, public  :: data_size                  !< Gives the size of the shared data vector
+      procedure, pass, public  :: send                       !< Send data to other threads
+      procedure, pass, public  :: recv                       !< Receive data from other threads
+      procedure, pass, public  :: update                     !< Perform update calculations after parallel computation cycle
       procedure, pass, private :: select_target_individual   !< Selects a target individual from the history list
       procedure, pass, private :: select_fitting_individuals !< Selects the fitting individuals for a given target individual
       procedure, pass, private :: get_weights                !< Calculates the weights of the fitting individuals
@@ -56,7 +61,6 @@ contains
       ! Inner variables
 
       integer                 :: nu          ! Number of unknowns
-      integer                 :: np          ! Size of the population
       integer                 :: ng          ! Maximum number of generations
       real(8)                 :: fnb         ! Multiple of the minimum number of points for RSM fitting
       character(str_size)     :: RS_model    ! Response surface model
@@ -70,9 +74,9 @@ contains
 
       call ifile1%init(filename=trim(sys_var%absfolderin)//trim(sys_var%parfile), field_separator="&")
       call ifile1%load()
-      call ifile1%get_value(nu,"nu")    ! Number of unknowns
-      call ifile1%get_value(np,"np")    ! Size of the population
-      call ifile1%get_value(ng,"ng")    ! Maximum number of generations
+      call ifile1%get_value(nu,"nu")         ! Number of unknowns
+      call ifile1%get_value(this%np,"np")    ! Size of the population
+      call ifile1%get_value(ng,"ng")         ! Maximum number of generations
 
       call ifile2%init(filename=conf_file_name, field_separator="&")
       call ifile2%load()
@@ -92,10 +96,10 @@ contains
 
 
       ! Checking if the number of generations is enough to apply RSM
-      if ( np * (ng-1) <= 2 * this%nf ) then
+      if ( this%np * (ng-1) <= 2 * this%nf ) then
 
          call sys_var%logger%print("ERROR: maximum number of generations ng is insufficient to apply RSM.")
-         call sys_var%logger%print("Minimum ng recommended: " // to_string(int(dble(10*this%nf)/dble(np))+1))
+         call sys_var%logger%print("Minimum ng recommended: " // to_string(int(dble(10*this%nf)/dble(this%np))+1))
 
          call mod_mpi_finalize()
 
@@ -191,6 +195,43 @@ contains
 
    end subroutine
 
+
+  !> \brief Gives the size of the shared data vector
+  integer function data_size(this)
+     implicit none
+     class(class_RSM_search_strategy) :: this !< A reference to this object
+
+     data_size = this%np
+
+  end function
+
+
+   !> \brief Send data to other threads
+   subroutine send(this, i, to_thread)
+      implicit none
+      class(class_RSM_search_strategy)      :: this      !< A reference to this object
+      integer,                   intent(in) :: i         !< Index of the shared data
+      integer,                   intent(in) :: to_thread !< Receiver thread
+
+   end subroutine
+
+
+   !> \brief Receive data from other threads
+   subroutine recv(this, i, from_thread)
+      implicit none
+      class(class_RSM_search_strategy)      :: this        !< A reference to this object
+      integer,                   intent(in) :: i           !< Index of the shared data
+      integer,                   intent(in) :: from_thread !< Sender thread
+
+   end subroutine
+
+
+   !> \brief Perform update calculations after parallel computation cycle
+   subroutine update(this)
+      implicit none
+      class(class_RSM_search_strategy) :: this !< A reference to this object
+
+   end subroutine
 
    !> \brief Selects a target individual from the history list
    subroutine select_target_individual(this, ind, nu, np, ng, g, hist, xs)

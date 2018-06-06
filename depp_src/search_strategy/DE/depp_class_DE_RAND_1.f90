@@ -22,6 +22,7 @@ module mod_class_DE_RAND_1
 
       private
 
+      integer :: np  !< Population size
       real(8) :: dif !< Differential parameter
       real(8) :: crs !< Crossing over parameter
 
@@ -30,6 +31,10 @@ module mod_class_DE_RAND_1
       procedure, public, pass :: init      !< Constructor
       procedure, public, pass :: get_trial !< Gets a trial individual
       procedure, public, pass :: feed_back !< Process the feedback from fitness calculator
+      procedure, public, pass :: data_size !< Gives the size of the shared data vector
+      procedure, public, pass :: send      !< Send data to other threads
+      procedure, public, pass :: recv      !< Receive data from other threads
+      procedure, public, pass :: update    !< Perform update calculations after parallel computation cycle
 
    end type
 
@@ -43,12 +48,19 @@ contains
       character(len=*),              intent(in) :: conf_file_name !< Configuration file
 
       ! Inner variables
-      type(class_ifile)   :: ifile
+      type(class_ifile)   :: ifile1
+      type(class_ifile)   :: ifile2
       character(str_size) :: CID
 
-      call ifile%init(filename=conf_file_name, field_separator='&')
-      call ifile%load()
-      call ifile%get_value(CID,"CID")
+      ! Getting parameters
+      call ifile1%init(filename=sys_var%absparfile, field_separator='&')
+      call ifile2%init(filename=conf_file_name,     field_separator='&')
+
+      call ifile1%load()
+      call ifile2%load()
+
+      call ifile1%get_value(this%np, "np")
+      call ifile2%get_value(    CID,"CID")
 
       if (trim(CID)/="DE/RAND/1") then
 
@@ -58,8 +70,8 @@ contains
 
       end if
 
-      call ifile%get_value(this%dif,"dif")
-      call ifile%get_value(this%crs,"crs")
+      call ifile2%get_value(this%dif,"dif")
+      call ifile2%get_value(this%crs,"crs")
 
    end subroutine
 
@@ -88,12 +100,18 @@ contains
       nu = size(x)
       np = size(ehist%pop,dim=1)
 
-      ! Choosing three individuals from the population
-      call select_individuals(np, ind, r)
+      do
 
-      x = ehist%pop(r(3),:) + this%dif*(ehist%pop(r(1),:) - ehist%pop(r(2),:))
+         ! Choosing three individuals from the population
+         call select_individuals(np, ind, r)
 
-      call crossing_over(ind, nu, np, this%crs, ehist%pop, x)
+         x = ehist%pop(r(3),:) + this%dif*(ehist%pop(r(1),:) - ehist%pop(r(2),:))
+
+         call crossing_over(ind, nu, np, this%crs, ehist%pop, x)
+
+         if ( .not. is_X_out_of_range(nu, ehist%xmin, ehist%xmax, x) ) exit
+
+      end do
 
    end subroutine
 
@@ -105,6 +123,44 @@ contains
       class(class_ehist),       intent(in)  :: ehist   !< Evolution history
       real(8),                  intent(in)  :: fit     !< Fitness of the trial individual
       integer,                  intent(in)  :: ecode   !< Error code
+
+   end subroutine
+
+
+  !> \brief Gives the size of the shared data vector
+  integer function data_size(this)
+     implicit none
+     class(class_DE_RAND_1) :: this !< A reference to this object
+
+     data_size = this%np
+
+  end function
+
+
+   !> \brief Send data to other threads
+   subroutine send(this, i, to_thread)
+      implicit none
+      class(class_DE_RAND_1)                :: this      !< A reference to this object
+      integer,                   intent(in) :: i         !< Index of the shared data
+      integer,                   intent(in) :: to_thread !< Receiver thread
+
+   end subroutine
+
+
+   !> \brief Receive data from other threads
+   subroutine recv(this, i, from_thread)
+      implicit none
+      class(class_DE_RAND_1)                :: this        !< A reference to this object
+      integer,                   intent(in) :: i           !< Index of the shared data
+      integer,                   intent(in) :: from_thread !< Sender thread
+
+   end subroutine
+
+
+   !> \brief Perform update calculations after parallel computation cycle
+   subroutine update(this)
+      implicit none
+      class(class_DE_RAND_1) :: this !< A reference to this object
 
    end subroutine
 

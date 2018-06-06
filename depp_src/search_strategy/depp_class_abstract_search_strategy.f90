@@ -17,10 +17,10 @@ module mod_class_abstract_search_strategy
 
       procedure(get_trial_interface), pass, deferred, public :: get_trial !< Gets a trial individual
       procedure(feed_back_interface), pass, deferred, public :: feed_back !< Process the feedback from fitness calculator
-      procedure,                      pass,           public :: data_size !< Gives the size of the shared data vector
-      procedure,                      pass,           public :: send      !< Send data to other threads
-      procedure,                      pass,           public :: recv      !< Receive data from other threads
-      procedure,                      pass,           public :: update    !< Perform update calculations after parallel computation cycle
+      procedure(data_size_interface), pass, deferred, public :: data_size !< Gives the size of the shared data vector
+      procedure(send_interface),      pass, deferred, public :: send      !< Send data to other threads
+      procedure(recv_interface),      pass, deferred, public :: recv      !< Receive data from other threads
+      procedure(update_interface),    pass, deferred, public :: update    !< Perform update calculations after parallel computation cycle
 
    end type
 
@@ -52,23 +52,17 @@ module mod_class_abstract_search_strategy
 
       end subroutine
 
-   end interface
-
-
-contains
-
       !> \brief Gives the size of the shared data vector
-      integer function data_size(this)
+      integer function data_size_interface(this)
+      import class_abstract_search_strategy
          implicit none
          class(class_abstract_search_strategy) :: this !< A reference to this object
-
-         ! By default, no data is shared among threads
-         data_size = 0
 
       end function
 
       !> \brief Send data to other threads
-      subroutine send(this, i, to_thread)
+      subroutine send_interface(this, i, to_thread)
+         import class_abstract_search_strategy
          implicit none
          class(class_abstract_search_strategy) :: this      !< A reference to this object
          integer,                   intent(in) :: i         !< Index of the shared data
@@ -77,7 +71,8 @@ contains
       end subroutine
 
       !> \brief Receive data from other threads
-      subroutine recv(this, i, from_thread)
+      subroutine recv_interface(this, i, from_thread)
+         import class_abstract_search_strategy
          implicit none
          class(class_abstract_search_strategy) :: this        !< A reference to this object
          integer,                   intent(in) :: i           !< Index of the shared data
@@ -86,11 +81,13 @@ contains
       end subroutine
 
       !> \brief Perform update calculations after parallel computation cycle
-      subroutine update(this)
+      subroutine update_interface(this)
+         import class_abstract_search_strategy
          implicit none
          class(class_abstract_search_strategy) :: this !< A reference to this object
 
       end subroutine
 
+   end interface
 
 end module
