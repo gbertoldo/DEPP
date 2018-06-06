@@ -12,7 +12,7 @@ All data must follow the input pattern: "value & variable & description", where 
                                    fitness.x &                   ffit  &  Name of executable for fitness calculation
                                            2 &                     nu  &  Number of unknowns
                                           20 &                     np  &  Size of population (recommended 10*nu)
-                       de_rsm_parameters.txt &   search_strategy_conf  &  Search strategy configuration file
+                       parameters_de_rsm.txt &   search_strategy_conf  &  Search strategy configuration file
                               uniform_random &  pop_initializer_model  &  Population initializer model
 
 ===========================================================================================================================================

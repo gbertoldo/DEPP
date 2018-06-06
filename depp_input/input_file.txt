@@ -1,2 +1,2 @@
-input_parameters.txt    & parfile &   Input file name of the parameters
+parameters_main.txt    & parfile &   Input file name of the parameters
 
