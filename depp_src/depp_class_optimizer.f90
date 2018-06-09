@@ -131,7 +131,7 @@ contains
             ! Printing CPU time
             call timer%measure()
 
-            call sys_var%logger%print("Accumulated CPU time: " // timer%formatted_elapsed_time())
+            call sys_var%logger%println("Accumulated CPU time: " // timer%formatted_elapsed_time())
 
 
             ! Generates a trial population and calculates its fitness function
@@ -162,9 +162,9 @@ contains
 
 
          ! Printing final solution
-         call sys_var%logger%print(ehist%final_solution_info())
-         call sys_var%logger%print(stopper%convergence_info())
-         call sys_var%logger%print(timer%formatted_elapsed_time() // " : Accumulated CPU time")
+         call sys_var%logger%println(ehist%final_solution_info())
+         call sys_var%logger%println(stopper%convergence_info())
+         call sys_var%logger%println(timer%formatted_elapsed_time() // " : Accumulated CPU time")
 
 
          ! Finishing MPI

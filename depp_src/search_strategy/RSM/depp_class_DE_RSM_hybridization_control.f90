@@ -146,7 +146,7 @@ contains
 
          case default
 
-            call this%sys_var%logger%print("class_DE_RSM_hybridization_control: unknown return code. Stopping.")
+            call this%sys_var%logger%println("class_DE_RSM_hybridization_control: unknown return code. Stopping.")
 
             call mod_mpi_finalize()
 

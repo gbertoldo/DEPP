@@ -19,10 +19,11 @@ module mod_class_p_measure_stop_condition
    type, public, extends(class_abstract_stop_condition) :: class_p_measure_stop_condition
 
       private
-      integer :: kpm      !< Kind of population convergence measure
-      real(8) :: ptol     !< Tolerance for the population convergence measure
-      logical :: stopflag !< Stop condition flag
-      real(8) :: pcm      !< Population convergence measure
+      integer :: kpm       !< Kind of population convergence measure
+      real(8) :: ptol      !< Tolerance for the population convergence measure
+      logical :: stopflag  !< Stop condition flag
+      real(8) :: pcm       !< Population convergence measure
+      integer :: verbosity !< Verbosity level for log
 
    contains
 
@@ -51,6 +52,7 @@ contains
       call ifile%load()
       call ifile%get_value(this%kpm,  "kpm")
       call ifile%get_value(this%ptol,"ptol")
+      call ifile%get_value(this%verbosity,"verbosity")
 
       this%stopflag = .false.
 
@@ -95,9 +97,26 @@ contains
       ! Inner variables
       character(len=str_size) caux
 
-      write(caux,"(A, ES14.7, A, ES14.7, A)") &
-         "   --->  Population convergence measure: ", &
-         this%pcm, ". Tolerance: ", this%ptol, "."
+      caux = ""
+
+      select case (this%verbosity)
+          case (0)
+
+          case (1)
+
+             write(caux,"(A, ES14.7, A, ES14.7, A)") &
+                "   --->  Population convergence measure: ", &
+                this%pcm, ". Tolerance: ", this%ptol, "."
+
+          case (2)
+
+             write(caux,"(A, ES14.7, A, ES14.7, A)") &
+                "   --->  Population convergence measure: ", &
+                this%pcm, ". Tolerance: ", this%ptol, "."
+
+          case default
+
+      end select
 
       str = trim(caux)
 

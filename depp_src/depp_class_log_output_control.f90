@@ -4,6 +4,7 @@
 module mod_class_log_output_control
 
    use mod_mpi
+   use mod_string
 
    implicit none
 
@@ -24,9 +25,10 @@ module mod_class_log_output_control
 
    contains
 
-      procedure, public, pass :: init   !< Constructor
-      procedure, public, pass :: print  !< Print
-      procedure, public, pass :: finish !< Destructor
+      procedure, public, pass :: init    !< Constructor
+      procedure, public, pass :: print   !< Print
+      procedure, public, pass :: println !< Print with a new line char
+      procedure, public, pass :: finish  !< Destructor
 
    end type
 
@@ -88,11 +90,23 @@ contains
 
          do i = 1, size(this%fileid)
 
-            write(this%fileid(i),*) trim(msg)
+            write(this%fileid(i),"(A)", advance='no') trim(msg)
 
          end do
 
       end if
+
+   end subroutine
+
+
+
+   !> \brief Print messages with new line char
+   subroutine println(this, msg)
+      implicit none
+      class(class_log_output_control) :: this !< A reference to this object
+      character(len=*),    intent(in) :: msg  !< Message to be printed
+
+      call this%print(trim(msg)//ENDL)
 
    end subroutine
 

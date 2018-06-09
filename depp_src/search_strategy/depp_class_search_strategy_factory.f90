@@ -66,7 +66,7 @@ contains
 
          else
 
-            call sys_var%logger%print("class_search_strategy_factory: Unknown search strategy model. Stopping.")
+            call sys_var%logger%println("class_search_strategy_factory: Unknown search strategy model. Stopping.")
 
             call mod_mpi_finalize()
 
@@ -92,7 +92,7 @@ contains
 
       else
 
-         call sys_var%logger%print("class_search_strategy_factory: Pointer already associated. Stopping.")
+         call sys_var%logger%println("class_search_strategy_factory: Pointer already associated. Stopping.")
 
          call mod_mpi_finalize()
 

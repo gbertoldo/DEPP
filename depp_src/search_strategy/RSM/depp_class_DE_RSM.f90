@@ -92,7 +92,7 @@ contains
 
       if (trim(CID)/="DE-RSM") then
 
-         call sys_var%logger%print("class_DE_RSM: unexpected CID. Stopping.")
+         call sys_var%logger%println("class_DE_RSM: unexpected CID. Stopping.")
 
          call mod_mpi_finalize()
 

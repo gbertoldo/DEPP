@@ -6,7 +6,8 @@ module mod_string
    implicit none
 
    ! Standard string size
-   integer, parameter :: str_size = 1000
+   integer,   parameter :: str_size = 1000
+   character, parameter :: ENDL = char(10)
 
    ! String conversion from basic types
    interface to_string

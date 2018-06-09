@@ -27,6 +27,8 @@ module mod_class_no_improvement_stop_condition
       integer                            :: nwi         !< Number of generations without improvement
       integer                            :: ireg        !< Current register
       character(len=:), allocatable      :: backup_file !< Backup file
+      integer                            :: verbosity   !< Verbosity level for log
+
 
    contains
 
@@ -60,6 +62,7 @@ contains
       call ifile%load()
       call ifile%get_value(this%GNoAcc,"GNoAcc")
       call ifile%get_value(reload,"reload")
+      call ifile%get_value(this%verbosity,"verbosity")
 
       ! Backup file
       this%backup_file = trim(sys_var%absfolderbkp) // "class_no_improvement_stop_condition_backup.txt"
@@ -200,9 +203,26 @@ contains
       ! Inner variables
       character(len=str_size) caux
 
-      write(caux,"(A, I7, A, I7, A)") &
-         "   --->  Number of generations without improving best fitness: ", &
-         this%nwi, ". Tolerance: ", this%GNoAcc, "."
+      caux = ""
+
+      select case (this%verbosity)
+          case (0)
+
+          case (1)
+
+             write(caux,"(A, I7, A, I7, A)") &
+                "   --->  Number of generations without improving best fitness: ", &
+                this%nwi, ". Tolerance: ", this%GNoAcc, "."
+
+          case (2)
+
+             write(caux,"(A, I7, A, I7, A)") &
+                "   --->  Number of generations without improving best fitness: ", &
+                this%nwi, ". Tolerance: ", this%GNoAcc, "."
+
+          case default
+
+      end select
 
       str = trim(caux)
 

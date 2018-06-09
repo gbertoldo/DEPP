@@ -24,6 +24,7 @@ module mod_class_ehist
       integer :: np                                    !< Population size
       integer :: ng                                    !< Maximum number of generations
       integer :: ibest                                 !< Index of the best individual in the population
+      integer :: verbosity                             !< Verbosity level for log
       real(8), dimension(:),     allocatable :: fit    !< Fitness of the current population
       real(8), dimension(:,:),   allocatable :: pop    !< Current population
 
@@ -79,11 +80,12 @@ contains
 
       call ifile%load()
 
-      call ifile%get_value( this%sname,  "sname")
-      call ifile%get_value(    this%nu,     "nu")
-      call ifile%get_value(    this%np,     "np")
-      call ifile%get_value(    this%ng,     "ng")
-      call ifile%get_value(     reload, "reload")
+      call ifile%get_value(    this%sname,    "sname")
+      call ifile%get_value(       this%nu,       "nu")
+      call ifile%get_value(       this%np,       "np")
+      call ifile%get_value(       this%ng,       "ng")
+      call ifile%get_value(        reload,   "reload")
+      call ifile%get_value(this%verbosity,"verbosity")
 
       allocate(this%xmin(this%nu))
       allocate(this%xmax(this%nu))
@@ -134,7 +136,7 @@ contains
          ! If no error occured, the input data is wrong
          if (IO1==0) then
 
-            call sys_var%logger%print("class_ehist: Unable to read constraint vectors. Stopping...")
+            call sys_var%logger%println("class_ehist: Unable to read constraint vectors. Stopping...")
 
             call mod_mpi_finalize()
 
@@ -162,7 +164,7 @@ contains
             ! Otherwise, there is some error...
             else
 
-               call sys_var%logger%print("class_ehist: Unable to read constraint vectors. Stopping...")
+               call sys_var%logger%println("class_ehist: Unable to read constraint vectors. Stopping...")
 
                call mod_mpi_finalize()
 
@@ -312,23 +314,36 @@ contains
       character(len=100000)         :: caux1
       character(len=:), allocatable :: caux2
 
+      select case (this%verbosity)
 
-      caux1 = ""
-      caux2 = endl // endl
+         case(0:1)
 
-      write(caux1,*) caux2, "Generation: ", this%g, endl, "Trial population:"
-      caux2 = trim(caux1) // endl
+            str = ""
 
-      do i = 1, this%np
+         case (2)
 
-         write(caux1,"(a, a, i4, a, 10(1pe23.15, 2x))") trim(caux2) &
-         , "The performance of the",  i, "th individual is ", this%hist(this%g,i,0), this%hist(this%g,i,1:)
+            caux1 = ""
+            caux2 = endl // endl
 
-         caux2 = trim(caux1) // endl
+            write(caux1,*) caux2, "Generation: ", this%g, endl, "Trial population:"
+            caux2 = trim(caux1) // endl
 
-      end do
+            do i = 1, this%np
 
-      str = trim(caux2)
+               write(caux1,"(a, a, i4, a, 10(1pe23.15, 2x))") trim(caux2) &
+               , "The performance of the",  i, "th individual is ", this%hist(this%g,i,0), this%hist(this%g,i,1:)
+
+               caux2 = trim(caux1) // endl
+
+            end do
+
+            str = trim(caux2)
+
+         case default
+
+            str = ""
+
+      end select
 
    end function
 
@@ -346,23 +361,36 @@ contains
       character(len=100000)         :: caux1
       character(len=:), allocatable :: caux2
 
+      select case (this%verbosity)
 
-      caux1 = ""
-      caux2 = endl // endl
+         case(0:1)
 
-      write(caux1,*) caux2, "Generation: ", this%g, endl, "Current population:"
-      caux2 = trim(caux1) // endl
+            str = ""
 
-      do i = 1, this%np
+         case (2)
 
-         write(caux1,"(a, a, i4, a, 10(1pe23.15, 2x))") trim(caux2) &
-         , "The performance of the",  i, "th individual is ", this%fit(i), this%pop(i,:)
+            caux1 = ""
+            caux2 = endl // endl
 
-         caux2 = trim(caux1) // endl
+            write(caux1,*) caux2, "Generation: ", this%g, endl, "Current population:"
+            caux2 = trim(caux1) // endl
 
-      end do
+            do i = 1, this%np
 
-      str = trim(caux2)
+               write(caux1,"(a, a, i4, a, 10(1pe23.15, 2x))") trim(caux2) &
+               , "The performance of the",  i, "th individual is ", this%fit(i), this%pop(i,:)
+
+               caux2 = trim(caux1) // endl
+
+            end do
+
+            str = trim(caux2)
+
+         case default
+
+            str = ""
+
+      end select
 
    end function
 
@@ -379,18 +407,32 @@ contains
       character(len=100000)         :: caux1
       character(len=:), allocatable :: caux2
 
-      caux1 = ""
-      caux2 = endl // "Current population statistics:" // endl
+      select case (this%verbosity)
 
-      write(caux1,"(A, A, 1(2x, 1pe23.15))") caux2, "   --->  Mean fitness: ", sum(this%fit)/this%np
+         case (0)
 
-      caux2 = trim(caux1) // endl
+            str = ""
 
-      write(caux1,"(A, A, 1(2x, 1pe23.15))") caux2, "   --->  Max. fitness: ", maxval(this%fit)
+         case (1:2)
 
-      caux2 = trim(caux1) // endl
+            caux1 = ""
+            caux2 = endl // "Current population statistics:" // endl
 
-      str = caux2
+            write(caux1,"(A, A, 1(2x, 1pe23.15))") caux2, "   --->  Mean fitness: ", sum(this%fit)/this%np
+
+            caux2 = trim(caux1) // endl
+
+            write(caux1,"(A, A, 1(2x, 1pe23.15))") caux2, "   --->  Max. fitness: ", maxval(this%fit)
+
+            caux2 = trim(caux1) // endl
+
+            str = caux2
+
+         case default
+
+            str = ""
+
+      end select
 
    end function
 

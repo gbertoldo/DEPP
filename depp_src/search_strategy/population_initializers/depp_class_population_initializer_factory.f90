@@ -57,7 +57,7 @@ contains
 
          else
 
-            call sys_var%logger%print("class_population_initializer_factory: Unkown model. Stopping.")
+            call sys_var%logger%println("class_population_initializer_factory: Unkown model. Stopping.")
 
             call mod_mpi_finalize()
 
@@ -73,7 +73,7 @@ contains
 
       else
 
-         call sys_var%logger%print("class_population_initializer_factory: Pointer already associated. Stopping.")
+         call sys_var%logger%println("class_population_initializer_factory: Pointer already associated. Stopping.")
 
          call mod_mpi_finalize()
 

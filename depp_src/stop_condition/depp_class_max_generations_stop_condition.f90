@@ -20,9 +20,10 @@ module mod_class_max_generation_stop_condition
    type, public, extends(class_abstract_stop_condition) :: class_max_generation_stop_condition
 
       private
-      integer :: g        !< Current generation
-      integer :: ng       !< Maximum number of generations allowed
-      logical :: stopflag !< Stop flag
+      integer :: g          !< Current generation
+      integer :: ng         !< Maximum number of generations allowed
+      logical :: stopflag   !< Stop flag
+      integer :: verbosity  !< Verbosity level for log
 
    contains
 
@@ -49,7 +50,8 @@ contains
       ! Reading configuration file
       call ifile%init(filename=trim(sys_var%absparfile), field_separator="&")
       call ifile%load()
-      call ifile%get_value(this%ng,"ng")
+      call ifile%get_value(       this%ng,       "ng")
+      call ifile%get_value(this%verbosity,"verbosity")
 
       this%stopflag = .false.
 
@@ -87,7 +89,22 @@ contains
       ! Inner variables
       character(len=str_size) caux
 
-      write(caux,"(A, I7, A, I7, A)") "   --->  Current generation: ", this%g, ". Tolerance: ", this%ng, "."
+      caux = ""
+
+      select case (this%verbosity)
+          case (0)
+
+          case (1)
+
+             write(caux,"(A, I7, A, I7, A)") "   --->  Current generation: ", this%g, ". Tolerance: ", this%ng, "."
+
+          case (2)
+
+             write(caux,"(A, I7, A, I7, A)") "   --->  Current generation: ", this%g, ". Tolerance: ", this%ng, "."
+
+          case default
+
+      end select
 
       str = trim(caux)
 

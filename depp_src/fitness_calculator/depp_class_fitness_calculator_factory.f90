@@ -49,7 +49,7 @@ contains
 
          else
 
-            call sys_var%logger%print("Unkown model. Stopping.")
+            call sys_var%logger%println("Unkown model. Stopping.")
 
             call mod_mpi_finalize()
 
@@ -67,7 +67,7 @@ contains
 
       else
 
-         call sys_var%logger%print("Pointer already associated. Stopping.")
+         call sys_var%logger%println("Pointer already associated. Stopping.")
 
          call mod_mpi_finalize()
 

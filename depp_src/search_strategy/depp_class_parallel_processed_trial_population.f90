@@ -102,10 +102,10 @@ contains
       ! to the size of the shared data vector of the current module.
       if ( this%searcher%data_size() /= this%data_size() ) then
 
-         call this%sys_var%logger%print("")
-         call this%sys_var%logger%print("The size of the data vector in the population searcher " &
+         call this%sys_var%logger%println("")
+         call this%sys_var%logger%println("The size of the data vector in the population searcher " &
          // "and the size of the data vector of the individual searcher must be equal. Stopping.")
-         call this%sys_var%logger%print("")
+         call this%sys_var%logger%println("")
 
          call mod_mpi_finalize()
 
@@ -123,10 +123,10 @@ contains
       ! must be equal to the size of the shared data vector of the current module.
       if ( this%fit_calculator%data_size() /= this%data_size() ) then
 
-         call this%sys_var%logger%print("")
-         call this%sys_var%logger%print("The size of the data vector in the population searcher " &
+         call this%sys_var%logger%println("")
+         call this%sys_var%logger%println("The size of the data vector in the population searcher " &
          // "and the size of the data vector of the fitness calculator module must be equal. Stopping.")
-         call this%sys_var%logger%print("")
+         call this%sys_var%logger%println("")
 
          call mod_mpi_finalize()
 
@@ -206,7 +206,7 @@ contains
                ! Checking the constraints
                if ( is_X_out_of_range(ehist%nu, ehist%xmin, ehist%xmax, trial_pop(i,:)) ) then
 
-                  call sys_var%logger%print("Pop. initializer must provide trial individuals that satisfy constraints. Stopping.")
+                  call sys_var%logger%println("Pop. initializer must provide trial individuals that satisfy constraints. Stopping.")
 
                   call mod_mpi_finalize()
 
@@ -237,7 +237,7 @@ contains
                   ! Unknown cases
                   case default
 
-                     call sys_var%logger%print("ERROR: fitness calculator returned an unknown status. Stopping...")
+                     call sys_var%logger%println("ERROR: fitness calculator returned an unknown status. Stopping...")
 
                      call mod_mpi_finalize()
 
@@ -258,7 +258,7 @@ contains
                ! Checking the constraints
                if ( is_X_out_of_range(ehist%nu, ehist%xmin, ehist%xmax, trial_pop(i,:)) ) then
 
-                  call sys_var%logger%print("Searcher must provide trial individuals that satisfy constraints. Stopping.")
+                  call sys_var%logger%println("Searcher must provide trial individuals that satisfy constraints. Stopping.")
 
                   call mod_mpi_finalize()
 
@@ -300,7 +300,7 @@ contains
                   ! Unknown cases
                   case default
 
-                     call sys_var%logger%print("ERROR: fitness calculator returned an unknown status. Stopping...")
+                     call sys_var%logger%println("ERROR: fitness calculator returned an unknown status. Stopping...")
 
                      call mod_mpi_finalize()
 

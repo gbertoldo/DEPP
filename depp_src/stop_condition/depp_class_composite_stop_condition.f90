@@ -29,8 +29,9 @@ module mod_class_composite_stop_condition
    type, public, extends(class_abstract_stop_condition) :: class_composite_stop_condition
 
       private
-      integer :: nsc      !< Number of stop conditions
-      logical :: stopflag !< Stop flag
+      integer :: nsc       !< Number of stop conditions
+      logical :: stopflag  !< Stop flag
+      integer :: verbosity !< Verbosity level for log
 
       type(ptr_stop_cond), allocatable, dimension(:) :: stop_cond_container !< A container of stop conditions objects
 
@@ -65,6 +66,7 @@ contains
       call ifile%init(filename=trim(sys_var%absparfile), field_separator="&")
       call ifile%load()
       call ifile%get_value(caux,"composite_stop_condition")
+      call ifile%get_value(this%verbosity,"verbosity")
 
       ! Identifying stop conditions
       models = "null"
@@ -148,13 +150,23 @@ contains
       ! Inner variables
       integer :: i
 
-      str = "Convergence info: " // char(10) ! char(10) = new line char
 
-      do i = 1, this%nsc
+      select case (this%verbosity)
+          case (0)
 
-         str = str // this%stop_cond_container(i)%ptr%convergence_info() // char(10)
+            str = ""
 
-      end do
+          case default
+
+             str = "Convergence info: " // char(10) ! char(10) = new line char
+
+             do i = 1, this%nsc
+
+                str = str // this%stop_cond_container(i)%ptr%convergence_info() // char(10)
+
+             end do
+
+      end select
 
    end function
 

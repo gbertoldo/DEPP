@@ -64,7 +64,7 @@ contains
 
       if (trim(CID)/="DE/RAND/1") then
 
-         call sys_var%logger%print("class_DE_RAND_1: unexpected CID. Stopping.")
+         call sys_var%logger%println("class_DE_RAND_1: unexpected CID. Stopping.")
 
          call mod_mpi_finalize()
 

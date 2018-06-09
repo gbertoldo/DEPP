@@ -43,7 +43,7 @@ contains
 
          else
 
-            call sys_var%logger%print("Unknown stop condition model: " // trim(model) // ". Stopping.")
+            call sys_var%logger%println("Unknown stop condition model: " // trim(model) // ". Stopping.")
 
             call mod_mpi_finalize()
 
@@ -69,7 +69,7 @@ contains
 
       else
 
-         call sys_var%logger%print("Variable already associated. Stopping.")
+         call sys_var%logger%println("Variable already associated. Stopping.")
 
          call mod_mpi_finalize()
 

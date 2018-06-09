@@ -44,7 +44,7 @@ contains
 
       else
 
-         call sys_var%logger%print("class_RSM_factory: Unknown response surface model. Stopping...")
+         call sys_var%logger%println("class_RSM_factory: Unknown response surface model. Stopping...")
 
          call mod_mpi_finalize()
 

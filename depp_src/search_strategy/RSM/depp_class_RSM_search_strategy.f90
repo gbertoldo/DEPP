@@ -98,8 +98,8 @@ contains
       ! Checking if the number of generations is enough to apply RSM
       if ( this%np * (ng-1) <= 2 * this%nf ) then
 
-         call sys_var%logger%print("ERROR: maximum number of generations ng is insufficient to apply RSM.")
-         call sys_var%logger%print("Minimum ng recommended: " // to_string(int(dble(10*this%nf)/dble(this%np))+1))
+         call sys_var%logger%println("ERROR: maximum number of generations ng is insufficient to apply RSM.")
+         call sys_var%logger%println("Minimum ng recommended: " // to_string(int(dble(10*this%nf)/dble(this%np))+1))
 
          call mod_mpi_finalize()
 

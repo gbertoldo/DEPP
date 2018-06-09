@@ -132,14 +132,14 @@ contains
       ! Initializing logger
       call this%logger%init(reload, trim(this%abslogfile))
 
-      call this%logger%print("")
-      call this%logger%print("")
-      call this%logger%print("  =======  DIFFERENTIAL EVOLUTION PARALLEL PROGRAM  =======  ")
-      call this%logger%print("")
-      call this%logger%print(this%calendar%get_date() // " : System date")
-      call this%logger%print(this%calendar%get_time() // " : System time")
-      call this%logger%print("")
-      call this%logger%print("")
+      call this%logger%println("")
+      call this%logger%println("")
+      call this%logger%println("  =======  DIFFERENTIAL EVOLUTION PARALLEL PROGRAM  =======  ")
+      call this%logger%println("")
+      call this%logger%println(this%calendar%get_date() // " : System date")
+      call this%logger%println(this%calendar%get_time() // " : System time")
+      call this%logger%println("")
+      call this%logger%println("")
 
    end subroutine
 

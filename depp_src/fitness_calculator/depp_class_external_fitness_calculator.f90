@@ -28,6 +28,8 @@ module mod_class_external_fitness_calculator
       integer                            :: success_counter !< Total number of success
       integer                            :: failure_counter !< Total number of failures
 
+      integer                            :: verbosity       !< Verbosity level for log
+
       character(len=:), allocatable :: backup_file  !< Backup file
       integer                       :: np           !< Population size
       character(len=:), allocatable :: sname        !< Simulation name
@@ -101,6 +103,8 @@ contains
          call this%load_backup()
 
       end if
+
+      call ifile%get_value(this%verbosity,"verbosity")
 
    end subroutine
 
@@ -198,15 +202,28 @@ contains
       character        :: ENDL = char(10) ! New line char
       character(len=7) :: caux
 
-      info = ENDL // ENDL // "Fitness calculator statistics: " // ENDL
+      select case (this%verbosity)
+          case (0)
 
-      write(caux,"(I7)") this%success_counter
+            info = ""
 
-      info = info // caux // " = number of function calls returning success" // ENDL
+          case (1:2)
 
-      write(caux,"(I7)") this%failure_counter
+            info = ENDL // ENDL // "Fitness calculator statistics: " // ENDL
 
-      info = info // caux // " = number of function calls returning failure" // ENDL
+            write(caux,"(I7)") this%success_counter
+
+            info = info // caux // " = number of function calls returning success" // ENDL
+
+            write(caux,"(I7)") this%failure_counter
+
+            info = info // caux // " = number of function calls returning failure" // ENDL
+
+          case default
+
+            info = ""
+
+      end select
 
    end function
 
