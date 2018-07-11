@@ -24,8 +24,9 @@ module mod_class_DE_RSM_hybridization_control
       real(8) ::  fhmin !< Minimum factor of hybridization
       real(8) ::  fhmax !< Maximum factor of hybridization
       integer ::    fhm !< Model for the dynamical calculation of the factor of hybridization
-      character(len=:), allocatable      :: backup_file !< Backup file
-      real(8), allocatable, dimension(:) :: r_rsm       !< Register if RSM was applied with success (1) or not (0)
+      character(len=:), allocatable      :: backup_file      !< Backup file
+      real(8), allocatable, dimension(:) :: r_rsm            !< Register if RSM was applied with success (1) or not (0)
+      integer                            :: save_backup_flag !< Save backup flag (0=no, 1=yes)
 
       ! Pointer to system variables
       class(class_system_variables), pointer :: sys_var !< System's variables
@@ -99,11 +100,13 @@ contains
 
       call ifile%load()
 
-      call ifile%get_value(reload,"reload")
+
+      call ifile%get_value(this%save_backup_flag,   "save_backup")
+      call ifile%get_value(               reload,        "reload")
 
       if (reload==1) then
 
-         call this%load_backup()
+         call this%load_backup(sys_var)
 
       end if
 
@@ -256,7 +259,7 @@ contains
       implicit none
       class(class_DE_RSM_hybridization_control) :: this !< A reference to this object
 
-      if (mpio%master) then
+      if ( mpio%master .and. this%save_backup_flag == 1 ) then
 
          open(20, file=this%backup_file)
 
@@ -272,17 +275,34 @@ contains
 
 
    !> \brief Loads backup of class state
-   subroutine load_backup(this)
+   subroutine load_backup(this, sys_var)
       implicit none
-      class(class_DE_RSM_hybridization_control) :: this !< A reference to this object
+      class(class_DE_RSM_hybridization_control) :: this    !< A reference to this object
+      class(class_system_variables), intent(in) :: sys_var !< System's variables
 
-      open(20, file=this%backup_file)
+      ! Inner variables
+      logical :: exists = .false.
 
-      read(20,*) this%ireg
-      read(20,*) this%fh
-      read(20,*) this%r_rsm
+      inquire( file = this%backup_file, exist = exists)
 
-      close(20)
+      if ( exists ) then
+
+         open(20, file=this%backup_file)
+
+         read(20,*) this%ireg
+         read(20,*) this%fh
+         read(20,*) this%r_rsm
+
+         close(20)
+
+      else
+
+         call sys_var%logger%println("No backup file found. Stopping...")
+
+         ! Finishing MPI
+         call mod_mpi_finalize()
+
+      end if
 
    end subroutine
 

@@ -24,6 +24,7 @@ module mod_class_ehist
       integer :: np                                    !< Population size
       integer :: ng                                    !< Maximum number of generations
       integer :: ibest                                 !< Index of the best individual in the population
+      integer :: save_backup_flag                      !< Save backup flag (0=no, 1=yes)
       integer :: verbosity                             !< Verbosity level for log
       real(8), dimension(:),     allocatable :: fit    !< Fitness of the current population
       real(8), dimension(:,:),   allocatable :: pop    !< Current population
@@ -80,12 +81,13 @@ contains
 
       call ifile%load()
 
-      call ifile%get_value(    this%sname,    "sname")
-      call ifile%get_value(       this%nu,       "nu")
-      call ifile%get_value(       this%np,       "np")
-      call ifile%get_value(       this%ng,       "ng")
-      call ifile%get_value(        reload,   "reload")
-      call ifile%get_value(this%verbosity,"verbosity")
+      call ifile%get_value(           this%sname,         "sname")
+      call ifile%get_value(              this%nu,            "nu")
+      call ifile%get_value(              this%np,            "np")
+      call ifile%get_value(              this%ng,            "ng")
+      call ifile%get_value(this%save_backup_flag,   "save_backup")
+      call ifile%get_value(               reload,        "reload")
+      call ifile%get_value(       this%verbosity,     "verbosity")
 
       allocate(this%xmin(this%nu))
       allocate(this%xmax(this%nu))
@@ -250,7 +252,7 @@ contains
       class(class_ehist)                        :: this    !< A reference to this object
       class(class_system_variables), intent(in) :: sys_var !< System's variables
 
-      if (mpio%master) then
+      if (mpio%master .and. this%save_backup_flag==1 ) then
 
          open(23, file = trim(sys_var%absfolderbkp) // trim(this%sname) // "-ehist-backup.txt")
 
@@ -281,22 +283,37 @@ contains
       class(class_system_variables), intent(in) :: sys_var !< System's variables
 
       ! Inner variables
+      logical :: exists = .false.
 
-      open(23, file = trim(sys_var%absfolderbkp) // trim(this%sname) // "-ehist-backup.txt")
+      inquire( file = trim(sys_var%absfolderbkp) // trim(this%sname) // "-ehist-backup.txt", exist = exists)
 
-      read(23,*) this%sname
-      read(23,*) this%g
-      read(23,*) this%nu
-      read(23,*) this%np
-      read(23,*) this%ng
-      read(23,*) this%ibest
-      read(23,*) this%fit
-      read(23,*) this%pop
-      read(23,*) this%hist
-      read(23,*) this%xmin
-      read(23,*) this%xmax
+      if ( exists ) then
 
-      close(23)
+         open(23, file = trim(sys_var%absfolderbkp) // trim(this%sname) // "-ehist-backup.txt")
+
+         read(23,*) this%sname
+         read(23,*) this%g
+         read(23,*) this%nu
+         read(23,*) this%np
+         read(23,*) this%ng
+         read(23,*) this%ibest
+         read(23,*) this%fit
+         read(23,*) this%pop
+         read(23,*) this%hist
+         read(23,*) this%xmin
+         read(23,*) this%xmax
+
+         close(23)
+
+      else
+
+         call sys_var%logger%println("No backup file found. Stopping...")
+
+         ! Finishing MPI
+         call mod_mpi_finalize()
+
+
+      end if
 
    end subroutine
 

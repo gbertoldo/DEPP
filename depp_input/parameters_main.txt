@@ -8,6 +8,7 @@ All data must follow the input pattern: "value & variable & description", where 
 
                                   function01 &                  sname  &  Simulation name
                                            1 &              verbosity  &  Defines log verbosity level (0=min, 1=med, 2=max)
+                                           0 &            save_backup  &  Saves backup (0=no, 1=yes: increases CPU time)
                                            0 &                 reload  &  Upload backup data and continue computation (0=no; 1=yes)
                   $PWD/interface/Fortran2008 &                   fdir  &  Name of working directory for fitness calculation
                                    fitness.x &                   ffit  &  Name of executable for fitness calculation

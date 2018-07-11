@@ -21,13 +21,14 @@ module mod_class_no_improvement_stop_condition
    type, public, extends(class_abstract_stop_condition) :: class_no_improvement_stop_condition
 
       private
-      integer                            :: GNoAcc      !< Maximum number of generations allowed before stopping if no improvement was found
-      real(8), allocatable, dimension(:) :: fbest       !< Register the last GNoAcc best values of the fitness function
-      logical                            :: stopflag    !< Stop flag
-      integer                            :: nwi         !< Number of generations without improvement
-      integer                            :: ireg        !< Current register
-      character(len=:), allocatable      :: backup_file !< Backup file
-      integer                            :: verbosity   !< Verbosity level for log
+      integer                            :: GNoAcc           !< Maximum number of generations allowed before stopping if no improvement was found
+      real(8), allocatable, dimension(:) :: fbest            !< Register the last GNoAcc best values of the fitness function
+      logical                            :: stopflag         !< Stop flag
+      integer                            :: nwi              !< Number of generations without improvement
+      integer                            :: ireg             !< Current register
+      character(len=:), allocatable      :: backup_file      !< Backup file
+      integer                            :: verbosity        !< Verbosity level for log
+      integer                            :: save_backup_flag !< Save backup flag (0=no, 1=yes)
 
 
    contains
@@ -60,9 +61,10 @@ contains
       ! Reading configuration file
       call ifile%init(filename=trim(sys_var%absparfile), field_separator="&")
       call ifile%load()
-      call ifile%get_value(this%GNoAcc,"GNoAcc")
-      call ifile%get_value(reload,"reload")
-      call ifile%get_value(this%verbosity,"verbosity")
+      call ifile%get_value(          this%GNoAcc,        "GNoAcc")
+      call ifile%get_value(               reload,        "reload")
+      call ifile%get_value(       this%verbosity,     "verbosity")
+      call ifile%get_value(this%save_backup_flag,   "save_backup")
 
       ! Backup file
       this%backup_file = trim(sys_var%absfolderbkp) // "class_no_improvement_stop_condition_backup.txt"
@@ -82,7 +84,7 @@ contains
 
       this%ireg = 0
 
-      if (reload==1) call this%load_backup()
+      if (reload==1) call this%load_backup(sys_var)
 
    end subroutine
 
@@ -233,7 +235,7 @@ contains
       implicit none
       class(class_no_improvement_stop_condition) :: this !< A reference to this object
 
-      if (mpio%master) then
+      if (mpio%master .and. this%save_backup_flag==1 ) then
 
          open(20, file=this%backup_file)
 
@@ -250,18 +252,35 @@ contains
 
 
    !> \brief Loads a backup of the class state
-   subroutine load_backup(this)
+   subroutine load_backup(this, sys_var)
       implicit none
-      class(class_no_improvement_stop_condition) :: this !< A reference to this object
+      class(class_no_improvement_stop_condition) :: this    !< A reference to this object
+      class(class_system_variables), intent(in)  :: sys_var !< System's variables
 
-      open(20, file=this%backup_file)
+      ! Inner variables
+      logical :: exists = .false.
 
-      read(20,*) this%ireg
-      read(20,*) this%fbest
-      read(20,*) this%stopflag
-      read(20,*) this%nwi
+      inquire( file = this%backup_file, exist = exists)
 
-      close(20)
+      if ( exists ) then
+
+         open(20, file=this%backup_file)
+
+         read(20,*) this%ireg
+         read(20,*) this%fbest
+         read(20,*) this%stopflag
+         read(20,*) this%nwi
+
+         close(20)
+
+      else
+
+         call sys_var%logger%println("No backup file found. Stopping...")
+
+         ! Finishing MPI
+         call mod_mpi_finalize()
+
+      end if
 
    end subroutine
 

@@ -20,6 +20,7 @@ module mod_class_btimer
 
       real(8)                       :: backup_tcpu = 0.d0 !< Elapsed time
       character(len=:), allocatable :: backup_file        !< Backup file
+      integer                       :: save_backup_flag   !< Save backup flag (0=no, 1=yes)
 
 
    contains
@@ -50,7 +51,8 @@ contains
       ! Checking reload option
       call ifile%init(filename=sys_var%absparfile, field_separator="&")
       call ifile%load()
-      call ifile%get_value(reload, "reload")
+      call ifile%get_value(this%save_backup_flag,   "save_backup")
+      call ifile%get_value(               reload,        "reload")
 
 
       ! Initializing timer
@@ -60,7 +62,7 @@ contains
 
       else
 
-         call this%load_backup()
+         call this%load_backup(sys_var)
 
          call this%start(this%backup_tcpu)
 
@@ -74,7 +76,7 @@ contains
    subroutine save_backup(this)
       class(class_btimer) :: this !< A reference to this object
 
-      if (mpio%master) then
+      if ( mpio%master .and. this%save_backup_flag==1 ) then
 
          open(1000,file=this%backup_file)
 
@@ -88,14 +90,31 @@ contains
 
 
    !> \brief Load backup
-   subroutine load_backup(this)
-      class(class_btimer) :: this !< A reference to this object
+   subroutine load_backup(this, sys_var)
+      class(class_btimer)                        :: this    !< A reference to this object
+      class(class_system_variables), intent(in)  :: sys_var !< System's variables
 
-      open(1000,file=this%backup_file)
+      ! Inner variables
+      logical :: exists = .false.
 
-      write(1000,*) this%backup_tcpu
+      inquire( file = this%backup_file, exist = exists)
 
-      close(1000)
+      if ( exists ) then
+
+         open(1000,file=this%backup_file)
+
+         read(1000,*) this%backup_tcpu
+
+         close(1000)
+
+      else
+
+         call sys_var%logger%println("No backup file found. Stopping...")
+
+         ! Finishing MPI
+         call mod_mpi_finalize()
+
+      end if
 
    end subroutine
 

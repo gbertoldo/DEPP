@@ -25,17 +25,18 @@ module mod_class_external_fitness_calculator
       integer, allocatable, dimension(:) :: failure_counter_thread !< Thread number of failures
 
       ! Store the number of success and failures of all threads
-      integer                            :: success_counter !< Total number of success
-      integer                            :: failure_counter !< Total number of failures
+      integer                            :: success_counter        !< Total number of success
+      integer                            :: failure_counter        !< Total number of failures
 
-      integer                            :: verbosity       !< Verbosity level for log
+      integer                            :: verbosity              !< Verbosity level for log
+      integer                            :: save_backup_flag       !< Save backup flag (0=no, 1=yes)
 
-      character(len=:), allocatable :: backup_file  !< Backup file
-      integer                       :: np           !< Population size
-      character(len=:), allocatable :: sname        !< Simulation name
-      character(len=:), allocatable :: absfolderout !< Absolute path to output folder
-      character(len=:), allocatable :: fdir         !< Name of working directory for fitness calculation
-      character(len=:), allocatable :: ffit         !< Name of executable for fitness calculation
+      character(len=:), allocatable      :: backup_file            !< Backup file
+      integer                            :: np                     !< Population size
+      character(len=:), allocatable      :: sname                  !< Simulation name
+      character(len=:), allocatable      :: absfolderout           !< Absolute path to output folder
+      character(len=:), allocatable      :: fdir                   !< Name of working directory for fitness calculation
+      character(len=:), allocatable      :: ffit                   !< Name of executable for fitness calculation
 
    contains
 
@@ -88,7 +89,8 @@ contains
 
       call ifile%load()
 
-      call ifile%get_value(reload,"reload")
+      call ifile%get_value(this%save_backup_flag,   "save_backup")
+      call ifile%get_value(               reload,        "reload")
 
       if (reload==0) then
 
@@ -100,7 +102,7 @@ contains
 
       else
 
-         call this%load_backup()
+         call this%load_backup(sys_var)
 
       end if
 
@@ -334,7 +336,7 @@ contains
       implicit none
       class(class_external_fitness_calculator) :: this !< A reference to this object
 
-      if (mpio%master) then
+      if (mpio%master .and. this%save_backup_flag == 1) then
 
          open(20, file=this%backup_file)
 
@@ -351,18 +353,35 @@ contains
 
 
    !> \brief Loads a backup of the class state
-   subroutine load_backup(this)
+   subroutine load_backup(this, sys_var)
       implicit none
-      class(class_external_fitness_calculator) :: this !< A reference to this object
+      class(class_external_fitness_calculator)  :: this    !< A reference to this object
+      class(class_system_variables), intent(in) :: sys_var !< System's variables
 
-      open(20, file=this%backup_file)
+      ! Inner variables
+      logical :: exists = .false.
 
-      read(20,*) this%success_counter_thread
-      read(20,*) this%failure_counter_thread
-      read(20,*) this%success_counter
-      read(20,*) this%failure_counter
+      inquire( file = this%backup_file, exist = exists)
 
-      close(20)
+      if ( exists ) then
+
+         open(20, file=this%backup_file)
+
+         read(20,*) this%success_counter_thread
+         read(20,*) this%failure_counter_thread
+         read(20,*) this%success_counter
+         read(20,*) this%failure_counter
+
+         close(20)
+
+      else
+
+         call sys_var%logger%println("No backup file found. Stopping...")
+
+         ! Finishing MPI
+         call mod_mpi_finalize()
+
+      end if
 
    end subroutine
 
