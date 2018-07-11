@@ -69,7 +69,7 @@ contains
       type(class_ifile) :: ifile
       integer           :: reload
 
-      this%absfolderout = sys_var%absfolderout
+      this%absfolderout = trim(sys_var%absfolderout) // "/tmp/"
       this%fdir         = sys_var%fdir
       this%ffit         = sys_var%ffit
       this%sname        = ehist%sname
@@ -107,6 +107,8 @@ contains
       end if
 
       call ifile%get_value(this%verbosity,"verbosity")
+
+      call execute_command_line("mkdir " // this%absfolderout)
 
    end subroutine
 
