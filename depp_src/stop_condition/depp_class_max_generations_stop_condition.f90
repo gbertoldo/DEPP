@@ -31,6 +31,7 @@ module mod_class_max_generation_stop_condition
       procedure, public, pass :: compute_stop_condition      !< Computes stop condition
       procedure, public, pass :: is_stop_condition_satisfied !< Checks if stop condition is satisfied
       procedure, public, pass :: convergence_info            !< Returns a string containing convergence information
+      procedure, public, pass :: final_convergence_info      !< Returns a string containing final convergence information
 
    end type
 
@@ -105,6 +106,25 @@ contains
           case default
 
       end select
+
+      str = trim(caux)
+
+   end function
+
+
+   !> \brief Returns the final convergence information
+   function final_convergence_info(this) result(str)
+      implicit none
+      class(class_max_generation_stop_condition) :: this !< A reference to this object
+      character(len=:), allocatable              :: str  !< String containing convergence information
+
+      ! Inner variables
+      character(len=str_size) caux
+
+      caux = ""
+
+      write(caux,"(A, I23, A)") trim(caux),  this%g, " : last generation"//char(10)
+      write(caux,"(A, I23, A)") trim(caux), this%ng, " : maximum number of generations"
 
       str = trim(caux)
 

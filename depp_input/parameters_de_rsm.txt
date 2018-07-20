@@ -9,7 +9,7 @@ All data must follow the input pattern: "value & variable & description", where 
                     DE-RSM &                      CID  &  Class ID of this configuration file
          parameters_de.txt &  de_search_strategy_conf  &  DE search strategy configuration file
         parameters_rsm.txt & rsm_search_strategy_conf  &  RSM search strategy configuration file
-                    0.35d0 &                       fh  &  Fraction of hybridization
+                    0.35d0 &                       fh  &  Initial fraction of hybridization
                     0.10d0 &                    fhmin  &  Minimum fraction of hybridization
                     0.90d0 &                    fhmax  &  Maximum fraction of hybridization
                          1 &                      fhm  &  Model for the dynamical calculation of the factor of hybridization

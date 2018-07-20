@@ -37,6 +37,7 @@ module mod_class_no_improvement_stop_condition
       procedure, public,  pass :: compute_stop_condition      !< Computes stop condition
       procedure, public,  pass :: is_stop_condition_satisfied !< Checks if stop condition is satisfied
       procedure, public,  pass :: convergence_info            !< Returns a string containing convergence information
+      procedure, public,  pass :: final_convergence_info      !< Returns a string containing final convergence information
       procedure, private, pass :: add                         !< Adds data to the convergence history
       procedure, private, pass :: save_backup                 !< Saves a backup of the class state
       procedure, private, pass :: load_backup                 !< Loads a backup of the class state
@@ -229,6 +230,26 @@ contains
       str = trim(caux)
 
    end function
+
+
+   !> \brief Returns the final convergence information
+   function final_convergence_info(this) result(str)
+      implicit none
+      class(class_no_improvement_stop_condition) :: this !< A reference to this object
+      character(len=:), allocatable              :: str  !< String containing convergence information
+
+      ! Inner variables
+      character(len=str_size) caux
+
+      caux = ""
+
+      write(caux,"(A, I23, A)") trim(caux),    this%nwi, " : number of generations without improving best fitness"//char(10)
+      write(caux,"(A, I23, A)") trim(caux), this%GNoAcc, " : maximum number of generations without improving best fitness"
+
+      str = trim(caux)
+
+   end function
+
 
    !> \brief Saves a backup of the class state
    subroutine save_backup(this)

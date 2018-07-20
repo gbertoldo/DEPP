@@ -18,6 +18,7 @@ module mod_class_abstract_stop_condition
       procedure(compute_stop_condition_interface),      pass, deferred, public :: compute_stop_condition      !< Computes stop condition
       procedure(is_stop_condition_satisfied_interface), pass, deferred, public :: is_stop_condition_satisfied !< Checks if stop condition is satisfied
       procedure(convergence_info_interface)           , pass, deferred, public :: convergence_info            !< Returns a string containing convergence information
+      procedure(final_convergence_info_interface)     , pass, deferred, public :: final_convergence_info      !< Returns a string containing final convergence information
 
    end type
 
@@ -43,6 +44,15 @@ module mod_class_abstract_stop_condition
 
       !> \brief Returns a string containing convergence information
       function convergence_info_interface(this) result(str)
+         import class_abstract_stop_condition
+         implicit none
+         class(class_abstract_stop_condition) :: this !< A reference to this object
+         character(len=:), allocatable        :: str
+
+      end function
+
+      !> \brief Returns a string containing final convergence information
+      function final_convergence_info_interface(this) result(str)
          import class_abstract_stop_condition
          implicit none
          class(class_abstract_stop_condition) :: this !< A reference to this object

@@ -41,6 +41,7 @@ module mod_class_composite_stop_condition
       procedure, public, pass :: compute_stop_condition      !< Computes stop condition
       procedure, public, pass :: is_stop_condition_satisfied !< Checks if stop condition is satisfied
       procedure, public, pass :: convergence_info            !< Returns a string containing convergence information
+      procedure, public, pass :: final_convergence_info      !< Returns a string containing final convergence information
 
    end type
 
@@ -167,6 +168,27 @@ contains
              end do
 
       end select
+
+   end function
+
+
+   !> \brief Returns the final convergence information
+   function final_convergence_info(this) result(str)
+      implicit none
+      class(class_composite_stop_condition) :: this !< A reference to this object
+      character(len=:), allocatable         :: str  !< String containing convergence information
+
+      ! Inner variables
+      integer :: i
+
+
+      str = " ================  CONVERGENCE INFO  ================= " // char(10) // char(10) ! char(10) = new line char
+
+      do i = 1, this%nsc
+
+         str = str // this%stop_cond_container(i)%ptr%final_convergence_info() // char(10)
+
+      end do
 
    end function
 

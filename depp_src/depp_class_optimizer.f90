@@ -5,6 +5,7 @@ module mod_class_optimizer
 
    use mod_mpi
    use mod_random_generator
+   use mod_string
    use mod_class_btimer
    use mod_class_system_variables
    use mod_class_ehist
@@ -163,8 +164,9 @@ contains
 
          ! Printing final solution
          call sys_var%logger%println(ehist%final_solution_info())
-         call sys_var%logger%println(stopper%convergence_info())
-         call sys_var%logger%println(timer%formatted_elapsed_time() // " : Accumulated CPU time")
+         call sys_var%logger%println(stopper%final_convergence_info())
+         call sys_var%logger%println(to_string(timer%elapsed_time()) // " : Accumulated CPU time (s)")
+         call sys_var%logger%println(timer%formatted_elapsed_time() // " : Accumulated CPU time (h:mm:ss)")
 
 
          ! Finishing MPI
