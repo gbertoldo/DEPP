@@ -108,7 +108,7 @@ contains
 
       call ifile%get_value(this%verbosity,"verbosity")
 
-      call execute_command_line("mkdir " // this%absfolderout)
+      if (mpio%master) call execute_command_line("mkdir " // this%absfolderout)
 
    end subroutine
 
