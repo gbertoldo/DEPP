@@ -1,4 +1,0 @@
-var namespacemod__class__population__initializer__uniform__random =
-[
-    [ "class_population_initializer_uniform_random", "structmod__class__population__initializer__uniform__random_1_1class__population__initializer__uniform__random.html", "structmod__class__population__initializer__uniform__random_1_1class__population__initializer__uniform__random" ]
-];

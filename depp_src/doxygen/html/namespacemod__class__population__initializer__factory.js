@@ -1,4 +1,0 @@
-var namespacemod__class__population__initializer__factory =
-[
-    [ "class_population_initializer_factory", "structmod__class__population__initializer__factory_1_1class__population__initializer__factory.html", "structmod__class__population__initializer__factory_1_1class__population__initializer__factory" ]
-];
