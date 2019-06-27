@@ -1,0 +1,4 @@
+var namespacemod__class__no__improvement__stop__condition =
+[
+    [ "class_no_improvement_stop_condition", "structmod__class__no__improvement__stop__condition_1_1class__no__improvement__stop__condition.html", "structmod__class__no__improvement__stop__condition_1_1class__no__improvement__stop__condition" ]
+];

@@ -1,0 +1,7 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$d1/d96/structmod__class__abstract__stop__condition_1_1class__abstract__stop__condition.html" title="Public class defining an interface for creating stop condition objects. " alt="" coords="5,125,172,181"/>
+<area shape="rect" id="node2" href="$dc/db1/structmod__class__composite__stop__condition_1_1class__composite__stop__condition.html" title="Class for creating a composite of stop condition objects. " alt="" coords="238,5,418,61"/>
+<area shape="rect" id="node3" href="$d3/dc6/structmod__class__max__generation__stop__condition_1_1class__max__generation__stop__condition.html" title="Class for creating a maximum number of generation based stop condition object. " alt="" coords="222,85,434,141"/>
+<area shape="rect" id="node4" href="$d6/d41/structmod__class__no__improvement__stop__condition_1_1class__no__improvement__stop__condition.html" title="Class for creating stop condition objects based on no improvement of the best fitness. " alt="" coords="220,165,436,221"/>
+<area shape="rect" id="node5" href="$dc/dba/structmod__class__p__measure__stop__condition_1_1class__p__measure__stop__condition.html" title="Class for creating stop condition objects based on the distance of the individuals. " alt="" coords="236,245,420,301"/>
+</map>

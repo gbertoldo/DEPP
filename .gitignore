@@ -1,6 +1,6 @@
 /depp.x
 /interface/functions.x
-depp_src/doxygen/
+#depp_src/doxygen/
 
 depp_src/depp2\.layout
 depp_output/*

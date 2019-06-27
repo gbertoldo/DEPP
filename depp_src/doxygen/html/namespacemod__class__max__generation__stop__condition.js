@@ -1,0 +1,4 @@
+var namespacemod__class__max__generation__stop__condition =
+[
+    [ "class_max_generation_stop_condition", "structmod__class__max__generation__stop__condition_1_1class__max__generation__stop__condition.html", "structmod__class__max__generation__stop__condition_1_1class__max__generation__stop__condition" ]
+];
