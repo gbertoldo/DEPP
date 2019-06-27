@@ -4,24 +4,30 @@
 !!
 !! \authors
 !!
-!!          Jonas Joacir Radtke
+!!          Jonas Joacir Radtke (a)
 !!
 !!                 E-mail: jonas.radtke@gmail.com
 !!             Curriculum: http://lattes.cnpq.br/7202527344656915
 !!                    URL: http://paginapessoal.utfpr.edu.br/jonas
 !!
 !!
-!!          Guilherme Bertoldo
+!!          Guilherme Bertoldo (a)
 !!
 !!                 E-mail: glbertoldo@gmail.com
 !!             Curriculum: http://lattes.cnpq.br/0176403556779673
 !!
 !!
+!!          Carlos Henrique Marchi (b)
+!!
+!!                 E-mail: chmcfd@gmail.com
+!!             Curriculum: http://lattes.cnpq.br/8251643344377056
+!!
+!!
 !! \par Institution
-!!          Federal University of Technology - Paraná - UTFPR
+!!          (a) Federal University of Technology - Paraná - UTFPR
+!!          (b) Federal University of Paraná - UFPR
 !!
-!!
-!! \date Jan, 2018.
+!! \date Jun, 2019.
 !!
 !! \version 2.0
 !!

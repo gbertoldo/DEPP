@@ -60,6 +60,9 @@ public:
 
       // Openning the output file
       ofstream ofs(ofile.c_str());
+      
+      // Setting output precision
+      ofs.precision(16);
 
       // Writing the fitness
       ofs << fit << " = Fitness" << endl;
