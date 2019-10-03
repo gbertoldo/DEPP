@@ -111,6 +111,62 @@ $$x'_{ij}=\frac{x_{ij}-L_j}{U_j-L_j}, \quad 1 \le j \le D$$
 and
 $$\boldsymbol{x}'_m=\frac{1}{N_p}\sum_{i=1}^{N_p}\boldsymbol{x}'_i.$$
 
-The approach presented in this section has three parameters: the population size $N_p$, the differentiation parameter $F$ and the crossover parameter $C_r$. Feoktistov[@Feoktistov:2006] gives reference values/ranges of these parameters based on optimization studies performed on many test functions.
+The approach presented in this section has three parameters: the population size $N_p$, the differentiation parameter $F$ and the crossover parameter $C_r$. @Feoktistov:2006 gives reference values/ranges of these parameters based on optimization studies performed on many test functions.
+
+
+### Differential Evolution and Response Surface Methodology {#sec:DERSM}
+
+In order to accelerate the convergence of DE, @Vincenzi:2015 proposed a new mutation operation based on the Response Surface Methodology (RSM)[@Khuri:1996; @Myers:2009]. The basic idea consists of fitting a simple response surface to a selected set of individuals of the population. The mutant vector is, then, obtained by
+maximizing the response surface, which is done through a matrix inversion. For a given benchmark, the authors showed that the number of generations necessary to reach a given precision was substantially reduced (more than 50%).
+
+Vincenzi and Savoia considered two response surfaces. The first one is a quadratic polynomial $P(\boldsymbol{x})$, given by
+$$P(\boldsymbol{x})=\beta_0+\sum_{i=1}^D\beta_i x_i+\sum_{i=1}^D\beta_{ii} x_i^2+\sum_{i=1}^{D-1}\sum_{j=i+1}^D\beta_{ij} x_ix_j,
+\label{eq:quadratic}$$ 
+where $\beta$ are coefficients to be fitted. The quadratic polynomial has $N_{f_m}=(D+1)(D+2)/2$ coefficients and, so, it requires, at least, the same number of points to be fitted. Note that the number of points grows significantly when the number of unknowns $D$ is increased. That is why Vincenzi and Savoia proposed a second model.
+
+The second model is an “Incomplete Quadratic Model”, where the terms $\beta_{ij}$ of Eq. (\[eq:quadratic\]) are neglected. In this case, the minimum number of fitting points is reduced to $N_{f_m}=2D+1$. On the other hand, the accuracy of the model is also reduced.
+
+The DE-RSM hybridization implemented in DEPP was inspired in the work of Vincenzi and Savoia, but with some modifications that are explained below.
+
+DEPP stores a history list, *i.e.* a list of all individuals calculated since the first generation and their corresponding fitness. This list is employed to generate mutant vectors by RSM hybridization and may be used by other methods to be implemented in the future.
+
+According to DE algorithm, for each individual $\boldsymbol{x}_i$ of the population, a trial individual $\boldsymbol{u}$ is created, resulting from a mutation and a crossing over. When the RSM hybridization is active, the mutant vector may be created by the DE procedure explained in the previous section or by hybridization with RSM. The following conditions must be satisfied simultaneously for applying RSM:
+
+-   The number of individuals in the history list must be, at least, twice the number of individuals required to fit the response surface $N_f$. Notice that $N_{f_m}\le N_f$;
+
+-   A random number $\mathcal{R}$ (within \[0,1)) must be less than the probability of hybridization $f_h$.
+
+The probability of hybridization $f_h$ may be prescribed by the user or may be calculated dynamically during the optimization. The dynamic calculation of $f_h$ considers the probability of success $f_s$ when applying RSM. More precisely, 
+$$f_h=
+\begin{cases}
+f_{h_{min}} & f_s \le f_{h_{min}}, \\
+f_s & f_{h_{min}} < f_s < f_{h_{max}}, \\
+f_{h_{max}} & f_{h_{max}} \le f_s, \\
+\end{cases}$$ 
+where $f_{h_{min}}$ and $f_{h_{max}}$ are the minimum and maximum values of $f_h$ allowed.
+
+The probability of success of RSM $f_s$ is the ratio of the number of times that the hybridization contributed to maximize the objective function to the last $N_p$ times RSM hybridization was applied. In the first generations, when the number of samples are less than $N_p$, $f_s$ is not available. In this case $f_h$ is equal to $f_{h0}$, an initial value of the fraction of hybridization.
+
+Suppose, now, that a mutant vector, associated to individual $\boldsymbol{x}_i$, will be calculated by DE-RSM hybridization. In order to fit a response surface, it is necessary to select a set of individuals. This selection is made in two steps. First, the history list is ordered from the best individual to the worst one and the i-th best individual $\hat{\boldsymbol{x}}$ is taken (target individual). Second, the history list is reordered from the closest to the furthermost individual to the target individual. From this list, $N_f-1$ individuals are selected according to the following rules, starting from the closest individual:
+
+-   The distance between $\hat{\boldsymbol{x}}$ and the candidate individual $\boldsymbol{x}_k$ must satisfy 
+$$\sqrt{\sum_{j=1}^{D}\left(\frac{\hat{x}_j-x_{kj}}{U_j-L_j}\right)^2} \ge \eta_{\text{tol}},$$
+    where $\eta_{\text{tol}}$ is a prescribed tolerance. In other words, there is a minimum distance between the target individual and its neighbors.
+
+-   The candidate individual $\boldsymbol{x}_k$ is selected with a probability of 50%.
+
+Once the fitting individuals are selected, the coefficients of the response surface are determined using the weighted least squares method[@Khuri:1996].
+
+Two weighting functions are implemented in DEPP: uniform and exponential[@Vincenzi:2015]. The exponential weighting function reads as
+$$w(\boldsymbol{x}_k)=
+\begin{cases}
+\exp{\left(\frac{f(\boldsymbol{x}_k)-f_{\text{best}}}{f_{\text{best}}}\right)} & f_{\text{best}}\neq 0\\
+\exp{\left(f(\boldsymbol{x}_k)-f_{\text{best}}\right)} & f_{\text{best}}= 0,
+\end{cases}$$ 
+where $\boldsymbol{x}_k$ is any of the selected individuals for fitting and $f_{\text{best}}$ is the best fitness among the individuals selected for fitting.
+
+Finally, the mutant vector is obtained by maximization of the response surface.
+
+If the application of RSM fails or the trial individual is out of range, then a pure DE individual is created.
 
 # References
