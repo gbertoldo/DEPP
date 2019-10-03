@@ -174,17 +174,17 @@ Examples {#sec:examples}
 
 Four test functions, whose maximizers are known analytically, were chosen for illustrating the application of DEPP:
 
--   Step function [@Zhang:2009] $f(\boldsymbol{x})=-\sum_{i=1}^{D} \lt( \lfloor x_i-0.5 \rfloor \rt)^2$,
+-   Step function [@Zhang:2009] $f(\boldsymbol{x})=-\sum_{i=1}^{D} \left( \lfloor x_i-0.5 \rfloor \right)^2$,
 ![Step function.](function02.png){width="50.00000%"}
 
--   Rosenbrock function [@Feoktistov:2006] $f(\boldsymbol{x})=-\sum_{i=1}^{D-1} 100\lt( x_i^2-x_{i+1}\rt)^2+(1-x_i)^2$,
+-   Rosenbrock function [@Feoktistov:2006] $f(\boldsymbol{x})=-\sum_{i=1}^{D-1} 100\left( x_i^2-x_{i+1}\right)^2+(1-x_i)^2$,
 ![Rosenbrock function.](function09.png){width="50.00000%"}
 
 -   Noisy Quartic function [@Zhang:2009] $f(\boldsymbol{x})=-\mathcal{R}-\sum_{i=1}^{D} i~x_i^4$, where $\mathcal{R}$ is a uniform
     random number belonging to $[0,1)$,
 ![Noisy Quartic function.](function13.png){width="50.00000%"}
 
--   Schwefel 2.26 function [@Zhang:2009] $f(\boldsymbol{x})=-418.98288727243369~D+\sum_{i=1}^{D} x_i\sin{\lt(\sqrt{|x_i|}\rt)}$.
+-   Schwefel 2.26 function [@Zhang:2009] $f(\boldsymbol{x})=-418.98288727243369~D+\sum_{i=1}^{D} x_i\sin{\left(\sqrt{|x_i|}\right)}$.
 ![Schwefel 2.26 function.](function14.png){width="50.00000%"}
 
 These functions were chosen because they present particular features that make optimization difficult. Step function (Fig. \[fig:step\]), a set o flat surfaces, pose a hard problem to optimizers relying on functions’ derivatives. This is even worst for Noisy Quartic function (Fig. \[fig:noisy\]), which has a noisy plateau near its maximum. Rosenbrock function (Fig. \[fig:rosenbrock\]), although smooth, has a sharp narrow ridge around a parabola, that makes it a challenge to find
