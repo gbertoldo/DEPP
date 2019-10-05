@@ -174,21 +174,74 @@ Examples {#sec:examples}
 
 Four test functions, whose maximizers are known analytically, were chosen for illustrating the application of DEPP:
 
--   Step function [@Zhang:2009] $f(\boldsymbol{x})=-\sum_{i=1}^{D} \left( \lfloor x_i-0.5 \rfloor \right)^2$,
+-   Step function [@Zhang:2009] 
+
+$f(\boldsymbol{x})=-\sum_{i=1}^{D} \left( \lfloor x_i-0.5 \rfloor \right)^2$,
+
 ![Step function.](function02.png){width="50.00000%"}
 
--   Rosenbrock function [@Feoktistov:2006] $f(\boldsymbol{x})=-\sum_{i=1}^{D-1} 100\left( x_i^2-x_{i+1}\right)^2+(1-x_i)^2$,
+-   Rosenbrock function [@Feoktistov:2006] 
+
+$f(\boldsymbol{x})=-\sum_{i=1}^{D-1} 100\left( x_i^2-x_{i+1}\right)^2+(1-x_i)^2$,
+
 ![Rosenbrock function.](function09.png){width="50.00000%"}
 
--   Noisy Quartic function [@Zhang:2009] $f(\boldsymbol{x})=-\mathcal{R}-\sum_{i=1}^{D} i~x_i^4$, where $\mathcal{R}$ is a uniform
-    random number belonging to $[0,1)$,
+-   Noisy Quartic function [@Zhang:2009] 
+
+$f(\boldsymbol{x})=-\mathcal{R}-\sum_{i=1}^{D} i~x_i^4$, 
+
+where $\mathcal{R}$ is a uniform random number belonging to $[0,1)$,
+
 ![Noisy Quartic function.](function13.png){width="50.00000%"}
 
--   Schwefel 2.26 function [@Zhang:2009] $f(\boldsymbol{x})=-418.98288727243369~D+\sum_{i=1}^{D} x_i\sin{\left(\sqrt{|x_i|}\right)}$.
+-   Schwefel 2.26 function [@Zhang:2009] 
+
+$f(\boldsymbol{x})=-418.98288727243369~D+\sum_{i=1}^{D} x_i\sin{\left(\sqrt{|x_i|}\right)}$.
+
 ![Schwefel 2.26 function.](function14.png){width="50.00000%"}
 
 These functions were chosen because they present particular features that make optimization difficult. Step function (Fig. \[fig:step\]), a set o flat surfaces, pose a hard problem to optimizers relying on functions’ derivatives. This is even worst for Noisy Quartic function (Fig. \[fig:noisy\]), which has a noisy plateau near its maximum. Rosenbrock function (Fig. \[fig:rosenbrock\]), although smooth, has a sharp narrow ridge around a parabola, that makes it a challenge to find
 an appropriate search direction. Finally, Schwefel 2.26 (Fig. \[fig:schwefel\]) has several local optima, which may lead to premature convergence.
 
+The maximizers $x_i^*$ and the domain of optimization of the test functions are presented in
+Table \[tab:boundsmaximizer\].
+
+     Function      $L_i$   $U_i$       $x_i^*$
+  --------------- ------- ------- ------------------
+       Step        -100     100          0.5
+    Rosenbrock      -2       2            1
+   Noisy Quartic   -1.28   1.28           0
+   Schwefel 2.26   -500     500    420.968597844358
+
+  : Lower $L_i$ and upper $U_i$ bounds for maximization and the global maximizer $x_i^*$ ($1\le i \le D$).
+
+\[tab:boundsmaximizer\]
+
+Additionally, this example aims (i) to show the effect of DE-Response Surface (DE-RSM) coupling on reducing the number of iterations required to achieve convergence and (ii) show the effect of parallelization on reducing the optimization time. In order to accomplish the first task, test functions (\[eq:step\])-(\[eq:schwefel\]) were optimized for $D \in \{2, 4, 8\}$ dimensions using DE and DE-RSM. For the second task, the number of dimensions was restricted to $D=2$, but for each call of the external software that calculates the objective function it was added a delay of 1 s in order to simulate a computationally expensive program. Since DE is a stochastic method, in both tasks, the final results are the average of 50 optmizations.
+
+The parameters applied in the optimization are as follows. The population size is $N_p=20$ for $D=2$ and $N_p=40$ for $D=4$ and $D=8$. For pure DE, $F=0.85$,  $C_r=0.5$. Hybridization uses quadratic polynomial as the response surface. The fraction of hybridization is calculated dynamically using $f_{h0}=0.35$, $f_{\text{min}}=0.1$ and $f_{\text{max}}=0.9$. The crossing over parameter of RSM is $C_r=1$. The number of individuals selected for fitting the response surface is twice the minimum required, *i.e.* $N_f=2N_{f_{m}}$. The tolerance for selecting individuals for fitting is $\eta_{\text{tol}}=0.0001$. Uniform weighting is applied for fitting. Concerning the stopping conditions, the maximum number of generations allowed is 5000, the maximum number of generations allowed without improving fitness function is 40, for $D=2$, and 80, for $D\in\{4;8\}$, and the tolerance of P-measure is $P_m\le P_{\text{tol}}=5\times 10^{-4}$.
+
+For the test functions considered, numerical results show that DE-Response Surface (DE-RSM) coupling reduces the number of generations necessary to find the global maximizer. Table \[tab:GPs\] compares the mean number of generations $G$ necessary to reach stop condition and the probability of success $P_s$ to achieve the global maximum. The number in parenthesis is the standard deviation $\sigma$. The poor performance of DE in finding the global maximum of Rosenbrock function is due to stop condition. In this case, the number of generations without improving the fitness function was exceeded and optimization was interrupted.
+
+  -------------------------------- ----- ---- -------- ----- --------
+                                                             
+   (r)[3-4]{} (r)[5-6]{} Function   $D$    DE   DE-RSM  DE    DE-RSM
+                                                   (0)  100    100
+                Step                               (0)  100    100
+                                                   (0)  100    100
+                                                        100    100
+             Rosenbrock                                 94     100
+                                                        20     100
+                                                        100    100
+           Noisy Quartic                                100    100
+                                                        100    100
+                                                        98      90
+           Schwefel 2.26                                100    100
+                                                        100     98
+  -------------------------------- ----- ---- -------- ----- --------
+
+  : Number of generations $G$ to reach stop condition and probability of success $P_s$.
+
+\[tab:GPs\]
 
 # References
