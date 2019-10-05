@@ -176,19 +176,19 @@ Four test functions, whose maximizers are known analytically, were chosen for il
 
 -   Step function [@Zhang:2009] 
 
-$f(\boldsymbol{x})=-\sum_{i=1}^{D} \left( \lfloor x_i-0.5 \rfloor \right)^2$,
+    $f(\boldsymbol{x})=-\sum_{i=1}^{D} \left( \lfloor x_i-0.5 \rfloor \right)^2$,
 
 ![Step function.](function02.png){width="50.00000%"}
 
 -   Rosenbrock function [@Feoktistov:2006] 
 
-$f(\boldsymbol{x})=-\sum_{i=1}^{D-1} 100\left( x_i^2-x_{i+1}\right)^2+(1-x_i)^2$,
+    $f(\boldsymbol{x})=-\sum_{i=1}^{D-1} 100\left( x_i^2-x_{i+1}\right)^2+(1-x_i)^2$,
 
 ![Rosenbrock function.](function09.png){width="50.00000%"}
 
 -   Noisy Quartic function [@Zhang:2009] 
 
-$f(\boldsymbol{x})=-\mathcal{R}-\sum_{i=1}^{D} i~x_i^4$, 
+    $f(\boldsymbol{x})=-\mathcal{R}-\sum_{i=1}^{D} i~x_i^4$, 
 
 where $\mathcal{R}$ is a uniform random number belonging to $[0,1)$,
 
@@ -196,7 +196,7 @@ where $\mathcal{R}$ is a uniform random number belonging to $[0,1)$,
 
 -   Schwefel 2.26 function [@Zhang:2009] 
 
-$f(\boldsymbol{x})=-418.98288727243369~D+\sum_{i=1}^{D} x_i\sin{\left(\sqrt{|x_i|}\right)}$.
+    $f(\boldsymbol{x})=-418.98288727243369~D+\sum_{i=1}^{D} x_i\sin{\left(\sqrt{|x_i|}\right)}$.
 
 ![Schwefel 2.26 function.](function14.png){width="50.00000%"}
 
@@ -223,25 +223,86 @@ The parameters applied in the optimization are as follows. The population size i
 
 For the test functions considered, numerical results show that DE-Response Surface (DE-RSM) coupling reduces the number of generations necessary to find the global maximizer. Table \[tab:GPs\] compares the mean number of generations $G$ necessary to reach stop condition and the probability of success $P_s$ to achieve the global maximum. The number in parenthesis is the standard deviation $\sigma$. The poor performance of DE in finding the global maximum of Rosenbrock function is due to stop condition. In this case, the number of generations without improving the fitness function was exceeded and optimization was interrupted.
 
-  -------------------------------- ----- ---- -------- ----- --------
-                                                             
-   (r)[3-4]{} (r)[5-6]{} Function   $D$    DE   DE-RSM  DE    DE-RSM
-                                                   (0)  100    100
-                Step                               (0)  100    100
-                                                   (0)  100    100
-                                                        100    100
-             Rosenbrock                                 94     100
-                                                        20     100
-                                                        100    100
-           Noisy Quartic                                100    100
-                                                        100    100
-                                                        98      90
-           Schwefel 2.26                                100    100
-                                                        100     98
-  -------------------------------- ----- ---- -------- ----- --------
+Table \[tab:GPs\].
+
+$G(\pm \sigma)$  $P_s$ (\%)
+           Function     $D$          DE        DE-RSM      DE    DE-RSM
+            --------   -----        ----      --------    ----  --------
+                         2         59 (4)       42 (0)     100    100
+            Step         4        130 (4)       82 (0)     100    100
+                         8        221 (9)       85 (0)     100    100
+            --------   -----        ----      --------    ----  --------
+                         2       106 (10)       35 (4)     100    100
+          Rosenbrock     4      636 (131)     101 (17)      94    100
+                         8     1526 (395)     288 (68)      20    100
+            --------   -----        ----      --------    ----  --------
+                         2        82 (30)      80 (30)     100    100
+       Noisy Quartic     4       178 (60)     155 (59)     100    100
+                         8       222 (60)     154 (72)     100    100
+            --------   -----        ----      --------    ----  --------
+                         2         47 (4)       20 (3)      98     90
+       Schwefel 2.26     4        107 (6)       43 (4)     100    100
+                         8       262 (12)     116 (11)     100     98
 
   : Number of generations $G$ to reach stop condition and probability of success $P_s$.
 
-\[tab:GPs\]
+\[tab:GPs\]  
+  
+
+The maximizer $\bs{x}^*$ of an optimization was considered a success if
+\be
+|f(\bs{x}^*)-f(\bs{x}_a^*)| \le F_{\text{tol}}\quad \text{or} \quad |\bs{x}^*-\bs{x}^*_a| \le P_{\text{tol}},
+\ee
+where $\bs{x}^*_a$ is the analytical global maximizer and $F_{\text{tol}}$ is given by
+\be
+F_{\text{tol}}=\max_{\bs{x}}{|f(\bs{x})-f(\bs{x}_a^*)|},\quad \text{subject to}\quad |\bs{x}-\bs{x}^*_a| \le P_{\text{tol}}.
+\ee		
+
+
+The maximizer $\boldsymbol{x}^*$ of an optimization was considered a success if
+$$
+|f(\boldsymbol{x}^*)-f(\boldsymbol{x}_a^*)| \le F_{\text{tol}}\quad \text{or} \quad |\boldsymbol{x}^*-\boldsymbol{x}^*_a| \le P_{\text{tol}},
+$$
+where $\boldsymbol{x}^*_a$ is the analytical global maximizer and $F_{\text{tol}}$ is given by
+$$
+F_{\text{tol}}=\max_{\boldsymbol{x}}{|f(\boldsymbol{x})-f(\boldsymbol{x}_a^*)|},\quad \text{subject to}\quad |\boldsymbol{x}-\boldsymbol{x}^*_a| \le P_{\text{tol}}.
+$$	
+
+Finally, Tab. \[tab:TCPU\] presents the mean computational time per generation $\tau$ for different number of threads $N_t$. As can be seen, $\tau_{N_t}$ is approximately proportional to $\tau_1/N_p$.
+
+  --------------------- ------- ------------ --------
+                                             
+   (r)[3-4]{} Function   $N_t$            DE   DE-RSM
+                                             
+          Step                               
+                                             
+                                             
+                                             
+       Rosenbrock                            
+                                             
+                                             
+                                             
+      Noisy Quartic                          
+                                             
+                                             
+                                             
+      Schwefel 2.26                          
+                                             
+                                             
+  --------------------- ------- ------------ --------
+
+  : Mean computational time per generation $\tau$ for different numbers of threads $N_t$. $D=2$.
+
+\[tab:TCPU\]
+
+Acknowledgements {#sec:acknow .unnumbered}
+================
+
+We would like to thank CNPq (National Counsel of Technological and Scientific Development, Brazil), CAPES (Coordination for the Improvement of Higher Education Personnel, Brazil), for their financial support, and UTFPR-FB (Universidade Tecnológica Federal do Paraná-Francisco Beltrão) for its technological support. The third author is supported by a CNPq scholarship.
+
+Funding {#funding .unnumbered}
+=======
+
+This study was financed in part by the Coordenação de Aperfeiçoamento de Pessoal de Nível Superior - Brasil (CAPES) - Finance Code 001.
 
 # References
