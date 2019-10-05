@@ -249,16 +249,6 @@ $G(\pm \sigma)$  $P_s$ (\%)
 \[tab:GPs\]  
   
 
-The maximizer $\bs{x}^*$ of an optimization was considered a success if
-\be
-|f(\bs{x}^*)-f(\bs{x}_a^*)| \le F_{\text{tol}}\quad \text{or} \quad |\bs{x}^*-\bs{x}^*_a| \le P_{\text{tol}},
-\ee
-where $\bs{x}^*_a$ is the analytical global maximizer and $F_{\text{tol}}$ is given by
-\be
-F_{\text{tol}}=\max_{\bs{x}}{|f(\bs{x})-f(\bs{x}_a^*)|},\quad \text{subject to}\quad |\bs{x}-\bs{x}^*_a| \le P_{\text{tol}}.
-\ee		
-
-
 The maximizer $\boldsymbol{x}^*$ of an optimization was considered a success if
 $$
 |f(\boldsymbol{x}^*)-f(\boldsymbol{x}_a^*)| \le F_{\text{tol}}\quad \text{or} \quad |\boldsymbol{x}^*-\boldsymbol{x}^*_a| \le P_{\text{tol}},
