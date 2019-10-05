@@ -223,30 +223,24 @@ The parameters applied in the optimization are as follows. The population size i
 
 For the test functions considered, numerical results show that DE-Response Surface (DE-RSM) coupling reduces the number of generations necessary to find the global maximizer. Table \[tab:GPs\] compares the mean number of generations $G$ necessary to reach stop condition and the probability of success $P_s$ to achieve the global maximum. The number in parenthesis is the standard deviation $\sigma$. The poor performance of DE in finding the global maximum of Rosenbrock function is due to stop condition. In this case, the number of generations without improving the fitness function was exceeded and optimization was interrupted.
 
-Table \[tab:GPs\].
-
-$G(\pm \sigma)$  $P_s$ (\%)
-           Function     $D$          DE        DE-RSM      DE    DE-RSM
-            --------   -----        ----      --------    ----  --------
-                         2         59 (4)       42 (0)     100    100
-            Step         4        130 (4)       82 (0)     100    100
-                         8        221 (9)       85 (0)     100    100
-            --------   -----        ----      --------    ----  --------
-                         2       106 (10)       35 (4)     100    100
-          Rosenbrock     4      636 (131)     101 (17)      94    100
-                         8     1526 (395)     288 (68)      20    100
-            --------   -----        ----      --------    ----  --------
-                         2        82 (30)      80 (30)     100    100
-       Noisy Quartic     4       178 (60)     155 (59)     100    100
-                         8       222 (60)     154 (72)     100    100
-            --------   -----        ----      --------    ----  --------
-                         2         47 (4)       20 (3)      98     90
-       Schwefel 2.26     4        107 (6)       43 (4)     100    100
-                         8       262 (12)     116 (11)     100     98
+--------------- ----- ------------ ---------- ----- --------
+                           
+     Function      $D$            DE     DE-RSM  DE    DE-RSM
+                    2         59 (4)     42 (0)  100    100
+       Step         4        130 (4)     82 (0)  100    100
+                    8        221 (9)     85 (0)  100    100
+                    2       106 (10)     35 (4)  100    100
+    Rosenbrock      4      636 (131)   101 (17)  94     100
+                    8     1526 (395)   288 (68)  20     100
+                    2        82 (30)    80 (30)  100    100
+   Noisy Quartic    4       178 (60)   155 (59)  100    100
+                    8       222 (60)   154 (72)  100    100
+                    2         47 (4)     20 (3)  98      90
+   Schwefel 2.26    4        107 (6)     43 (4)  100    100
+                    8       262 (12)   116 (11)  100     98
+  --------------- ----- ------------ ---------- ----- --------
 
   : Number of generations $G$ to reach stop condition and probability of success $P_s$.
-
-\[tab:GPs\]  
   
 
 The maximizer $\boldsymbol{x}^*$ of an optimization was considered a success if
@@ -260,30 +254,28 @@ $$
 
 Finally, Tab. \[tab:TCPU\] presents the mean computational time per generation $\tau$ for different number of threads $N_t$. As can be seen, $\tau_{N_t}$ is approximately proportional to $\tau_1/N_p$.
 
-  --------------------- ------- ------------ --------
-                                             
-   (r)[3-4]{} Function   $N_t$            DE   DE-RSM
-                                             
-          Step                               
-                                             
-                                             
-                                             
-       Rosenbrock                            
-                                             
-                                             
-                                             
-      Noisy Quartic                          
-                                             
-                                             
-                                             
-      Schwefel 2.26                          
-                                             
-                                             
-  --------------------- ------- ------------ --------
+  --------------- ------- ------------ --------
+                                       
+     Function      $N_t$            DE   DE-RSM
+                     1           20.27    20.27
+       Step          2           10.11    10.10
+                     3            7.07     7.09
+                     4            5.06     5.06
+                     1           20.23    20.28
+    Rosenbrock       2           10.11    10.11
+                     3            7.10     7.08
+                     4            5.07     5.07
+                     1           20.23    20.19
+   Noisy Quartic     2           10.11    10.12
+                     3            7.07     7.07
+                     4            5.08     5.07
+                     1           20.21    20.26
+   Schwefel 2.26     2           10.14    10.13
+                     3            7.09     7.08
+                     4            5.07     5.09
+  --------------- ------- ------------ --------
 
   : Mean computational time per generation $\tau$ for different numbers of threads $N_t$. $D=2$.
-
-\[tab:TCPU\]
 
 Acknowledgements {#sec:acknow .unnumbered}
 ================
