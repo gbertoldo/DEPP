@@ -49,7 +49,7 @@ DEPP is written in FORTRAN 2008 standard language[@Brainerd:2015] with the Messa
 advantage of the Object-Oriented Paradigm.
 
 The folder structure of DEPP is shown in Figure 1. The directory *depp\_input* contains the input (text) files which defines
-the control parameters of the optimization. Results of DEPP are saved into *depp\_output* directory. The source code is within *depp\_src* directory. This directory also contains the Bash[@Ramey:2016] script *compile.sh*, which compiles DEPP source code and generates the executable *depp.exe* in the root of the file structure.  The interface between DEPP and the external program (EP), which calculates the objective function, is defined in the *interface* directory. Finally, the script *run.sh* runs DEPP using MPI.
+the control parameters of the optimization. Results of DEPP are saved into *depp\_output* directory. The source code is within *depp\_src* directory. This directory also contains the Bash[@Ramey:2016] script *compile.sh*, which compiles DEPP source code and generates the executable *depp.x* in the root of the file structure.  The interface between DEPP and the external program (EP), which calculates the objective function, is defined in the *interface* directory. Finally, the script *run.sh* runs DEPP using MPI.
 
 ![Folder structure of DEPP.](folder_structure.png){width="50.00000%"}
 
