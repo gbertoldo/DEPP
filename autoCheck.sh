@@ -43,9 +43,9 @@ printf "Scripts ./compile.sh,\n"
 printf "        ./interface/C++/compile.sh,\n"
 printf "        ./interface/Fortran2008/compile.sh and \n"
 printf "        ./interface/Functions/compile.sh\n" 
-printf "use GNU Fortran compiler (gfortran) and GNU C++ compiler (g++).\n"
+printf "use GNU Fortran compiler (gfortran >=7.4.0) and GNU C++ compiler (g++ >=7.4.0).\n"
 printf "If you have different compilers, please edit these scripts properly.\n"
-printf "You will also need MPI. For more details, see\n\n" 
+printf "You will also need MPI (Open MPI >=2.1.1). For more details, see\n\n" 
 printf "https://github.com/gbertoldo/DEPP/wiki#how-to-install-depp\n\n"
 
 while true; do
