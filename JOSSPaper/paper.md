@@ -1,11 +1,4 @@
 ---
-title: "DEPP"
-author: "Guilherme"
-date: "05/10/2019"
-output: pdf_document
----
-
----
 title: 'DEPP - Differential Evolution Parallel Program'
 tags:
   - Optimization
