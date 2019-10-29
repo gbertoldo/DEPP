@@ -14,7 +14,7 @@
 !
 !    You should have received a copy of the GNU General Public License
 !    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-!    
+!
 !    Contact:
 !          Jonas Joacir Radtke (a)
 !                 E-mail: jonas.radtke@gmail.com
@@ -28,7 +28,7 @@
 !          (a) Federal University of Technology - Paraná - UTFPR
 !              Linha Santa Bárbara, s/n, Francisco Beltrão, Paraná, Brazil
 !              Zip Code 85601-970
-!              
+!
 !          (b) Federal University of Paraná - UFPR
 !              Curitiba, Paraná, Brazil
 !              Caixa postal 19040
@@ -56,7 +56,7 @@ module mod_class_abstract_search_strategy_factory
    abstract interface
 
       !> \brief Creates an instance of the search strategy object
-      subroutine create_interface(this, sys_var, conf_file_name, searcher)
+      subroutine create_interface(this, sys_var, conf_file_name, SSID, searcher)
 
          import class_abstract_search_strategy_factory
          import class_system_variables
@@ -66,6 +66,7 @@ module mod_class_abstract_search_strategy_factory
          class(class_abstract_search_strategy_factory)               :: this           !< A reference to this object
          class(class_system_variables),                  intent(in)  :: sys_var        !< System's variables
          character(len=*),                               intent(in)  :: conf_file_name !< Configuration file
+         character(len=*),                               intent(in)  :: SSID           !< Search strategy ID
          class(class_abstract_search_strategy), pointer, intent(out) :: searcher       !< Search strategy object
 
 

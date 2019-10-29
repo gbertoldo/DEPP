@@ -14,7 +14,7 @@
 !
 !    You should have received a copy of the GNU General Public License
 !    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-!    
+!
 !    Contact:
 !          Jonas Joacir Radtke (a)
 !                 E-mail: jonas.radtke@gmail.com
@@ -28,7 +28,7 @@
 !          (a) Federal University of Technology - Paraná - UTFPR
 !              Linha Santa Bárbara, s/n, Francisco Beltrão, Paraná, Brazil
 !              Zip Code 85601-970
-!              
+!
 !          (b) Federal University of Paraná - UFPR
 !              Curitiba, Paraná, Brazil
 !              Caixa postal 19040
@@ -108,7 +108,7 @@ contains
       type(class_ifile)                      :: ifile
       type(class_fitness_calculator_factory) :: fit_calculator_factory
       type(class_search_strategy_factory)    :: search_strategy_factory
-      character(len=str_size)                :: search_strategy_conf
+      character(len=str_size)                :: search_strategy_id
 
 
       ! Associating pointers
@@ -124,11 +124,9 @@ contains
       ! Creating the search strategy object
       call ifile%init( filename=this%sys_var%absparfile, field_separator="&" )
       call ifile%load()
-      call ifile%get_value(search_strategy_conf,  "search_strategy_conf")
+      call ifile%get_value(search_strategy_id,  "search_strategy")
 
-      search_strategy_conf = trim(sys_var%absfolderin) // trim(search_strategy_conf)
-
-      call search_strategy_factory%create(sys_var, search_strategy_conf, this%searcher)
+      call search_strategy_factory%create(sys_var, this%sys_var%absparfile, search_strategy_id, this%searcher)
 
 
       ! Since the individual searcher is run in parallel, it may contains data that need

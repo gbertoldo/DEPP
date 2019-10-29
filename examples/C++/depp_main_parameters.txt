@@ -10,11 +10,11 @@ All data must follow the input pattern: "value & variable & description", where 
                                            0 &              verbosity  &  Defines log verbosity level (0=min, 1=med, 2=max)
                                            0 &            save_backup  &  Saves backup (0=no, 1=yes: increases CPU time)
                                            0 &                 reload  &  Upload backup data and continue computation (0=no; 1=yes)
-                                       $PWD/ &                   fdir  &  Name of working directory for fitness calculation
+                  $PWD/interface/Fortran2008 &                   fdir  &  Name of working directory for fitness calculation
                                    fitness.x &                   ffit  &  Name of executable for fitness calculation
                                            2 &                     nu  &  Number of unknowns
                                           20 &                     np  &  Size of population (recommended 10*nu)
-                      DEPP_DE_parameters.txt &   search_strategy_conf  &  Search strategy configuration file
+                                   DE/RAND/1 &   search_strategy_conf  &  Search strategy configuration 
                               uniform_random &  pop_initializer_model  &  Population initializer model
 
 ===========================================================================================================================================
@@ -47,6 +47,49 @@ each component separated by comma, space or tab.
 
                                      -500.d0 &             lower_bound  &  Components of the lower bound vector.
                                       500.d0 &             upper_bound  &  Components of the upper bound vector.
+
+
+===========================================================================================================================================
+
+                                              PARAMETERS OF DE-RSM SEARCH STRATEGY
+                                              
+-------------------------------------------------------------------------------------------------------------------------------------------
+
+                 DE/RAND/1 & DE-RSM-de_search_strategy  &  DE search strategy configuration
+                    0.35d0 &                 DE-RSM-fh  &  Initial fraction of hybridization
+                    0.10d0 &              DE-RSM-fhmin  &  Minimum fraction of hybridization
+                    0.90d0 &              DE-RSM-fhmax  &  Maximum fraction of hybridization
+                         1 &                DE-RSM-fhm  &  Model for the dynamical calculation of the factor of hybridization
+                 Quadratic &              RSM-RS_model  &  Response Surface model
+                    -0.5d0 &                  RSM-crsh  &  Crossover probability of the hybridized model (disable if crsh < 0)
+                         1 &                    RSM-kw  &  Kind of weighting function for RSM fitting (1=uniform, 2=exponential)
+                     2.0d0 &                   RSM-fnb  &  Multiple of the minimum number of points for RSM fitting
+                  0.0001d0 &                 RSM-netol  &  Tolerance for distance when selecting neighbors points for RSM adjusting
+
+RS-Model:
+---------
+   
+Incomplete_Quadratic - Response Surface Methodology. Selects the nf-1 individuals closest to the selected individual. Fits an incomplete
+                       quadratic model and returns the maximizer of this model.
+
+Quadratic            - Response Surface Methodology. Selects the nf-1 individuals closest to the selected individual. Fits a complete
+                       quadratic model and returns the maximizer of this model.
+
+Model for calculation of the factor of hybridization (fhm):
+-----------------------------------------------------------
+
+0 - fh = constant
+
+1 - fh = probability of success of the previous application of RSM
+
+===========================================================================================================================================
+
+                                              PARAMETERS OF DE/RAND/1 SEARCH STRATEGY 
+                                              
+-------------------------------------------------------------------------------------------------------------------------------------------
+
+                    0.85d0 &      DE/RAND/1-dif    &  Differentiation constant of DE/RAND/1 strategy (recommended 0.85)
+                     0.5d0 &      DE/RAND/1-crs    &  Crossover probability of DE/RAND/1 strategy (recommended 0.5)
 
 ===========================================================================================================================================
 

@@ -14,7 +14,7 @@
 !
 !    You should have received a copy of the GNU General Public License
 !    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-!    
+!
 !    Contact:
 !          Jonas Joacir Radtke (a)
 !                 E-mail: jonas.radtke@gmail.com
@@ -28,7 +28,7 @@
 !          (a) Federal University of Technology - Paraná - UTFPR
 !              Linha Santa Bárbara, s/n, Francisco Beltrão, Paraná, Brazil
 !              Zip Code 85601-970
-!              
+!
 !          (b) Federal University of Paraná - UFPR
 !              Curitiba, Paraná, Brazil
 !              Caixa postal 19040
@@ -86,7 +86,6 @@ contains
       ! Inner variables
       type(class_ifile)   :: ifile1
       type(class_ifile)   :: ifile2
-      character(str_size) :: CID
 
       ! Getting parameters
       call ifile1%init(filename=sys_var%absparfile, field_separator='&')
@@ -96,18 +95,8 @@ contains
       call ifile2%load()
 
       call ifile1%get_value(this%np, "np")
-      call ifile2%get_value(    CID,"CID")
-
-      if (trim(CID)/="DE/RAND/1") then
-
-         call sys_var%logger%println("class_DE_RAND_1: unexpected CID. Stopping.")
-
-         call mod_mpi_finalize()
-
-      end if
-
-      call ifile2%get_value(this%dif,"dif")
-      call ifile2%get_value(this%crs,"crs")
+      call ifile2%get_value(this%dif,"DE/RAND/1-dif")
+      call ifile2%get_value(this%crs,"DE/RAND/1-crs")
 
    end subroutine
 

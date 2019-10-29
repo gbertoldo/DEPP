@@ -14,7 +14,7 @@
 !
 !    You should have received a copy of the GNU General Public License
 !    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-!    
+!
 !    Contact:
 !          Jonas Joacir Radtke (a)
 !                 E-mail: jonas.radtke@gmail.com
@@ -28,7 +28,7 @@
 !          (a) Federal University of Technology - Paraná - UTFPR
 !              Linha Santa Bárbara, s/n, Francisco Beltrão, Paraná, Brazil
 !              Zip Code 85601-970
-!              
+!
 !          (b) Federal University of Paraná - UFPR
 !              Curitiba, Paraná, Brazil
 !              Caixa postal 19040
@@ -116,11 +116,11 @@ contains
 
       call ifile2%init(filename=conf_file_name, field_separator="&")
       call ifile2%load()
-      call ifile2%get_value( this%crsh,     "crsh")  ! Crossing over parameter
-      call ifile2%get_value(   this%kw,       "kw")  ! Kind of weight
-      call ifile2%get_value(  RS_model, "RS_model")  ! Response Surface model
-      call ifile2%get_value(       fnb,      "fnb")  ! Multiple of the minimum number of points for RSM fitting
-      call ifile2%get_value(this%netol,    "netol")  ! Tolerance for selecting neighbor points
+      call ifile2%get_value( this%crsh,     "RSM-crsh")  ! Crossing over parameter
+      call ifile2%get_value(   this%kw,       "RSM-kw")  ! Kind of weight
+      call ifile2%get_value(  RS_model, "RSM-RS_model")  ! Response Surface model
+      call ifile2%get_value(       fnb,      "RSM-fnb")  ! Multiple of the minimum number of points for RSM fitting
+      call ifile2%get_value(this%netol,    "RSM-netol")  ! Tolerance for selecting neighbor points
 
 
       ! Creating response surface model

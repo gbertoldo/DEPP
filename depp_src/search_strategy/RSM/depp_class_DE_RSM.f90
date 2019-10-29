@@ -14,7 +14,7 @@
 !
 !    You should have received a copy of the GNU General Public License
 !    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-!    
+!
 !    Contact:
 !          Jonas Joacir Radtke (a)
 !                 E-mail: jonas.radtke@gmail.com
@@ -28,7 +28,7 @@
 !          (a) Federal University of Technology - Paraná - UTFPR
 !              Linha Santa Bárbara, s/n, Francisco Beltrão, Paraná, Brazil
 !              Zip Code 85601-970
-!              
+!
 !          (b) Federal University of Paraná - UFPR
 !              Curitiba, Paraná, Brazil
 !              Caixa postal 19040
@@ -103,7 +103,7 @@ contains
       type(class_ifile)   :: ifile2             ! Input file
       character(str_size) :: de_conf_file_name  ! DE configuration file
       character(str_size) :: rsm_conf_file_name ! RSM configuration file
-      character(str_size) :: CID                ! Class ID
+      character(str_size) :: DESSID             ! DE search strategy ID
       integer             :: np                 ! Population size
       real(8)             :: fh                 ! Hybridization fraction/Initial hybridization fraction
       real(8)             :: fhmin              ! Minimum hybridization factor
@@ -119,38 +119,19 @@ contains
       call ifile1%load()
       call ifile2%load()
 
-      call ifile1%get_value(        np,    "np")
-      call ifile2%get_value(       CID,   "CID")
-      call ifile2%get_value(        fh,    "fh")
-      call ifile2%get_value(     fhmin, "fhmin")
-      call ifile2%get_value(     fhmax, "fhmax")
-      call ifile2%get_value(       fhm,   "fhm")
-
-      if (trim(CID)/="DE-RSM") then
-
-         call sys_var%logger%println("class_DE_RSM: unexpected CID. Stopping.")
-
-         call mod_mpi_finalize()
-
-      end if
-
+      call ifile1%get_value(        np,   "np")
+      call ifile2%get_value(    DESSID,   "DE-RSM-de_search_strategy")
+      call ifile2%get_value(        fh,   "DE-RSM-fh")
+      call ifile2%get_value(     fhmin,   "DE-RSM-fhmin")
+      call ifile2%get_value(     fhmax,   "DE-RSM-fhmax")
+      call ifile2%get_value(       fhm,   "DE-RSM-fhm")
 
       ! Creating DE search strategy
-
-      call ifile2%get_value(de_conf_file_name,"de_search_strategy_conf")
-
-      de_conf_file_name = trim(sys_var%absfolderin) // trim(de_conf_file_name)
-
-      call search_strategy_factory%create(sys_var, de_conf_file_name, this%de_searcher)
+      call search_strategy_factory%create(sys_var, sys_var%absparfile, DESSID, this%de_searcher)
 
 
       ! Creating RSM search strategy
-
-      call ifile2%get_value(rsm_conf_file_name,"rsm_search_strategy_conf")
-
-      rsm_conf_file_name = trim(sys_var%absfolderin) // trim(rsm_conf_file_name)
-
-      call search_strategy_factory%create(sys_var, rsm_conf_file_name, this%rsm_searcher)
+      call search_strategy_factory%create(sys_var, sys_var%absparfile, "RSM", this%rsm_searcher)
 
 
       ! Getting nf
