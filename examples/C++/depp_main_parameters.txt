@@ -10,11 +10,11 @@ All data must follow the input pattern: "value & variable & description", where 
                                            0 &              verbosity  &  Defines log verbosity level (0=min, 1=med, 2=max)
                                            0 &            save_backup  &  Saves backup (0=no, 1=yes: increases CPU time)
                                            0 &                 reload  &  Upload backup data and continue computation (0=no; 1=yes)
-                  $PWD/interface/Fortran2008 &                   fdir  &  Name of working directory for fitness calculation
+                                       $PWD/ &                   fdir  &  Name of working directory for fitness calculation
                                    fitness.x &                   ffit  &  Name of executable for fitness calculation
                                            2 &                     nu  &  Number of unknowns
                                           20 &                     np  &  Size of population (recommended 10*nu)
-                       parameters_de_rsm.txt &   search_strategy_conf  &  Search strategy configuration file
+                      DEPP_DE_parameters.txt &   search_strategy_conf  &  Search strategy configuration file
                               uniform_random &  pop_initializer_model  &  Population initializer model
 
 ===========================================================================================================================================

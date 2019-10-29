@@ -14,7 +14,7 @@
 !
 !    You should have received a copy of the GNU General Public License
 !    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-!    
+!
 !    Contact:
 !          Jonas Joacir Radtke (a)
 !                 E-mail: jonas.radtke@gmail.com
@@ -28,7 +28,7 @@
 !          (a) Federal University of Technology - Paraná - UTFPR
 !              Linha Santa Bárbara, s/n, Francisco Beltrão, Paraná, Brazil
 !              Zip Code 85601-970
-!              
+!
 !          (b) Federal University of Paraná - UFPR
 !              Curitiba, Paraná, Brazil
 !              Caixa postal 19040
@@ -55,7 +55,7 @@ module mod_class_system_variables
    type, public :: class_system_variables
 
       character(str_size) :: sname                        !< Simulation id
-      character(str_size) :: folderin  = "./depp_input/"  !< Folder the for input files
+      character(str_size) :: folderin  = "./"             !< Folder the for input files
       character(str_size) :: folderout = "./depp_output/" !< Folder the for output files
       character(str_size) :: ifilename = "input_file.txt" !< Stores the name of the parameters input file
       character(str_size) :: absfolderin                  !< Absolute path to folderin
@@ -101,11 +101,17 @@ contains
       this%absfolderin  = trim(this%CWD) // "/" // trim(this%folderin)
 
 
-      ! Reading the name of the input file
-      call ifile%init(filename=trim(this%absfolderin)//trim(this%ifilename), field_separator='&')
-      call ifile%load()
-      call ifile%get_value(this%parfile,"parfile")
+      ! Checking the number of input parameters
+      if ( COMMAND_ARGUMENT_COUNT() /= 1 ) then
 
+            call this%logger%println("class_system_variables: wrong number of input parametersř. Stopping...")
+
+            call mod_mpi_finalize()
+
+      end if
+
+      ! Reading the name of the input file
+      call get_command_argument(1, this%parfile)
 
       ! Absolute path to parameter file
       this%absparfile = trim(this%absfolderin) // "/" // trim(this%parfile)
@@ -124,7 +130,7 @@ contains
 
 
       ! folderout for current simulation
-      this%folderout = trim(this%folderout) // trim(this%sname) // "/"
+      this%folderout = trim(this%folderout) //  "/"
 
       ! Absolute path to backup folder for current simulation
       this%absfolderbkp = trim(this%folderout) //  "backup/"

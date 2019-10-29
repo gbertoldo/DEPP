@@ -35,6 +35,6 @@
 #              Zip Code 81531-980
 #
 
-gfortran -std=f2008 -Wall -O3 -o fitness.x depp_interface.f90 Fortran2008.f90
+gfortran -std=f2008 -Wall -O3 -o fitness.x functions.f90
 
 rm *.mod

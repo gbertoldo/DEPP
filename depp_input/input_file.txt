@@ -1,2 +1,0 @@
-parameters_main.txt    & parfile &   Input file name of the parameters
-
