@@ -14,7 +14,7 @@
 !
 !    You should have received a copy of the GNU General Public License
 !    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-!    
+!
 !    Contact:
 !          Jonas Joacir Radtke (a)
 !                 E-mail: jonas.radtke@gmail.com
@@ -28,7 +28,7 @@
 !          (a) Federal University of Technology - Paraná - UTFPR
 !              Linha Santa Bárbara, s/n, Francisco Beltrão, Paraná, Brazil
 !              Zip Code 85601-970
-!              
+!
 !          (b) Federal University of Paraná - UFPR
 !              Curitiba, Paraná, Brazil
 !              Caixa postal 19040
@@ -44,6 +44,7 @@ module mod_class_p_measure_stop_condition
    use mod_class_system_variables
    use mod_class_ifile
    use mod_string
+   use mod_mpi
 
    implicit none
 
@@ -81,15 +82,26 @@ contains
       class(class_system_variables),  intent(in) :: sys_var !< System's variables
 
       ! Inner variables
-      type(class_ifile) :: ifile
+      type(class_ifile)       :: ifile
+      character(len=str_size) :: kind_of_population_measure
 
 
       ! Reading configuration file
       call ifile%init(filename=trim(sys_var%absparfile), field_separator="&")
       call ifile%load()
-      call ifile%get_value(this%kpm,  "kpm")
-      call ifile%get_value(this%ptol,"ptol")
-      call ifile%get_value(this%verbosity,"verbosity")
+      call ifile%get_value(kind_of_population_measure,       "kpm")
+      call ifile%get_value(                 this%ptol,      "ptol")
+      call ifile%get_value(            this%verbosity, "verbosity")
+
+      if ( kind_of_population_measure == "dimensional" ) then
+         this%kpm = 0
+      else if ( kind_of_population_measure == "dimensionless" ) then
+         this%kpm = 1
+      else
+         call sys_var%logger%println("class_p_measure_stop_condition: Unknown kpm model. Stopping.")
+
+         call mod_mpi_finalize()
+      end if
 
       this%stopflag = .false.
 

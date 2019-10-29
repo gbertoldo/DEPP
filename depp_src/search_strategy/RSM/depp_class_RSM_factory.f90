@@ -14,7 +14,7 @@
 !
 !    You should have received a copy of the GNU General Public License
 !    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-!    
+!
 !    Contact:
 !          Jonas Joacir Radtke (a)
 !                 E-mail: jonas.radtke@gmail.com
@@ -28,7 +28,7 @@
 !          (a) Federal University of Technology - Paraná - UTFPR
 !              Linha Santa Bárbara, s/n, Francisco Beltrão, Paraná, Brazil
 !              Zip Code 85601-970
-!              
+!
 !          (b) Federal University of Paraná - UFPR
 !              Curitiba, Paraná, Brazil
 !              Caixa postal 19040
@@ -70,11 +70,11 @@ contains
       character(len=*),                   intent(in)  :: option  !< RSM model
       class(class_abstract_RSM), pointer, intent(out) :: obj     !< RSM object
 
-      if ( trim(adjustl(option)) == "Quadratic" ) then
+      if ( trim(adjustl(option)) == "quadratic" ) then
 
          allocate(class_RSM_Quadratic_Model::obj)
 
-      else if ( trim(adjustl(option)) == "Incomplete_Quadratic" ) then
+      else if ( trim(adjustl(option)) == "incomplete_quadratic" ) then
 
          allocate(class_RSM_Incomplete_Quadratic_Model::obj)
 

@@ -91,40 +91,35 @@ module mod_class_DE_RSM
 contains
 
    !> \brief Constructor
-   subroutine init(this, sys_var, conf_file_name, search_strategy_factory)
+   subroutine init(this, sys_var, search_strategy_factory)
       implicit none
       class(class_DE_RSM)                                       :: this                    !< A reference to this object
       class(class_system_variables),                 intent(in) :: sys_var                 !< System's variables
-      character(len=*),                              intent(in) :: conf_file_name          !< Configuration file
       class(class_abstract_search_strategy_factory), intent(in) :: search_strategy_factory !< Search strategy factory
 
       ! Inner variables
-      type(class_ifile)   :: ifile1             ! Input file
-      type(class_ifile)   :: ifile2             ! Input file
-      character(str_size) :: de_conf_file_name  ! DE configuration file
-      character(str_size) :: rsm_conf_file_name ! RSM configuration file
+      type(class_ifile)   :: ifile              ! Input file
       character(str_size) :: DESSID             ! DE search strategy ID
       integer             :: np                 ! Population size
       real(8)             :: fh                 ! Hybridization fraction/Initial hybridization fraction
       real(8)             :: fhmin              ! Minimum hybridization factor
       real(8)             :: fhmax              ! Maximum hybridization factor
+      character(str_size) :: fhmodel            ! Name of the model for the dynamical calculation of the factor of hybridization
       integer             :: fhm                ! Model for the dynamical calculation of the factor of hybridization
       integer             :: nf                 ! Number of fitting points for response surface adjustment
 
 
       ! Getting parameters
-      call ifile1%init(filename=sys_var%absparfile, field_separator='&')
-      call ifile2%init(filename=conf_file_name,     field_separator='&')
+      call ifile%init(filename=sys_var%absparfile, field_separator='&')
 
-      call ifile1%load()
-      call ifile2%load()
+      call ifile%load()
 
-      call ifile1%get_value(        np,   "np")
-      call ifile2%get_value(    DESSID,   "DE-RSM-de_search_strategy")
-      call ifile2%get_value(        fh,   "DE-RSM-fh")
-      call ifile2%get_value(     fhmin,   "DE-RSM-fhmin")
-      call ifile2%get_value(     fhmax,   "DE-RSM-fhmax")
-      call ifile2%get_value(       fhm,   "DE-RSM-fhm")
+      call ifile%get_value(        np,   "np")
+      call ifile%get_value(    DESSID,   "DE-RSM-de_search_strategy")
+      call ifile%get_value(        fh,   "DE-RSM-fh")
+      call ifile%get_value(     fhmin,   "DE-RSM-fhmin")
+      call ifile%get_value(     fhmax,   "DE-RSM-fhmax")
+      call ifile%get_value(   fhmodel,   "DE-RSM-fhm")
 
       ! Creating DE search strategy
       call search_strategy_factory%create(sys_var, sys_var%absparfile, DESSID, this%de_searcher)
@@ -153,6 +148,17 @@ contains
       allocate(this%rsm_tag(np)  )
       allocate(this%trial_fit(np))
       allocate(this%curnt_fit(np))
+
+      ! Checking fh model
+      if ( trim(fhmodel) == "constant") then
+         fhm = 0
+      else if ( trim(fhmodel) == "dynamic") then
+         fhm = 1
+      else
+         call sys_var%logger%println("class_DE_RSM: Unknown fh model. Stopping.")
+
+         call mod_mpi_finalize()
+      end if
 
       ! Initializing the hybridization control object
       call this%hybrid_control%init(sys_var, np, nf, fh, fhmin, fhmax, fhm)

@@ -10,12 +10,21 @@ All data must follow the input pattern: "value & variable & description", where 
                                            0 &              verbosity  &  Defines log verbosity level (0=min, 1=med, 2=max)
                                            0 &            save_backup  &  Saves backup (0=no, 1=yes: increases CPU time)
                                            0 &                 reload  &  Upload backup data and continue computation (0=no; 1=yes)
-                  $PWD/interface/Fortran2008 &                   fdir  &  Name of working directory for fitness calculation
+                                        $PWD &                   fdir  &  Name of working directory for fitness calculation
                                    fitness.x &                   ffit  &  Name of executable for fitness calculation
                                            2 &                     nu  &  Number of unknowns
                                           20 &                     np  &  Size of population (recommended 10*nu)
-                                   DE/RAND/1 &   search_strategy_conf  &  Search strategy configuration 
+                                      DE-RSM &        search_strategy  &  Search strategy model 
                               uniform_random &  pop_initializer_model  &  Population initializer model
+
+Search strategy models: 
+-----------------------
+                         - DE/RAND/1: pure DE search strategy
+                         - DE-RSM: DE-RSM hybridized search strategy model   
+
+Population initializer models:
+------------------------------
+                         - uniform_random: individuals of initial population are randomly generated                              
 
 ===========================================================================================================================================
 
@@ -23,18 +32,22 @@ All data must follow the input pattern: "value & variable & description", where 
 
 -------------------------------------------------------------------------------------------------------------------------------------------
 
-Stop condition is a composite of the following models. Choose a composition of models and set the corresponding parameters. 
-
+Stop condition is a composite of the following models:
+                         - max_generations: stops if number of generations exceeds ng (set ng bellow)
+                         - no_improvement: stops if the best fitness is not improved within GNoAcc generations (set GNoAcc bellow)
+                         - p_measure: stops if p-measure of Feoktistov is satisfied within tolerance ptol (set ptol bellow)
+Choose a composition of models and set the corresponding parameters.
+                         
   max_generations, no_improvement, p_measure & composite_stop_condition &  List of stop condition models
                                          200 &                      ng  &  Maximum number of generations (Model: max_generations)
                                           40 &                  GNoAcc  &  Max. num. of gen. before stopping if no improvement was found (Model: no_improvement)
-                                           2 &                     kpm  &  Kind of population convergence measure (See options bellow) (Model: p_measure)
+                               dimensionless &                     kpm  &  Kind of population convergence measure (See options bellow) (Model: p_measure)
                                     0.0005d0 &                    ptol  &  Tolerance for the population convergence measure (Model: p_measure)
 
 Kind of population convergence measure (kpm):
-
-1 - Population convergence measure of Feoktistov using dimensional variables
-2 - Population convergence measure of Feoktistov using dimensionless variables
+---------------------------------------------
+                         - dimensional:   population convergence measure of Feoktistov using dimensional variables
+                         - dimensionless: population convergence measure of Feoktistov using dimensionless variables
 
 ===========================================================================================================================================
 
@@ -55,32 +68,26 @@ each component separated by comma, space or tab.
                                               
 -------------------------------------------------------------------------------------------------------------------------------------------
 
-                 DE/RAND/1 & DE-RSM-de_search_strategy  &  DE search strategy configuration
-                    0.35d0 &                 DE-RSM-fh  &  Initial fraction of hybridization
-                    0.10d0 &              DE-RSM-fhmin  &  Minimum fraction of hybridization
-                    0.90d0 &              DE-RSM-fhmax  &  Maximum fraction of hybridization
-                         1 &                DE-RSM-fhm  &  Model for the dynamical calculation of the factor of hybridization
-                 Quadratic &              RSM-RS_model  &  Response Surface model
-                    -0.5d0 &                  RSM-crsh  &  Crossover probability of the hybridized model (disable if crsh < 0)
-                         1 &                    RSM-kw  &  Kind of weighting function for RSM fitting (1=uniform, 2=exponential)
-                     2.0d0 &                   RSM-fnb  &  Multiple of the minimum number of points for RSM fitting
-                  0.0001d0 &                 RSM-netol  &  Tolerance for distance when selecting neighbors points for RSM adjusting
+                 DE/RAND/1 &    DE-RSM-de_search_strategy  &  DE search strategy configuration
+                    0.35d0 &    DE-RSM-fh                  &  Initial fraction of hybridization
+                    0.10d0 &    DE-RSM-fhmin               &  Minimum fraction of hybridization
+                    0.90d0 &    DE-RSM-fhmax               &  Maximum fraction of hybridization
+                   dynamic &    DE-RSM-fhm                 &  Model for calculation of the factor of hybridization (see options bellow)
+                 quadratic &       RSM-RS_model            &  Response Surface model (see options bellow)
+                    -0.5d0 &       RSM-crsh                &  Crossover probability of the hybridized model (disabled if crsh < 0)
+                         1 &       RSM-kw                  &  Kind of weighting function for RSM fitting (1=uniform, 2=exponential)
+                     2.0d0 &       RSM-fnb                 &  Multiple of the minimum number of points for RSM fitting
+                  0.0001d0 &       RSM-netol               &  Tolerance for distance when selecting neighbors points for RSM adjusting
 
-RS-Model:
----------
-   
-Incomplete_Quadratic - Response Surface Methodology. Selects the nf-1 individuals closest to the selected individual. Fits an incomplete
-                       quadratic model and returns the maximizer of this model.
-
-Quadratic            - Response Surface Methodology. Selects the nf-1 individuals closest to the selected individual. Fits a complete
-                       quadratic model and returns the maximizer of this model.
+Response surface model (RS-Model):
+----------------------------------
+                         - quadratic: multidimentional quadratic polynomial
+                         - incomplete_quadratic: like quadratic model, but neglecting cross terms
 
 Model for calculation of the factor of hybridization (fhm):
 -----------------------------------------------------------
-
-0 - fh = constant
-
-1 - fh = probability of success of the previous application of RSM
+                         - constant: fraction of hybridization is constant during optimization
+                         - dynamic: fraction of hybridization is dynamically changed during optimization
 
 ===========================================================================================================================================
 
@@ -88,8 +95,8 @@ Model for calculation of the factor of hybridization (fhm):
                                               
 -------------------------------------------------------------------------------------------------------------------------------------------
 
-                    0.85d0 &      DE/RAND/1-dif    &  Differentiation constant of DE/RAND/1 strategy (recommended 0.85)
-                     0.5d0 &      DE/RAND/1-crs    &  Crossover probability of DE/RAND/1 strategy (recommended 0.5)
+                    0.85d0 &      DE/RAND/1-dif    &  Differentiation constant of DE/RAND/1 search strategy (recommended 0.85)
+                     0.5d0 &      DE/RAND/1-crs    &  Crossover probability of DE/RAND/1 search strategy (recommended 0.5)
 
 ===========================================================================================================================================
 

@@ -88,11 +88,10 @@ module mod_class_RSM_search_strategy
 contains
 
    !> \brief Constructor
-   subroutine init(this, sys_var, conf_file_name)
+   subroutine init(this, sys_var)
       implicit none
       class(class_RSM_search_strategy)             :: this           !< A reference to this object
       class(class_system_variables),   intent(in)  :: sys_var        !< System's variables
-      character(len=*),                intent(in)  :: conf_file_name !< Name of the configuration file
 
       ! Inner variables
 
@@ -100,27 +99,23 @@ contains
       integer                 :: ng          ! Maximum number of generations
       real(8)                 :: fnb         ! Multiple of the minimum number of points for RSM fitting
       character(str_size)     :: RS_model    ! Response surface model
-      type(class_ifile)       :: ifile1      ! Input file 1
-      type(class_ifile)       :: ifile2      ! Input file 2
+      type(class_ifile)       :: ifile       ! Input file
       type(class_RSM_factory) :: RSM_factory ! Response surface factory
 
 
 
       ! Reading input files
 
-      call ifile1%init(filename=trim(sys_var%absfolderin)//trim(sys_var%parfile), field_separator="&")
-      call ifile1%load()
-      call ifile1%get_value(nu,"nu")         ! Number of unknowns
-      call ifile1%get_value(this%np,"np")    ! Size of the population
-      call ifile1%get_value(ng,"ng")         ! Maximum number of generations
-
-      call ifile2%init(filename=conf_file_name, field_separator="&")
-      call ifile2%load()
-      call ifile2%get_value( this%crsh,     "RSM-crsh")  ! Crossing over parameter
-      call ifile2%get_value(   this%kw,       "RSM-kw")  ! Kind of weight
-      call ifile2%get_value(  RS_model, "RSM-RS_model")  ! Response Surface model
-      call ifile2%get_value(       fnb,      "RSM-fnb")  ! Multiple of the minimum number of points for RSM fitting
-      call ifile2%get_value(this%netol,    "RSM-netol")  ! Tolerance for selecting neighbor points
+      call ifile%init(filename=trim(sys_var%absfolderin)//trim(sys_var%parfile), field_separator="&")
+      call ifile%load()
+      call ifile%get_value(        nu,           "nu")  ! Number of unknowns
+      call ifile%get_value(   this%np,           "np")  ! Size of the population
+      call ifile%get_value(        ng,           "ng")  ! Maximum number of generations
+      call ifile%get_value( this%crsh,     "RSM-crsh")  ! Crossing over parameter
+      call ifile%get_value(   this%kw,       "RSM-kw")  ! Kind of weight
+      call ifile%get_value(  RS_model, "RSM-RS_model")  ! Response Surface model
+      call ifile%get_value(       fnb,      "RSM-fnb")  ! Multiple of the minimum number of points for RSM fitting
+      call ifile%get_value(this%netol,    "RSM-netol")  ! Tolerance for selecting neighbor points
 
 
       ! Creating response surface model

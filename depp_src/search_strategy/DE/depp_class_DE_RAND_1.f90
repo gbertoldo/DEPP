@@ -77,26 +77,22 @@ module mod_class_DE_RAND_1
 contains
 
    !> \brief Constructor
-   subroutine init(this, sys_var, conf_file_name)
+   subroutine init(this, sys_var)
       implicit none
       class(class_DE_RAND_1)                    :: this           !< A reference to this object
       class(class_system_variables), intent(in) :: sys_var        !< System's variables
-      character(len=*),              intent(in) :: conf_file_name !< Configuration file
 
       ! Inner variables
-      type(class_ifile)   :: ifile1
-      type(class_ifile)   :: ifile2
+      type(class_ifile)   :: ifile
 
       ! Getting parameters
-      call ifile1%init(filename=sys_var%absparfile, field_separator='&')
-      call ifile2%init(filename=conf_file_name,     field_separator='&')
+      call ifile%init(filename=sys_var%absparfile, field_separator='&')
 
-      call ifile1%load()
-      call ifile2%load()
+      call ifile%load()
 
-      call ifile1%get_value(this%np, "np")
-      call ifile2%get_value(this%dif,"DE/RAND/1-dif")
-      call ifile2%get_value(this%crs,"DE/RAND/1-crs")
+      call ifile%get_value(this%np, "np")
+      call ifile%get_value(this%dif,"DE/RAND/1-dif")
+      call ifile%get_value(this%crs,"DE/RAND/1-crs")
 
    end subroutine
 

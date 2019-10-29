@@ -101,15 +101,15 @@ contains
 
             type is ( class_RSM_search_strategy )
 
-               call searcher%init(sys_var, conf_file_name)
+               call searcher%init(sys_var)
 
             type is ( class_DE_RSM )
 
-               call searcher%init(sys_var, conf_file_name, this)
+               call searcher%init(sys_var, this)
 
             type is ( class_DE_RAND_1 )
 
-               call searcher%init(sys_var, conf_file_name)
+               call searcher%init(sys_var)
 
          end select
 
