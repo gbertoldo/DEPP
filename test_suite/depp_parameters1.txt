@@ -6,14 +6,14 @@ All data must follow the input pattern: "value & variable & description", where 
 
 -------------------------------------------------------------------------------------------------------------------------------------------
 
-                                  function02 &                  sname  &  Simulation name
+                                         SIM &                  sname  &  Simulation name
                                            0 &              verbosity  &  Defines log verbosity level (0=min, 1=med, 2=max)
                                            0 &            save_backup  &  Saves backup (0=no, 1=yes: increases CPU time)
                                            0 &                 reload  &  Upload backup data and continue computation (0=no; 1=yes)
                                         $PWD &                   fdir  &  Name of working directory for fitness calculation
                                    fitness.x &                   ffit  &  Name of executable for fitness calculation
-                                           4 &                     nu  &  Number of unknowns
-                                          40 &                     np  &  Size of population (recommended 10*nu)
+                                           2 &                     nu  &  Number of unknowns
+                                          20 &                     np  &  Size of population (recommended 10*nu)
                                    DE/RAND/1 &        search_strategy  &  Search strategy model 
                               uniform_random &  pop_initializer_model  &  Population initializer model
 
@@ -39,8 +39,8 @@ Stop condition is a composite of the following models:
 Choose a composition of models and set the corresponding parameters.
                          
   max_generations, no_improvement, p_measure & composite_stop_condition &  List of stop condition models
-                                       20000 &                      ng  &  Maximum number of generations (Model: max_generations)
-                                         500 &                  GNoAcc  &  Max. num. of gen. before stopping if no improvement was found (Model: no_improvement)
+                                         200 &                      ng  &  Maximum number of generations (Model: max_generations)
+                                          40 &                  GNoAcc  &  Max. num. of gen. before stopping if no improvement was found (Model: no_improvement)
                                dimensionless &                     kpm  &  Kind of population convergence measure (See options bellow) (Model: p_measure)
                                     0.0005d0 &                    ptol  &  Tolerance for the population convergence measure (Model: p_measure)
 

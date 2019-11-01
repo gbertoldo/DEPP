@@ -89,6 +89,7 @@ module mod_class_ifile
       procedure, public,  pass :: init                             !< Constructor
       procedure, public,  pass :: clear                            !< Clears allocated memory
       procedure, public,  pass :: load                             !< Loads input file data to ifile object
+      procedure, public,  pass :: set_value                        !< Sets the value of 'varname'
       generic,   public        :: get_value => get_int_value    &  !< Gets the value of 'varname' (overload function)
          ,                                     get_real8_value  &
          ,                                     get_string_value
@@ -341,6 +342,35 @@ contains
          end if
 
       end do
+
+   end subroutine
+
+
+   !> \brief Sets the value of varname
+   subroutine set_value(this,value,varname)
+      implicit none
+      class(class_ifile)            :: this    !< A reference to this object
+      character(len=*), intent(in)  :: value   !< Value of varname
+      character(len=*), intent(in)  :: varname !< Variable name
+
+      ! Inner variables
+      integer :: i
+
+      do i = 1, size(this%data)
+
+         if (trim(adjustl(varname))==trim(adjustl(this%data(i)%varname))) then
+
+            this%data(i)%value = value
+
+            return
+
+         end if
+
+      end do
+
+      write(*,*) "Variable ", trim(adjustl(varname)), " not found. Stopping."
+
+      call mod_mpi_finalize()
 
    end subroutine
 

@@ -37,4 +37,32 @@
 
 #!/bin/bash
 
-mpirun -np 4 ./depp.x
+echo "Generating the executable that will be used to check the code..."
+echo "================================================================"
+echo
+gfortran code_verification_mpi.f90 ../depp_src/util/depp_string.f90 ../depp_src/util/depp_class_ifile.f90 code_verification.f90 -o code_verification.x
+rm *.mod > /dev/null
+
+cd ../examples/TestFunctions/
+./compile.sh
+cd - > /dev/null
+cp ../examples/TestFunctions/fitness.x ./
+
+
+echo
+echo "Performing code verification of pure DE algorithm..."
+echo "===================================================="
+echo
+./code_verification.x depp_parameters1.txt
+
+
+echo
+echo "Performing code verification of DE-RSM algorithm..."
+echo "==================================================="
+echo
+./code_verification.x depp_parameters2.txt
+
+
+echo
+echo "Cleanning directory..."
+rm -rf  depp_output depp_par.txt fitness.x code_verification.x 
