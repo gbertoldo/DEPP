@@ -40,7 +40,7 @@
 echo "Generating the executable that will be used to check the code..."
 echo "================================================================"
 echo
-gfortran code_verification_mpi.f90 ../depp_src/util/depp_string.f90 ../depp_src/util/depp_class_ifile.f90 code_verification.f90 -o code_verification.x
+gfortran  -std=f2008 -Wall -O3  test_mpi.f90 ../depp_src/util/depp_string.f90 ../depp_src/util/depp_class_ifile.f90 test.f90 -o test.x
 rm *.mod > /dev/null
 
 cd ../examples/TestFunctions/
@@ -53,16 +53,16 @@ echo
 echo "Performing code verification of pure DE algorithm..."
 echo "===================================================="
 echo
-./code_verification.x depp_parameters1.txt
+./test.x depp_parameters1.txt
 
 
 echo
 echo "Performing code verification of DE-RSM algorithm..."
 echo "==================================================="
 echo
-./code_verification.x depp_parameters2.txt
+./test.x depp_parameters2.txt
 
 
 echo
 echo "Cleanning directory..."
-rm -rf  depp_output depp_par.txt fitness.x code_verification.x 
+rm -rf  depp_output depp_par.txt fitness.x test.x 
