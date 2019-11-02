@@ -26,3 +26,5 @@ interface/Functions/fitness\.x
 interface/Functions/compile\.sh~
 
 help\.txt
+
+bin/depp.x

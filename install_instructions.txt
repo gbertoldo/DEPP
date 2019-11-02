@@ -1,0 +1,26 @@
+In order to install DEPP, you must to compile DEPP's source code, that is in 'src' directory.
+There is a Bash script named 'compile.sh' within src. 
+
+Enter src/ directory 
+
+cd src
+
+Compile the source code by running the 'compile.sh' script
+
+sh compile.sh
+
+This script generates a 'depp.x' executable and moves it to ../bin/ directory. To access depp.x everywhere, add the path to DEPP's directory to your system's PATH variable. 
+
+First enter bin/ directory
+
+cd ../bin
+
+and then type
+
+echo $PWD
+
+that will return the full path to the bin directory. Copy this path to your home direct
+
+export PATH=$PATH:$PWD
+
+$PWD returns the full path to the current directory. 

@@ -1,4 +1,0 @@
-var namespacemod__class__no__improvement__stop__condition =
-[
-    [ "class_no_improvement_stop_condition", "d6/d41/structmod__class__no__improvement__stop__condition_1_1class__no__improvement__stop__condition.html", "d6/d41/structmod__class__no__improvement__stop__condition_1_1class__no__improvement__stop__condition" ]
-];

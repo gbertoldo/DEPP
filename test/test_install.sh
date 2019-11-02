@@ -37,32 +37,30 @@
 
 #!/bin/bash
 
-echo "Generating the executable that will be used to check the code..."
-echo "================================================================"
-echo
-gfortran  -std=f2008 -Wall -O3  test_mpi.f90 ../src/util/depp_string.f90 ../src/util/depp_class_ifile.f90 test.f90 -o test.x
-rm *.mod > /dev/null
-
-cd ../examples/TestFunctions/
+echo "Generating the executable that will be used to check installation..."
+cd ../examples/Fortran2008/
 sh ./compile.sh
 cd - > /dev/null
-cp ../examples/TestFunctions/fitness.x ./
+mv ../examples/Fortran2008/fitness.x ./
 
 
-echo
-echo "Performing code verification of pure DE algorithm..."
-echo "===================================================="
-echo
-./test.x depp_parameters1.txt
+echo "Trying to run DEPP..."
+mpirun -np 2 depp.x depp_parameters1.txt > /dev/null
 
+FNAME=$(ls ./depp_output/*logfile.txt)
 
-echo
-echo "Performing code verification of DE-RSM algorithm..."
-echo "==================================================="
-echo
-./test.x depp_parameters2.txt
+RESULT=$(cat $FNAME | grep "fittest: The best fitness found")
 
+if [ "$RESULT" != "" ]
+then
+   echo
+   echo "DEPP has been successfully installed!"
+   echo
+else
+   echo
+   echo "DEPP installation: FAILURE!"
+   echo
+fi
 
-echo
 echo "Cleanning directory..."
-rm -rf  depp_output depp_par.txt fitness.x test.x 
+rm -rf  depp_output fitness.x 
