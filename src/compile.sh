@@ -35,6 +35,8 @@
 #              Zip Code 81531-980
 #
 
+#!/bin/bash
+
 flist="
 depp_mpi.f90 
 ./util/depp_gauss_solver.f90

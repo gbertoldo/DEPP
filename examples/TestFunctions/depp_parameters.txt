@@ -12,8 +12,8 @@ All data must follow the input pattern: "value & variable & description", where 
                                            0 &                 reload  &  Upload backup data and continue computation (0=no; 1=yes)
                                         $PWD &                   fdir  &  Name of working directory for fitness calculation
                                    fitness.x &                   ffit  &  Name of executable for fitness calculation
-                                           4 &                     nu  &  Number of unknowns
-                                          40 &                     np  &  Size of population (recommended 10*nu)
+                                           2 &                     nu  &  Number of unknowns
+                                          20 &                     np  &  Size of population (recommended 10*nu)
                                    DE/RAND/1 &        search_strategy  &  Search strategy model 
                               uniform_random &  pop_initializer_model  &  Population initializer model
 

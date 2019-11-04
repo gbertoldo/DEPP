@@ -40,13 +40,13 @@
 echo "Generating the executable that will be used to check the code..."
 echo "================================================================"
 echo
-gfortran  -std=f2008 -Wall -O3  test_mpi.f90 ../src/util/depp_string.f90 ../src/util/depp_class_ifile.f90 test.f90 -o test.x
+gfortran  -std=f2008 -Wall -O3  verification_test_mpi.f90 ../src/util/depp_string.f90 ../src/util/depp_class_ifile.f90 verification_test.f90 -o test.x
 rm *.mod > /dev/null
 
 cd ../examples/TestFunctions/
 sh ./compile.sh
 cd - > /dev/null
-cp ../examples/TestFunctions/fitness.x ./
+mv ../examples/TestFunctions/fitness.x ./
 
 
 echo

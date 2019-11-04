@@ -35,6 +35,8 @@
 #              Zip Code 81531-980
 #
 
+#!/bin/bash
+
 gfortran -std=f2008 -Wall -O3 -o fitness.x Fortran2008.f90
 
 rm *.mod

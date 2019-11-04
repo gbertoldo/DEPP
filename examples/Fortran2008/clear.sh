@@ -37,5 +37,4 @@
 
 #!/bin/bash
 
-g++ -std=c++11 ./main.cpp -o fitness.x
-
+rm -rf fitness.x depp_output > /dev/null

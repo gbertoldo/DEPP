@@ -37,90 +37,150 @@
 
 #!/bin/bash
 
-stopflag=false
-
-DEPENDENCIES="mpirun mpif90 g++ gfortran"
-
-echo "Checking dependencies..."
-
-for prog in $DEPENDENCIES
-do
-
-   result=$(which $prog)
-   
-   if [ "$result" == "" ]
-   then
-      echo "    $prog was not found!"
-      stopflag=true
-   else
-      echo "    $prog was found!"
-   fi
-
-done
-
-if [ "$stopflag" == "true" ] 
+printf "Preparing to run ../example/Fortran2008..."
+if ! cd ../examples/Fortran2008/ > /dev/null
 then
-   echo "Aborting..."
+   printf "fail! Stopping...\n"
    exit
-else
-   echo "All dependencies satisfied!"
 fi
 
 
 
-printf "Getting root folder path...\n"
-DEPPROOT=$PWD
-
-
-
-printf "Entering source code directory... "
-if ! cd $DEPPROOT/src > /dev/null 
+if ! bash ./compile.sh > /dev/null
 then
    printf "fail! Stopping...\n"
    exit
 else
-   printf "ok! \n"
+   printf " ok! \n"
 fi
 
 
 
-printf "Compiling source code... "
-if ! sh ./compile.sh > /dev/null 
+printf "Running ../example/Fortran2008..."
+if ! mpirun -np 2 depp.x depp_parameters.txt > /dev/null
 then
    printf "fail! Stopping...\n"
    exit
 else
-   printf "ok! \n"
+   printf " ok! \n"
+fi
+
+
+FNAME=$(ls ./depp_output/*logfile.txt)
+
+
+RESULT=$(cat $FNAME | grep "fittest: The best fitness found")
+
+if [ "$RESULT" != "" ]
+then
+   echo
+   echo "SUCCESS!"
+   echo
+else
+   echo
+   echo "FAILURE!"
+   echo
+   exit
+fi
+
+
+bash clear.sh
+
+printf "Preparing to run ../example/C++..."
+if ! cd ../C++/ > /dev/null
+then
+   printf "fail! Stopping...\n"
+   exit
 fi
 
 
 
-printf "Adding DEPP's path to system's PATH variable..."
-PATHTODEPP=$(echo 'export PATH=$PATH:"'$DEPPROOT/bin'"')
-export PATH=$PATH:'"'$DEPPROOT/bin'"'
-echo $PATHTODEPP >> $HOME/.bashrc
-source ~/.bashrc
-
-
-
-result=$(which depp.x)
-if [ "$result" == "" ]
+if ! bash ./compile.sh > /dev/null
 then
    printf "fail! Stopping...\n"
    exit
 else
-   printf "ok! \n"
+   printf " ok! \n"
 fi
 
 
 
-printf "Returning to root directory... "
-if ! cd $DEPPROOT > /dev/null 
+printf "Running ../example/C++..."
+if ! mpirun -np 2 depp.x depp_parameters.txt > /dev/null
 then
    printf "fail! Stopping...\n"
    exit
 else
-   printf "ok! \n"
+   printf " ok! \n"
 fi
 
 
+FNAME=$(ls ./depp_output/*logfile.txt)
+
+
+RESULT=$(cat $FNAME | grep "fittest: The best fitness found")
+
+if [ "$RESULT" != "" ]
+then
+   echo
+   echo "SUCCESS!"
+   echo
+else
+   echo
+   echo "FAILURE!"
+   echo
+   exit
+fi
+
+bash clear.sh
+
+printf "Preparing to run ../example/TestFunctions..."
+if ! cd ../TestFunctions/ > /dev/null
+then
+   printf "fail! Stopping...\n"
+   exit
+fi
+
+
+
+if ! bash ./compile.sh > /dev/null
+then
+   printf "fail! Stopping...\n"
+   exit
+else
+   printf " ok! \n"
+fi
+
+
+
+printf "Running ../example/TestFunctions..."
+if ! mpirun -np 2 depp.x depp_parameters.txt > /dev/null
+then
+   printf "fail! Stopping...\n"
+   exit
+else
+   printf " ok! \n"
+fi
+
+
+FNAME=$(ls ./depp_output/*logfile.txt)
+
+
+RESULT=$(cat $FNAME | grep "fittest: The best fitness found")
+
+if [ "$RESULT" != "" ]
+then
+   echo
+   echo "SUCCESS!"
+   echo
+else
+   echo
+   echo "FAILURE!"
+   echo
+   exit
+fi
+
+bash clear.sh
+
+
+cd ../../test

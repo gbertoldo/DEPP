@@ -37,30 +37,4 @@
 
 #!/bin/bash
 
-echo "Generating the executable that will be used to check installation..."
-cd ../examples/Fortran2008/
-sh ./compile.sh
-cd - > /dev/null
-mv ../examples/Fortran2008/fitness.x ./
-
-
-echo "Trying to run DEPP..."
-mpirun -np 2 depp.x depp_parameters1.txt > /dev/null
-
-FNAME=$(ls ./depp_output/*logfile.txt)
-
-RESULT=$(cat $FNAME | grep "fittest: The best fitness found")
-
-if [ "$RESULT" != "" ]
-then
-   echo
-   echo "DEPP has been successfully installed!"
-   echo
-else
-   echo
-   echo "DEPP installation: FAILURE!"
-   echo
-fi
-
-echo "Cleanning directory..."
-rm -rf  depp_output fitness.x 
+rm -rf fitness.x depp_output > /dev/null
