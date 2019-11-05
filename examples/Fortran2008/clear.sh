@@ -37,4 +37,4 @@
 
 #!/bin/bash
 
-rm -rf fitness.x depp_output > /dev/null
+rm -rf fitness.x depp_output *.mod > /dev/null

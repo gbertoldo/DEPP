@@ -250,13 +250,13 @@ contains
           case (1)
 
              write(caux,"(A, I7, A, I7, A)") &
-                "   --->  Number of generations without improving best fitness: ", &
+                "   --->  Number of generations without improving the best fitness: ", &
                 this%nwi, ". Tolerance: ", this%GNoAcc, "."
 
           case (2)
 
              write(caux,"(A, I7, A, I7, A)") &
-                "   --->  Number of generations without improving best fitness: ", &
+                "   --->  Number of generations without improving the best fitness: ", &
                 this%nwi, ". Tolerance: ", this%GNoAcc, "."
 
           case default

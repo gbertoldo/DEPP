@@ -10,7 +10,7 @@ All data must follow the input pattern: "value & variable & description", where 
                                            0 &              verbosity  &  Defines log verbosity level (0=min, 1=med, 2=max)
                                            0 &            save_backup  &  Saves backup (0=no, 1=yes: increases CPU time)
                                            0 &                 reload  &  Upload backup data and continue computation (0=no; 1=yes)
-                                        $PWD &                   fdir  &  Name of working directory for fitness calculation
+                                        $PWD &                   fdir  &  Name of the working directory for fitness calculation
                                    fitness.x &                   ffit  &  Name of executable for fitness calculation
                                            2 &                     nu  &  Number of unknowns
                                           20 &                     np  &  Size of population (recommended 10*nu)
@@ -24,7 +24,7 @@ Search strategy models:
 
 Population initializer models:
 ------------------------------
-                         - uniform_random: individuals of initial population are randomly generated                              
+                         - uniform_random: individuals of the initial population are randomly generated                              
 
 ===========================================================================================================================================
 
@@ -33,15 +33,15 @@ Population initializer models:
 -------------------------------------------------------------------------------------------------------------------------------------------
 
 Stop condition is a composite of the following models:
-                         - max_generations: stops if number of generations exceeds ng (set ng bellow)
-                         - no_improvement: stops if the best fitness is not improved within GNoAcc generations (set GNoAcc bellow)
-                         - p_measure: stops if p-measure of Feoktistov is satisfied within tolerance ptol (set ptol bellow)
+                         - max_generations: stops if the number of generations exceeds ng (set ng below)
+                         - no_improvement: stops if the best fitness is not improved within GNoAcc generations (set GNoAcc below)
+                         - p_measure: stops if p-measure of Feoktistov is satisfied within tolerance ptol (set ptol below)
 Choose a composition of models and set the corresponding parameters.
                          
   max_generations, no_improvement, p_measure & composite_stop_condition &  List of stop condition models
                                          200 &                      ng  &  Maximum number of generations (Model: max_generations)
                                           40 &                  GNoAcc  &  Max. num. of gen. before stopping if no improvement was found (Model: no_improvement)
-                               dimensionless &                     kpm  &  Kind of population convergence measure (See options bellow) (Model: p_measure)
+                               dimensionless &                     kpm  &  Kind of population convergence measure (See options below) (Model: p_measure)
                                     0.0005d0 &                    ptol  &  Tolerance for the population convergence measure (Model: p_measure)
 
 Kind of population convergence measure (kpm):
@@ -58,8 +58,8 @@ Kind of population convergence measure (kpm):
 Tip: if all components have the same value, just type one value, i.e., it is not necessary to repeat all components. Otherwise, type
 each component separated by comma, space or tab.
 
-                                     -500.d0 &             lower_bound  &  Components of the lower bound vector.
-                                      500.d0 &             upper_bound  &  Components of the upper bound vector.
+                                     -5.12d0 &             lower_bound  &  Components of the lower bound vector.
+                                      5.12d0 &             upper_bound  &  Components of the upper bound vector.
 
 
 ===========================================================================================================================================
@@ -72,8 +72,8 @@ each component separated by comma, space or tab.
                     0.35d0 &    DE-RSM-fh                  &  Initial fraction of hybridization
                     0.10d0 &    DE-RSM-fhmin               &  Minimum fraction of hybridization
                     0.90d0 &    DE-RSM-fhmax               &  Maximum fraction of hybridization
-                   dynamic &    DE-RSM-fhm                 &  Model for calculation of the factor of hybridization (see options bellow)
-                 quadratic &       RSM-RS_model            &  Response Surface model (see options bellow)
+                   dynamic &    DE-RSM-fhm                 &  Model for calculation of the factor of hybridization (see options below)
+                 quadratic &       RSM-RS_model            &  Response Surface model (see options below)
                     -0.5d0 &       RSM-crsh                &  Crossover probability of the hybridized model (disabled if crsh < 0)
                          1 &       RSM-kw                  &  Kind of weighting function for RSM fitting (1=uniform, 2=exponential)
                      2.0d0 &       RSM-fnb                 &  Multiple of the minimum number of points for RSM fitting
@@ -81,7 +81,7 @@ each component separated by comma, space or tab.
 
 Response surface model (RS-Model):
 ----------------------------------
-                         - quadratic: multidimentional quadratic polynomial
+                         - quadratic: multidimensional quadratic polynomial
                          - incomplete_quadratic: like quadratic model, but neglecting cross terms
 
 Model for calculation of the factor of hybridization (fhm):
