@@ -26,13 +26,13 @@ bibliography: paper.bib
 
 # Summary
 
-Optimization is a mathematical problem often found in science and engineering. Currently, however, there is no general method to face this problem. Solutions are generally addressed by two approaches, both iterative: (a) quasi-Newton methods [@Griva:2009] and (b) heuristic methods [@Coley:1999; @Feoktistov:2006]. Each one has advantages depending on the problem to be optimized. Quasi-Newton methods, in general, converge faster then heuristic methods, provided the function to be optimized (the objective function) is smooth. Heuristic methods, on the other hand, are more appropriate to deal with noisy objective functions, to handle failures in the calculation of the objective function and are less susceptible to be retained in local optimum than quasi-Newton methods. 
+Optimization is a mathematical problem often found in science and engineering. Currently, however, there is no general method to face this problem. Solutions are generally addressed by two approaches, both iterative: (a) quasi-Newton methods [@Griva:2009] and (b) heuristic methods [@Coley:1999; @Feoktistov:2006]. Each one has advantages depending on the problem to be optimized. Quasi-Newton methods, in general, converge faster then heuristic methods provided the function to be optimized (the objective function) is smooth. Heuristic methods, on the other hand, are more appropriate to deal with noisy objective functions, to handle failures in the calculation of the objective function and are less susceptible to be retained in local optimum than quasi-Newton methods. 
 
 Among the heuristic methods, Differential Evolution (DE)[@Storn:1997; @Price:2005] had emerged as a simple and efficient method for finding the global maximum. This method is based on the principles of biological evolution.
 
 To combine the robustness of heuristic methods with the high convergence speed of quasi-Newton methods, Loris Vincenzi and Marco Savoia [@Vincenzi:2015] proposed coupling Differential Evolution heuristic with Response Surfaces [@Khuri:1996; @Myers:2009]. Fitting Response Surfaces during optimization and finding their optima mimics quasi-Newton methods. The authors showed that this approach reduced significantly the effort to solve some problems within a given tolerance (in general, more than 50% compared to the original heuristic method). 
 
-Based on the paper of Loris Vincenzi and Marco Savoia, but applying a different algorithm, a software called ``DEPP``, an acronym for Differential Evolution Parallel Program, was elaborated. ``DEPP`` source code is written in Fortran 2008 standard[@Brainerd:2015], it is based on the object-oriented paradigm and it includes MPI paralellization[@Tennessee:2009]. The main algorithm was elaborated to simplify the development and extension of the code, relying on abstract classes and polymorphism. Following this idea, design patterns [@Freeman:2004] were also applied. Object instances are generated through the Factory Design Pattern and Adapter Design Pattern was applied to encapsulate MPI commands, for instance. In this way, users may implement new optimization methods without changing the main algorithm. 
+Based on the paper of Loris Vincenzi and Marco Savoia, but applying a different algorithm, a software called ``DEPP``, an acronym for Differential Evolution Parallel Program, was elaborated. ``DEPP`` source code is written following Fortran 2008 standard[@Brainerd:2015], it is based on the object-oriented paradigm and it includes MPI paralellization[@Tennessee:2009]. The main algorithm was elaborated to simplify the development and extension of the code, relying on abstract classes and polymorphism. Following this idea, design patterns [@Freeman:2004] were also applied. Object instances are generated through the Factory Design Pattern and Adapter Design Pattern was applied to encapsulate MPI commands, for instance. In this way, users may implement new optimization methods without changing the main algorithm. 
 
 Due to its supporting theory, ``DEPP`` is well suited to address optimization problems of multimodal, noisy, poor-precision-calculated and failure-susceptible objective functions, taking advantage of acceleration provided by parallelization and hybridization models, like Differential Evolution-Response Surface coupling. 
 
@@ -45,25 +45,38 @@ Software description {#sec:description}
 Software Architecture {#sec:arch}
 ---------------------
 
-DEPP is written in FORTRAN 2008 standard language[@Brainerd:2015] with the Message Passing Interface (MPI) directives[@Tennessee:2009] and takes
-advantage of the Object-Oriented Paradigm.
-
-The folder structure of DEPP is shown in Figure 1. The directory *depp\_input* contains the input (text) files that define
-the control parameters of the optimization. Results of DEPP are saved into *depp\_output* directory. The source code is within *depp\_src* directory. This directory also contains the Bash[@Ramey:2016] script *compile.sh*, which compiles DEPP source code and generates the executable *depp.x* in the root of the file structure.  The interface between DEPP and the external program (EP), which calculates the objective function, is defined in the *interface* directory. Finally, the script *run.sh* runs DEPP using MPI.
-
-![Folder structure of DEPP.](folder_structure.png){width="50.00000%"}
-
+DEPP source code was written following the FORTRAN 2008 standard language[@Brainerd:2015], it uses the Message Passing Interface (MPI) directives[@Tennessee:2009] for parallel processing and takes advantage of the Object-Oriented Paradigm.
 
 Thanks to Object-Oriented Programming, the source code was designed to simplify the implementation of new methods. The algorithm works on
 abstract classes separated, basically, as (i) population initializers, (ii) search strategies, (iii) fitness calculation and (iv) stop conditions. The concrete classes are generated using the Factory Design Pattern[@Freeman:2004]. All MPI commands are encapsulated into proper classes, following the logic of the Adapter Design Pattern. In this way, users interested in the implementation of new methods will not concern about MPI details.
 
-Interfacing DEPP with an external program is exemplified in *interface* directory. This folder contains three examples based on C++ and FORTRAN 2008 languages, although many other programming languages may be used for interfacing.
+DEPP treats the fitness function as a black-box, that must be provided by an external program (EP). This approach increases the range of the application of DEPP, since in many cases the fitness function can not be written as a DEPP subroutine.
 
-The basic algorithm of DEPP is illustrated in Figure 2. DEPP reads the input data from *depp\_input* directory (optionally, it may start from some backup). The stop condition is analyzed. In the first iteration, the stop condition is generally not satisfied (it may not be true when starting from a
-backup). When the stop condition is satisfied, the iterative procedure is finished and the output data is saved in the *depp\_output* directory. Otherwise, a trial population is generated. DEPP sends the information to a set of threads (T1,$\cdots$, TN) using MPI. Then, each of these threads runs a copy of the external program (EP) for a given individual of the population. After that, DEPP receives the calculated objective function and compares their fitness with the fitness of the current
-population. Only the best individuals are held. A backup is optionally generated and the iterative cycle is restarted. During the calculation of the objective function, some failures may occur. DEPP handles failures using an error code returned by the external program. If the error code is 0, the calculations were performed correctly; if 1 is returned, then a failure occurred and the trial individual is discarded; if 2 is returned, then a failure occurred, the trial individual is discarded and a new one is generated. All the failures are registered for the posterior user’s analysis.
+Communication between DEPP and the external program is performed by disk files.  DEPP calls the EP by command-line, passing to it the name of a file as an argument. This file contains the name of another file (where the external program must save fitness), the dimension of the trial solution vector **X** and the components X1, X2, ... of **X**, e.g.,
+```
+<path/filename> = arqfit: name of the file to save fitness
+        <value> =     nu: number of unknowns (dimension of the trial vector X)
+  <value of X1>
+        .
+        .
+        .
+ <value of Xnu>
+```
+On the other hand, the external program must calculate, and save the fitness in the file indicated by DEPP with an exit status code (to be further explained). This file reads as
+```
+<value> = Fitness
+<value> = Exit status code
+```
+
+The basic algorithm of DEPP is illustrated in Figure 1. DEPP reads the input data from a configuration file, whose name is passed to it by a command-line argument. The stop condition is analyzed. In the first iteration, the stop condition is generally not satisfied (it may not be true when starting from a
+backup). When the stop condition is satisfied, the iterative procedure is finished and the output data is saved in the *depp\_output* directory. Otherwise, a trial population is generated. DEPP sends the information to a set of threads (T1,$\cdots$, TN) using MPI. Then, each of these threads runs a copy of the external program (EP) for a given individual of the population. After that, DEPP receives the calculated objective function and compares their fitness with the fitness of the current population. Only the best individuals are held. A backup is optionally generated and the iterative cycle is restarted. During the calculation of the objective function, some failures may occur. DEPP handles failures using an exit status code returned by the external program. If the exit code is 0, the calculations were performed correctly; if 1 is returned, then a failure occurred and the trial individual is discarded; if 2 is returned, then a failure occurred, the trial individual is discarded and a new one is generated. All the failures are registered for the posterior user’s analysis.
 
 ![DEPP's basic algorithm.](algorithm1.png){width="55.00000%"}
+
+The folder structure of DEPP is shown in Figure 2. The directory *src* contains the DEPP source code. After compiled, the executable *depp.x* is moved to *bin* directory. *test* folder contains Bash scripts[@Ramey:2016] to perform code verification and installation check up. Examples are provided within *examples* directory.
+
+![Folder structure of DEPP.](folder_structure.png){width="50.00000%"}
+
 
 Supporting theory {#sec:theory}
 -----------------
@@ -72,7 +85,7 @@ The following sections describe the optimization theory behind the current imple
 
 ### Differential Evolution {#sec:DE}
 
-Differential Evolution algorithm is based on the principles of biological evolution. Basically, it works as follows. Given a population (set of discrete points in the domain of search), new individuals (trial points) are generated by “mutation” and “crossing over”. Here, “mutation” means a rule for creating new trial individuals while “crossing over” means a rule of exchanging information between a trial individual and an individual of the population. The fitness (objective function) of the new individuals is compared to the fitness of the parent individuals and the worse individuals are eliminated. The procedure is repeated for several generations (iterations) until a criterion of convergence is satisfied within a given tolerance.
+Differential Evolution algorithm is based on the principles of biological evolution. Basically, it works as follows. Given a population (set of discrete points in the domain of search), new individuals (trial points) are generated by “mutation” and “crossing over”. Here, “mutation” means a rule for creating new trial individuals while “crossing over” means a rule of exchanging information between a trial individual and an individual of the population. The fitness (objective function) of the new individuals is compared to the fitness of the2parent individuals and the worse individuals are eliminated. The procedure is repeated for several generations (iterations) until a criterion of convergence is satisfied within a given tolerance.
 
 Current version of DEPP focus on a particular kind of maximization problem, often found in practical applications, i.e.,
 $$\begin{aligned}
