@@ -2,7 +2,7 @@
 /interface/functions.x
 #depp_src/doxygen/
 
-depp_src/depp2\.layout
+depp_src/depp\.layout
 depp_output/*
 
 depp_src/ToDo\.txt
@@ -11,7 +11,7 @@ depp_src/ToDo\.txt
 
 depp_src/obj/Debug/
 
-depp_src/depp2\.depend
+depp_src/depp\.depend
 
 interface/C\+\+/fitness\.x
 

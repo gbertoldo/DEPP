@@ -2,7 +2,7 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="depp2" />
+		<Option title="depp" />
 		<Option pch_mode="2" />
 		<Option compiler="gfortran" />
 		<Build>
@@ -152,6 +152,7 @@
 			<code_completion />
 			<lib_finder disable_auto="1" />
 			<debugger />
+			<fortran_project />
 		</Extensions>
 	</Project>
 </CodeBlocks_project_file>
