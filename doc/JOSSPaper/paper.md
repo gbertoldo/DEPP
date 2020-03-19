@@ -28,11 +28,11 @@ bibliography: paper.bib
 
 Optimization is a mathematical problem often found in science and engineering. Currently, however, there is no general method to face this problem. Solutions are generally addressed by two approaches, both iterative: (a) quasi-Newton methods [@Griva:2009] and (b) heuristic methods [@Coley:1999; @Feoktistov:2006]. Each one has advantages depending on the problem to be optimized. Quasi-Newton methods, in general, converge faster then heuristic methods provided the function to be optimized (the objective function) is smooth. Heuristic methods, on the other hand, are more appropriate to deal with noisy objective functions, to handle failures in the calculation of the objective function and are less susceptible to be retained in local optimum than quasi-Newton methods. 
 
-Among the heuristic methods, Differential Evolution (DE)[@Storn:1997; @Price:2005] had emerged as a simple and efficient method for finding the global maximum. This method is based on the principles of biological evolution.
+Among the heuristic methods, Differential Evolution (DE) [@Storn:1997; @Price:2005] had emerged as a simple and efficient method for finding the global maximum. This method is based on the principles of biological evolution.
 
 To combine the robustness of heuristic methods with the high convergence speed of quasi-Newton methods, Loris Vincenzi and Marco Savoia [@Vincenzi:2015] proposed coupling Differential Evolution heuristic with Response Surfaces [@Khuri:1996; @Myers:2009]. Fitting Response Surfaces during optimization and finding their optima mimics quasi-Newton methods. The authors showed that this approach reduced significantly the effort to solve some problems within a given tolerance (in general, more than 50% compared to the original heuristic method). 
 
-Based on the paper of Loris Vincenzi and Marco Savoia, but applying a different algorithm, a software called ``DEPP``, an acronym for Differential Evolution Parallel Program, was elaborated. ``DEPP`` source code is written following Fortran 2008 standard[@Brainerd:2015], it is based on the object-oriented paradigm and it includes MPI paralellization[@Tennessee:2009]. The main algorithm was elaborated to simplify the development and extension of the code, relying on abstract classes and polymorphism. Following this idea, design patterns [@Freeman:2004] were also applied. Object instances are generated through the Factory Design Pattern and Adapter Design Pattern was applied to encapsulate MPI commands, for instance. In this way, users may implement new optimization methods without changing the main algorithm. 
+Based on the paper of Loris Vincenzi and Marco Savoia, but applying a different algorithm, a software called ``DEPP``, an acronym for Differential Evolution Parallel Program, was developed. ``DEPP`` source code is written following Fortran 2008 standard [@Brainerd:2015], it is based on the object-oriented paradigm and it includes MPI parallelization [@Tennessee:2009]. The main algorithm was prepared to simplify the development and extension of the code, relying on abstract classes and polymorphism. Following this idea, design patterns [@Freeman:2004] were also applied. Object instances are generated through the Factory Design Pattern and Adapter Design Pattern was applied to encapsulate MPI commands, for instance. In this way, users may implement new optimization methods without changing the main algorithm. 
 
 Due to its supporting theory, ``DEPP`` is well suited to address optimization problems of multimodal, noisy, poor-precision-calculated and failure-susceptible objective functions, taking advantage of acceleration provided by parallelization and hybridization models, like Differential Evolution-Response Surface coupling. 
 
@@ -45,10 +45,10 @@ Software description {#sec:description}
 Software Architecture {#sec:arch}
 ---------------------
 
-DEPP source code was written following the FORTRAN 2008 standard language[@Brainerd:2015], it uses the Message Passing Interface (MPI) directives[@Tennessee:2009] for parallel processing and takes advantage of the Object-Oriented Paradigm.
+DEPP source code was written following the FORTRAN 2008 standard language [@Brainerd:2015], it uses the Message Passing Interface (MPI) directives [@Tennessee:2009] for parallel processing and takes advantage of the Object-Oriented Paradigm.
 
 Thanks to Object-Oriented Programming, the source code was designed to simplify the implementation of new methods. The algorithm works on
-abstract classes separated, basically, as (i) population initializers, (ii) search strategies, (iii) fitness calculation and (iv) stop conditions. The concrete classes are generated using the Factory Design Pattern[@Freeman:2004]. All MPI commands are encapsulated into proper classes, following the logic of the Adapter Design Pattern. In this way, users interested in the implementation of new methods will not concern about MPI details.
+abstract classes separated, basically, as (i) population initializers, (ii) search strategies, (iii) fitness calculation and (iv) stop conditions. The concrete classes are generated using the Factory Design Pattern [@Freeman:2004]. All MPI commands are encapsulated into proper classes, following the logic of the Adapter Design Pattern. In this way, users interested in the implementation of new methods will not concern about MPI details.
 
 DEPP treats the fitness function as a black-box, that must be provided by an external program (EP). This approach increases the range of the application of DEPP, since in many cases the fitness function can not be written as a DEPP subroutine.
 
@@ -73,7 +73,7 @@ backup). When the stop condition is satisfied, the iterative procedure is finish
 
 ![DEPP's basic algorithm.](algorithm1.png){width="55.00000%"}
 
-The folder structure of DEPP is shown in Figure 2. The directory *src* contains the DEPP source code. After compiled, the executable *depp.x* is moved to *bin* directory. *test* folder contains Bash scripts[@Ramey:2016] to perform code verification and installation check up. Examples are provided within *examples* directory.
+The folder structure of DEPP is shown in Figure 2. The directory *src* contains the DEPP source code. After compilation, the executable *depp.x* is moved to *bin* directory. *test* folder contains Bash scripts [@Ramey:2016] to perform code verification and installation check-up. Examples are provided within *examples* directory.
 
 ![Folder structure of DEPP.](folder_structure.png){width="50.00000%"}
 
@@ -85,16 +85,16 @@ The following sections describe the optimization theory behind the current imple
 
 ### Differential Evolution {#sec:DE}
 
-Differential Evolution algorithm is based on the principles of biological evolution. Basically, it works as follows. Given a population (set of discrete points in the domain of search), new individuals (trial points) are generated by “mutation” and “crossing over”. Here, “mutation” means a rule for creating new trial individuals while “crossing over” means a rule of exchanging information between a trial individual and an individual of the population. The fitness (objective function) of the new individuals is compared to the fitness of the2parent individuals and the worse individuals are eliminated. The procedure is repeated for several generations (iterations) until a criterion of convergence is satisfied within a given tolerance.
+The Differential Evolution algorithm is based on the principles of biological evolution. Basically, it works as follows. Given a population (set of discrete points in the domain of search), new individuals (trial points) are generated by “mutation” and “crossing over”. Here, “mutation” means a rule for creating new trial individuals while “crossing over” means a rule of exchanging information between a trial individual and an individual of the population. The fitness (objective function) of the new individuals is compared to the fitness of the2parent individuals and the worse individuals are eliminated. The procedure is repeated for several generations (iterations) until a criterion of convergence is satisfied within a given tolerance.
 
-Current version of DEPP focus on a particular kind of maximization problem, often found in practical applications, i.e.,
+The current version of DEPP focus on a particular kind of maximization problem, often found in practical applications, i.e.,
 $$\begin{aligned}
         \underset{\boldsymbol{x}}{\text{maximize}} &\quad f(\boldsymbol{x}) \\
         \text{subject to}&\\
         &\quad \boldsymbol{L} \le \boldsymbol{x}  \le \boldsymbol{U},
 \end{aligned}
 \label{eq:maximization}$$ 
-where $f$ is a real valued function, also known as objective function, depending on a D-dimensional vector $\boldsymbol{x}=(x_1, \cdots, x_D)$ of real variables. The variable $\boldsymbol{x}$ is confined in a box with lower $\boldsymbol{L}=(L_1,\cdots, L_D)$ and upper $\boldsymbol{U}=(U_1,\cdots, U_D)$ bounds.
+where $f$ is a real-valued function, also known as the objective function, depending on a D-dimensional vector $\boldsymbol{x}=(x_1, \cdots, x_D)$ of real variables. The variable $\boldsymbol{x}$ is confined in a box with lower $\boldsymbol{L}=(L_1,\cdots, L_D)$ and upper $\boldsymbol{U}=(U_1,\cdots, U_D)$ bounds.
 
 The first step toward solving this optimization problem is the population initialization. For the first generation ($g=1$), a population (set of points) $\{\boldsymbol{x}_i\}$ $1\le i \le N_p$ is created randomly within the box $\boldsymbol{L} \le \boldsymbol{x}  \le \boldsymbol{U}$, *e.g.* 
 $$x_{ij}=L_j+(U_j-L_j) \mathcal{R},\quad 1\le j \le D,$$ 
@@ -104,19 +104,19 @@ After the population initialization, the fitness of each individual $\boldsymbol
 
 For the next generations, trial individuals are calculated based on the population of the previous generations. Trial individuals are created by a process of mutation and crossing over as follows. For each individual $\boldsymbol{x}_i$ of the previous population, other three distinct individuals ($\boldsymbol{x}_{i_1}$, $\boldsymbol{x}_{i_2}$ and $\boldsymbol{x}_{i_3}$) of the same population are randomly selected and a mutant individual $\boldsymbol{v}$ is created 
 $$\boldsymbol{v}=\boldsymbol{x}_{i_1}+F(\boldsymbol{x}_{i_3}-\boldsymbol{x}_{i_2}),$$ 
-where $F$ is the differentiation parameter. Then, the mutant individual suffers a crossing over with $\boldsymbol{x}_i$, that produces the trial individual $\boldsymbol{u}$. The components $u_j$ ($1 \le j \le D$) of $\boldsymbol{u}$ are given by 
+where $F$ is the differentiation parameter. Then, the mutant individual crosses over with $\boldsymbol{x}_i$, that produces the trial individual $\boldsymbol{u}$. The components $u_j$ ($1 \le j \le D$) of $\boldsymbol{u}$ are given by 
 $$u_{j}=\begin{cases} 
 v_{j} &  \text{if}~~\mathcal{R} < C_r~~\text{or}~~j = j^*, \\
 x_{ij} & \text{otherwise}.
 \end{cases}
 \label{eq:crossover}$$ 
-In previous equation, $C_r$ is the crossover parameter and $j^*$ is an integer randomly chosen between 1 and $D$. If the trial individual violates the constraints, i.e. if it is not within $\boldsymbol{L} \le \boldsymbol{u} \le \boldsymbol{U}$, then the process of generating a trial individual is repeated.
+In the previous equation, $C_r$ is the crossover parameter and $j^*$ is an integer randomly chosen between 1 and $D$. If the trial individual violates the constraints, i.e. if it is not within $\boldsymbol{L} \le \boldsymbol{u} \le \boldsymbol{U}$, then the process of generating a trial individual is repeated.
 
 The fitness of the trial individual is compared to the fitness of $\boldsymbol{x}_i$. If $f(\boldsymbol{x}_i)\le f(\boldsymbol{u})$, then $\boldsymbol{u}$ replaces
-$\boldsymbol{x}_i$. This is the so called selection.
+$\boldsymbol{x}_i$. This is the so-called selection.
 
 New generations are created until a stopping condition is satisfied. DEPP implements a composition of the following stopping conditions: (i) best fitness stagnation, (ii) maximum number of generations and (iii) population convergence measure. In the first one, the generation cycle is interrupted if no improvement of the fitness function is achieved within $N_A$ generations. The second condition establishes the maximum number of generations allowed. Finally, in the third condition, the
-cycle is interrupted if the P-measure $P_m$[@Feoktistov:2006] is lower or equal to a given tolerance. P-measure is evaluated as
+cycle is interrupted if the P-measure $P_m$ [@Feoktistov:2006] is lower or equal to a given tolerance. The P-measure is evaluated as
 $$P_m=\max_{1 \le i \le N_p} |\boldsymbol{x}'_i-\boldsymbol{x}'_m|,$$ 
 where $|\cdot|$ is the $L_2$ norm, the components of $\boldsymbol{x}'_i$ are given by
 $$x'_{ij}=\frac{x_{ij}-L_j}{U_j-L_j}, \quad 1 \le j \le D$$ 
@@ -128,7 +128,7 @@ The approach presented in this section has three parameters: the population size
 
 ### Differential Evolution and Response Surface Methodology {#sec:DERSM}
 
-In order to accelerate the convergence of DE, @Vincenzi:2015 proposed a new mutation operation based on the Response Surface Methodology (RSM)[@Khuri:1996; @Myers:2009]. The basic idea consists of fitting a simple response surface to a selected set of individuals of the population. The mutant vector is, then, obtained by
+In order to accelerate the convergence of DE, @Vincenzi:2015 proposed a new mutation operation based on the Response Surface Methodology (RSM) [@Khuri:1996; @Myers:2009]. The basic idea consists of fitting a simple response surface to a selected set of individuals of the population. The mutant vector is, then, obtained by
 maximizing the response surface, which is done through matrix inversion. For a given benchmark, the authors showed that the number of generations necessary to reach a given precision was substantially reduced (more than 50%).
 
 Vincenzi and Savoia considered two response surfaces. The first one is a quadratic polynomial $P(\boldsymbol{x})$, given by
@@ -155,7 +155,7 @@ f_{h_{min}} & f_s \le f_{h_{min}}, \\
 f_s & f_{h_{min}} < f_s < f_{h_{max}}, \\
 f_{h_{max}} & f_{h_{max}} \le f_s, \\
 \end{cases}$$ 
-where $f_{h_{min}}$ and $f_{h_{max}}$ are the minimum and maximum allowed values of $f_h$.
+where $f_{h_{min}}$ and $f_{h_{max}}$ are the minimum and maximum allowed values of $f_h$, respectively.
 
 The probability of success of RSM $f_s$ is the ratio of the number of times that the hybridization contributed to maximizing the objective function to the last $N_p$ times RSM hybridization was applied. In the first generations, when the number of samples is less than $N_p$, $f_s$ is not available. In this case, $f_h$ is equal to $f_{h0}$, an initial value of the fraction of hybridization.
 
@@ -167,9 +167,9 @@ $$\sqrt{\sum_{j=1}^{D}\left(\frac{\hat{x}_j-x_{kj}}{U_j-L_j}\right)^2} \ge \eta_
 
 -   The candidate individual $\boldsymbol{x}_k$ is selected with a probability of 50%.
 
-Once the fitting individuals are selected, the coefficients of the response surface are determined using the weighted least squares method[@Khuri:1996].
+Once the fitting individuals are selected, the coefficients of the response surface are determined using the weighted least squares method [@Khuri:1996].
 
-Two weighting functions are implemented in DEPP: uniform and exponential[@Vincenzi:2015]. The exponential weighting function reads as
+Two weighting functions are implemented in DEPP: uniform and exponential [@Vincenzi:2015]. The exponential weighting function reads as
 $$w(\boldsymbol{x}_k)=
 \begin{cases}
 \exp{\left(\frac{f(\boldsymbol{x}_k)-f_{\text{best}}}{f_{\text{best}}}\right)} & f_{\text{best}}\neq 0\\
@@ -212,7 +212,7 @@ where $\mathcal{R}$ is a uniform random number belonging to $[0,1)$,
 
 ![Schwefel 2.26 function.](function14.png){width="50.00000%"}
 
-These functions were chosen because they present particular features that make optimization difficult. Step function (Fig. 3), a set o flat surfaces, pose a hard problem to optimizers relying on functions’ derivatives. This is even worse for the Noisy Quartic function (Fig. 4), which has a noisy plateau near its maximum. Rosenbrock's function (Fig. 5), although smooth, has a sharp narrow ridge around a parabola, which makes it a challenge to find
+These functions were chosen because they present particular features that make optimization difficult. The Step function (Fig. 3), a set of flat surfaces, poses a hard problem to optimizers relying on functions’ derivatives. This is even worse for the Noisy Quartic function (Fig. 4), which has a noisy plateau near its maximum. Rosenbrock's function (Fig. 5), although smooth, has a sharp narrow ridge around a parabola, which makes it a challenge to find
 an appropriate search direction. Finally, Schwefel 2.26 (Fig. 6) has several local optima, which may lead to premature convergence.
 
 The maximizers $x_i^*$ and the domain of optimization of the test functions are presented in
@@ -228,7 +228,7 @@ Table 1.
   : Lower $L_i$ and upper $U_i$ bounds for maximization and the global maximizer $x_i^*$ ($1\le i \le D$).
 
 
-Additionally, this example aims (i) to show the effect of DE-Response Surface (DE-RSM) coupling on reducing the number of iterations required to achieve convergence and (ii) show the effect of parallelization on reducing the optimization time. In order to accomplish the first task, the  four test functions were optimized for $D \in \{2, 4, 8\}$ dimensions using DE and DE-RSM. For the second task, the number of dimensions was restricted to $D=2$, but for each call of the external software that calculates the objective function it was added a delay of 1 s in order to simulate a computationally expensive program. Since DE is a stochastic method, in both tasks, the final results are the average of 50 optimizations.
+Additionally, this example aims (i) to show the effect of DE-Response Surface (DE-RSM) coupling on reducing the number of iterations required to achieve convergence and (ii) to show the effect of parallelization on reducing the optimization time. In order to accomplish the first task, the  four test functions were optimized for $D \in \{2, 4, 8\}$ dimensions using DE and DE-RSM. For the second task, the number of dimensions was restricted to $D=2$, but for each call of the external software that calculates the objective function, it was added a delay of 1 s in order to simulate a computationally expensive program. Since DE is a stochastic method, in both tasks, the final results are the average of 50 optimizations.
 
 The parameters applied in the optimization are as follows. The population size is $N_p=20$ for $D=2$ and $N_p=40$ for $D=4$ and $D=8$. For pure DE, $F=0.85$,  $C_r=0.5$. Hybridization uses quadratic polynomial as the response surface. The fraction of hybridization is calculated dynamically using $f_{h0}=0.35$, $f_{\text{min}}=0.1$ and $f_{\text{max}}=0.9$. The crossing over parameter of RSM is $C_r=1$. The number of individuals selected for fitting the response surface is twice the minimum required, *i.e.* $N_f=2N_{f_{m}}$. The tolerance for selecting individuals for fitting is $\eta_{\text{tol}}=0.0001$. Uniform weighting is applied for fitting. Concerning the stopping conditions, the maximum number of generations allowed is 5000, the maximum number of generations allowed without improving fitness function is 40, for $D=2$, and 80, for $D\in\{4;8\}$, and the tolerance of P-measure is $P_m\le P_{\text{tol}}=5\times 10^{-4}$.
 
@@ -257,7 +257,7 @@ For the test functions considered, numerical results show that DE-Response Surfa
   : Number of generations $G$ to reach stop condition and probability of success $P_s$.
   
 
-The maximizer $\boldsymbol{x}^*$ of an optimization was considered a success if
+The maximizer $\boldsymbol{x}^*$ of optimization was considered a success if
 $$
 |f(\boldsymbol{x}^*)-f(\boldsymbol{x}_a^*)| \le F_{\text{tol}}\quad \text{or} \quad |\boldsymbol{x}^*-\boldsymbol{x}^*_a| \le P_{\text{tol}},
 $$
@@ -294,8 +294,8 @@ Finally, Tab. 3 presents the mean computational time per generation $\tau$ for d
 
   : Mean computational time per generation $\tau$ for different numbers of threads $N_t$. $D=2$.
 
-Acknowledgements {#sec:acknow .unnumbered}
-================
+Acknowledgments {#sec:acknow .unnumbered}
+===============
 
 We would like to thank CNPq (National Counsel of Technological and Scientific Development, Brazil), CAPES (Coordination for the Improvement of Higher Education Personnel, Brazil), for their financial support, and UTFPR-FB (Universidade Tecnológica Federal do Paraná-Francisco Beltrão) for its technological support. The third author is supported by a CNPq scholarship.
 
