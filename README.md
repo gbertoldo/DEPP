@@ -5,4 +5,4 @@ For details, please, see the documentation page: https://github.com/gbertoldo/DE
 
 # VERSION
 
-Version 1.0.1
+Version 1.0.3
